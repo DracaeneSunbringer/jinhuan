@@ -1,0 +1,428 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><base href="/arcade/rift/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>无尽裂隙：刷宝者</title>
+<!--<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=ZCOOL+QingKe+HuangYou&display=swap">-->
+<link rel="stylesheet" href="original.css"><link rel="stylesheet" href="/arcade/host.css"><link rel="stylesheet" href="theme.css">
+
+</head>
+<body class="arcade-loading" data-game="rift">
+
+<!-- ==================== 开场界面 ==================== -->
+<div id="titleScreen">
+  <div class="titleBox">
+    <h1>无尽裂隙：刷宝者</h1>
+    <div class="sub">RIFT LOOTER</div>
+  <!--  <canvas class="titleArt" id="titleArt" aria-hidden="true"></canvas>-->
+
+    <div class="story">
+      <p>【纪元 · 终末】</p>
+      <p>天空在三年前裂开了。</p>
+      <p>没有人知道那道缝隙从何而来——它不声不响地横亘在苍穹之上，像一道被利器划开的伤口。缝隙之下，现实开始崩塌。城市沉降，海洋倒灌，被称作「<span class="hl">裂隙生物</span>」的东西从裂缝中涌出，将文明碾成了齑粉。</p>
+      <p>幸存者们退守到最后的堡垒，却发现裂隙并非只有吞噬——它同样吐出了东西。</p>
+      <p>那些从裂缝中坠落的<span class="hl2">武器、护甲、饰品</span>，携带着远超人类工艺的力量。佩戴者能够与裂隙生物抗衡。人们把这些东西称作「<span class="hl2">遗珍</span>」，而拾荒这些遗珍、深入裂隙猎杀怪物的人，被称作——</p>
+      <p style="text-align:center;font-size:15px;color:#ffd479;letter-spacing:3px;margin:14px 0">刷 宝 者</p>
+      <p>裂隙共有 <span class="hl">100 层</span>。层数越深，怪物越强，遗珍越珍贵。</p>
+      <p>传说在裂隙的最深处，第 100 层，沉睡着<span class="hl">裂隙之主</span>。只要击败它，裂隙就会闭合。</p>
+      <p>三年来，无数刷宝者走进裂隙。</p>
+      <p>没有一个回来。</p>
+      <p style="color:#c4b3ff">现在，轮到你了。</p>
+    </div>
+
+    <div class="titleBtns">
+      <button id="btnContinue" style="display:none">继 续 游 戏</button>
+      <button id="btnEnterGame">开 始 游 戏</button>
+    </div>
+    <div class="saveHint" id="saveHint"></div>
+  </div>
+</div>
+
+<!-- ==================== 多标签提示 ==================== -->
+<div id="tabLockModal" class="modal" style="display:none;z-index:1000">
+  <div class="modalBox">
+    <h2>游戏已在另一个标签页打开</h2>
+    <p class="codeTip">同一浏览器同时开两个游戏标签会<b>互相覆盖存档</b>，所以这个标签页已暂停保存。请回到原来的标签页继续，或者在这里接管：会读取最新的本地存档继续游戏，原标签页随即停止保存。</p>
+    <div class="titleBtns">
+      <button id="btnTabTakeover" class="gold">在这里继续游戏</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 通关界面 ==================== -->
+<div id="clearScreen">
+  <div class="clearBox">
+    <h2>通 关</h2>
+    <div class="cSub">裂隙之主已被击败，裂缝正在闭合……</div>
+    <div class="clearStats" id="clearStats"></div>
+    <button class="gold" id="btnClearClose" style="font-size:15px;padding:10px 40px;letter-spacing:3px">继 续 游 玩</button>
+  </div>
+</div>
+
+<div class="toast-save" id="saveToast"></div>
+
+<!-- ==================== 游戏主界面 ==================== -->
+<div class="app" id="gameApp" style="display:none">
+
+  <!-- 新手引导覆盖层 -->
+  <div id="guideOverlay" class="guideOverlay" style="display:none">
+    <div class="guideMask"></div>
+    <div class="guideSpot" id="guideSpot"></div>
+    <div class="guideTip" id="guideTip">
+      <div class="guideStep" id="guideStep">1 / 7</div>
+      <div class="guideText" id="guideText"></div>
+      <div class="guideBtns">
+        <button class="small" id="guideSkip">跳过</button>
+        <button class="small" id="guideNext">下一步</button>
+      </div>
+    </div>
+  </div>
+
+  <header>
+    <h1 class="logo">无尽裂隙：刷宝者</h1>
+    <div class="logoMini" aria-hidden="true">⚔️</div>
+    <div class="hud">
+      <span class="lv">等级 <b id="uiLevel">1</b></span>
+      <span>D币 <b id="uiGold">0</b></span>
+      <span class="dust">裂隙尘 <b id="uiDust">0</b></span>
+      <span class="crystal" title="裂隙结晶：精英必掉，用于装备强化"><i data-mat-ico="crystal" data-size="12">💎</i> 结晶 <b id="uiCrystal">0</b></span>
+      <span>最高层 <b id="uiMaxFloor">1</b></span>
+      <span class="power">战力 <b id="uiTotalPower">0</b></span>
+    </div>
+  </header>
+
+  <div class="expwrap">
+    <span>经验</span>
+    <div class="expbar"><div id="uiExpFill"></div></div>
+    <span id="uiExpText">0 / 60</span>
+  </div>
+
+  <!-- 手机端 APP 壳：舞台停靠区（桌面端舞台留在战斗面板内，由 hud.js 按断点搬动） -->
+  <div class="stageDock" id="stageDock"></div>
+
+  <main id="pageContent">
+
+    <!-- ============ 左列 ============ -->
+    <div class="col-left">
+      <section class="panel" id="pnlStats">
+        <h2>角色属性</h2>
+        <div class="attrTop">
+          <span>可用属性点 <b class="pts" id="uiPoints">0</b></span>
+          <label class="toggleItem" id="autoAllocToggle"><input type="checkbox" id="uiAutoAlloc"> 自动分配</label>
+        </div>
+        <div id="attrRows" class="attrGrid">
+          <div class="attrRow"><span>力量 <i>攻击 +2.5</i></span><b id="uiAttrStr">0</b><button data-add="str" data-amount="1">+1</button><button data-add="str" data-amount="10">+10</button><button data-add="str" data-amount="100">+100</button></div>
+          <div class="attrRow"><span>体质 <i>生命 +26 · 防御 +1.5</i></span><b id="uiAttrCon">0</b><button data-add="con" data-amount="1">+1</button><button data-add="con" data-amount="10">+10</button><button data-add="con" data-amount="100">+100</button></div>
+          <div class="attrRow"><span>敏捷 <i>攻速 · 闪避</i></span><b id="uiAttrAgi">0</b><button data-add="agi" data-amount="1">+1</button><button data-add="agi" data-amount="10">+10</button><button data-add="agi" data-amount="100">+100</button></div>
+          <div class="attrRow"><span>幸运 <i>暴击 · 暴伤 · 吸血</i></span><b id="uiAttrLuk">0</b><button data-add="luk" data-amount="1">+1</button><button data-add="luk" data-amount="10">+10</button><button data-add="luk" data-amount="100">+100</button></div>
+        </div>
+        <div id="statList"></div>
+      </section>
+
+      <section class="panel" id="pnlAttrDetail">
+        <h2>详细属性 <span class="hint">含洗练词条 · 上限提示</span></h2>
+        <div class="segs" id="detailSegs">
+          <button data-seg="0" class="active">基础</button>
+          <button data-seg="1">输出</button>
+          <button data-seg="2">生存</button>
+          <button data-seg="3">收益</button>
+        </div>
+        <div id="attrDetailList"></div>
+        <div class="washRow">
+          <span class="washCost">洗点消耗：<b id="uiWashCost">200</b> D币</span>
+          <button class="small red" id="btnWash">洗点</button>
+        </div>
+      </section>
+
+
+      <!-- 手机端「更多」页菜单：点条目把对应面板搬进底部弹层；桌面端不显示 -->
+      <section class="panel" id="pnlMore">
+        <h2>更多</h2>
+        <div class="moreList">
+          <button class="moreItem" data-panel="pnlShop" data-title="商店"><span class="ico">🏪</span><span class="txt">商店 <i>D币换裂隙尘 · 净化药剂</i></span><span class="go">›</span></button>
+          <button class="moreItem" data-panel="pnlMaterials" data-title="材料与消耗品"><span class="ico">💎</span><span class="txt">材料与消耗品 <i>结晶 · 保护券 · 药剂 · 卷轴</i></span><span class="go">›</span></button>
+          <button class="moreItem" data-panel="pnlMap" data-title="层域地图"><span class="ico">🗺️</span><span class="txt">层域地图 <i>路线 · 改道 · 挂机策略</i></span><span class="go">›</span></button>
+          <button class="moreItem" data-panel="pnlGoals" data-title="目标与成就"><span class="ico">🎯</span><span class="txt">目标与成就 <i>目标链 · 挑战 · 最快记录</i></span><span class="go">›</span></button>
+          <button class="moreItem" data-panel="pnlRebirth" data-title="无尽与轮回"><span class="ico">♻️</span><span class="txt">无尽与轮回 <i>无尽纪录 · 裂隙印记 · 永久天赋</i></span><span class="go">›</span></button>
+          <button class="moreItem" data-panel="pnlSystem" data-title="系统"><span class="ico">⚙️</span><span class="txt">系统 <i>存档 · 音效 · 引导</i></span><span class="go">›</span></button>
+        </div>
+      </section>
+
+
+
+
+
+    </div>
+
+    <!-- ============ 中列 ============ -->
+    <div class="col-mid">
+      <section class="panel" id="pnlBattle">
+        <h2>裂隙战斗</h2>
+
+        <div class="floorSel">
+          <button id="btnFloorDown10" title="后退 10 层">«</button>
+          <button id="btnFloorDown">◀</button>
+          <div>第 <b id="uiFloor">1</b> 层 <span class="nodeTag" id="uiNodeTag" style="display:none"></span></div>
+          <button id="btnFloorUp">▶</button>
+          <button id="btnFloorUp10" title="前进 10 层">»</button>
+          <div class="diffInfo" id="uiDiffInfo">—</div>
+        </div>
+
+        <div class="catchup" id="catchupBanner" style="display:none"></div>
+
+        <div id="stageAnchor"></div>
+        <div class="stageWrap" id="stageWrap"><div class="goalStrip" id="goalStrip" title="点击查看全部目标与成就"></div></div>
+
+        <div class="hpRow legacy">
+          <div class="hpLabel">
+            <span>你（Lv.<b id="uiPlayerLv">1</b>）</span>
+            <span id="uiPlayerHpText">220 / 220</span>
+          </div>
+          <div class="hpbar">
+            <div id="uiPlayerHpFill" class="pfill"></div>
+            <div id="uiPlayerShieldFill" class="sfill"></div>
+          </div>
+        </div>
+
+        <div class="hpRow" style="margin-bottom:8px">
+          <div class="hpLabel">
+            <span>怒气</span>
+            <span id="uiRageText">0 / 100</span>
+          </div>
+          <div class="hpbar ragebar">
+            <div id="uiRageFill" class="rfill"></div>
+          </div>
+        </div>
+
+        <div class="castBar legacy" id="uiCastBar">
+          <div class="castTop">
+            <span class="cName" id="uiCastName">— 正在施法 —</span>
+            <span class="cTime" id="uiCastTime">5.0s</span>
+          </div>
+          <div class="castTrack"><div id="uiCastFill"></div></div>
+        </div>
+
+        <div class="hpRow legacy">
+          <div class="hpLabel">
+            <span id="uiMonsterName">— 无敌人 —</span>
+            <span id="uiMonsterHpText">—</span>
+          </div>
+          <div class="hpbar">
+            <div id="uiMonsterHpFill" class="mfill"></div>
+            <div id="uiMonsterShieldFill" class="msfill"></div>
+          </div>
+        </div>
+
+        <div class="progRow">
+          <div class="progress" id="uiFloorProgress">待命中，点击「开始战斗」进入裂隙</div>
+          <div class="expedRow" id="uiExpedRow"></div>
+        </div>
+        <div class="statusRow">
+          <div class="buffRow" id="uiBuffRow"></div>
+          <button class="small" id="btnPotion" style="display:none" title="清除全部负面状态">🧪 净化 <b id="uiPotionCount">0</b></button>
+        </div>
+
+        <div id="battleControls">
+        <div class="skillBar" id="skillBar"></div>
+        <div class="keyHint">快捷键：数字 1–8 施放技能 · 空格 开始 / 停止 · Q / E 切换层数</div>
+
+        <div class="toolRow">
+          <div class="speedBtns" id="speedBtns" title="2× 需到达第 10 层解锁，3× 需到达第 40 层解锁">
+            <button data-speed="1" class="active">1×</button>
+            <button data-speed="2">2×</button>
+            <button data-speed="3">3×</button>
+          </div>
+          <div class="toggleRow">
+            <label class="toggleItem" id="autoNextToggle">
+              <input type="checkbox" id="uiAutoNext"> 自动下一层
+            </label>
+            <label class="toggleItem" id="autoSweepToggle">
+              <input type="checkbox" id="uiAutoSweepOnDeath"> 死亡后扫荡
+            </label>
+            <label class="toggleItem" id="autoRetreatToggle" title="血量低于 25% 且治疗没好时自动撤退：远征携带带回 70%，退回前几层刷一会儿再回来，挂机不会死在墙上">
+              <input type="checkbox" id="uiAutoRetreat"> 低血撤退
+            </label>
+            <label class="toggleItem" id="autoEventsToggle" title="事件出现时自动选默认项，挂机不卡住">
+              <input type="checkbox" id="uiAutoEvents"> 事件自动选
+            </label>
+          </div>
+        </div>
+
+        <div class="btns">
+          <button id="btnStart">开始战斗</button>
+          <button id="btnStop">停止战斗</button>
+          <button id="btnBoss" class="red">挑战 Boss</button>
+                    <button id="btnSweep" class="gold" title="扫荡消耗 1 张扫荡券；手动清一层 +1 张，Boss 层 +3 张">扫荡 🎫<b id="uiTickets">0</b></button>
+          <button id="btnSweep10" class="gold" title="一次扫荡 10 次">扫荡 ×10</button>
+          <button id="btnSweep100" class="gold" title="一次扫荡 100 次（需 ≥100 张券）">扫荡 ×100</button>
+        </div>
+        </div><!-- /battleControls -->
+      </section>
+
+      <section class="panel" id="pnlEquip">
+        <h2>装备栏 <span class="hint" id="uiSetHint">点击槽位查看详情</span></h2>
+        <div class="equipGrid" id="equipGrid"></div>
+      </section>
+
+      <section class="panel" id="pnlDetail">
+        <h2>装备详情 <span class="hint" id="uiDetailHint">未选中装备</span></h2>
+        <div id="detailContent">
+          <div class="emptyDetail">点击背包或装备栏中的装备查看详情</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ 右列 ============ -->
+    <div class="col-right">
+      <section class="panel" id="pnlLog">
+        <h2><span>战斗日志</span><button class="small" id="btnLogToggle" title="折叠 / 展开战斗日志">收起 ▾</button></h2>
+        <div class="logFilters" id="logFilters">
+          <button data-filter="all" class="active">全部</button>
+          <button data-filter="attack">攻击</button>
+          <button data-filter="crit">暴击</button>
+          <button data-filter="drop">掉落</button>
+          <button data-filter="skill">技能</button>
+          <button data-filter="boss">Boss</button>
+          <button data-filter="fail">失败</button>
+        </div>
+        <div id="logList"></div>
+      </section>
+
+      <section class="panel" id="pnlBag">
+        <h2>背包 <span class="bagCount">容量 <b id="uiInvCount">0 / 60</b></span></h2>
+
+        <div class="bagTop" id="bagTop">
+          <label class="autoToggle">
+            <input type="checkbox" id="uiAutoEquip"> 自动装备
+          </label>
+          <button class="small" id="btnSalvageCfg">自动分解 ⚙</button>
+          <button class="small" id="btnSellLow" title="分解所有战力低于已装备同槽位的装备">分解低评分</button>
+        </div>
+
+        <div class="salvageBox" id="salvageBox">
+          <div class="salvageTitle">
+            <span>自动分解</span>
+            <label class="autoToggle"><input type="checkbox" id="uiAutoSalvage"> 开启</label>
+          </div>
+          <div class="qChecks" id="autoSalvageQualities">
+            <label class="qCheck" style="color:#d0d0d0"><input type="checkbox" data-q="common" checked>普通</label>
+            <label class="qCheck" style="color:#4ade80"><input type="checkbox" data-q="fine">精良</label>
+            <label class="qCheck" style="color:#60a5fa"><input type="checkbox" data-q="rare">稀有</label>
+            <label class="qCheck" style="color:#c084fc"><input type="checkbox" data-q="epic">史诗</label>
+            <label class="qCheck" style="color:#fb923c"><input type="checkbox" data-q="legendary">传说</label>
+            <label class="qCheck" style="color:#f87171"><input type="checkbox" data-q="mythic">神话</label>
+          </div>
+          <div class="tierSel">
+            分解装备等级 ≤
+            <select id="uiAutoSalvageTier">
+              <option value="0">不限</option>
+              <option value="1">1 级</option>
+              <option value="2">2 级</option>
+              <option value="3">3 级</option>
+              <option value="4">4 级</option>
+              <option value="5">5 级</option>
+              <option value="6">6 级</option>
+              <option value="7">7 级</option>
+              <option value="8">8 级</option>
+              <option value="9">9 级</option>
+              <option value="10">10 级</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="invList" id="invList"></div>
+      </section>
+      <section class="panel" id="pnlSkills">
+        <h2>技能总览 <span class="hint">点卡片设置符文 / 自动施放</span></h2>
+        <div id="skillInfoList"></div>
+        <div style="font-size:11px;color:#6c6191;margin-top:8px;text-align:center;line-height:1.6">
+          点技能卡设置符文与自动施放 · 技能 30 级全部解锁，符文 60 级全部解锁
+        </div>
+      </section>
+    </div>
+    <!-- ============ 底部整行（桌面端三列下方；手机端在「更多」弹层里） ============ -->
+    <div class="col-bottom">
+      <div id="bottomTabs" class="bottomTabs">
+        <button data-panel="pnlShop" class="active">🏪 商店</button>
+        <button data-panel="pnlMaterials">💎 材料</button>
+        <button data-panel="pnlMap">🗺️ 地图</button>
+        <button data-panel="pnlGoals">🎯 目标</button>
+        <button data-panel="pnlRebirth">♻️ 轮回</button>
+        <button data-panel="pnlSystem">⚙️ 系统</button>
+      </div>
+      <section class="panel" id="pnlShop">
+        <h2>商店 <span class="bagCount">D币 <b id="uiGold2">0</b></span></h2>
+        <div id="shopList"></div>
+        <div style="font-size:11px;color:#6c6191;margin-top:8px;text-align:center">
+          裂隙尘用于装备洗练
+        </div>
+      </section>
+      <section class="panel" id="pnlMaterials">
+        <h2>材料与消耗品 <span class="hint">精英 · 宝箱 · 商人</span></h2>
+        <div class="matList">
+          <div class="matRow"><span class="matIco" data-mat-ico="crystal">💎</span><span class="matName">裂隙结晶 <i>装备强化材料</i></span><b id="uiMatCrystal">0</b></div>
+          <div class="matRow"><span class="matIco" data-mat-ico="protect">🎫</span><span class="matName">强化保护券 <i>+10 以上失败不降级</i></span><b id="uiMatProtect">0</b></div>
+          <div class="matRow"><span class="matIco" data-mat-ico="potion">🧪</span><span class="matName">净化药剂 <i>清除全部负面状态</i></span><b id="uiMatPotion">0</b><button class="small" id="btnPotion2">使用</button></div>
+                    <div class="matRow"><span class="matIco" data-mat-ico="scroll">📜</span><span class="matName">祝福卷轴 <i>随机获得一条祝福</i></span><b id="uiMatScroll">0</b><button class="small" id="btnScroll">用1</button><button class="small" id="btnScroll10">用10</button><button class="small" id="btnScrollAll">全用</button></div>
+          <div class="matRow"><span class="matIco">🔁</span><span class="matName">每层自动使用卷轴 <i>进层时若祝福未满自动用 1 张</i></span><b></b><label class="autoToggle"><input type="checkbox" id="uiAutoScroll"> 开启</label></div>
+          <div class="matRow"><span class="matIco">🧪</span><span class="matName">自动净化 <i>进层时若有负面状态自动用 1 瓶药剂</i></span><b></b><label class="autoToggle"><input type="checkbox" id="uiAutoPotion"> 开启</label></div>
+        </div>
+      </section>
+      <section class="panel" id="pnlMap">
+        <h2>层域地图 <span class="hint">每层域一张图 · 挂机自动选路</span></h2>
+        <div class="mapBody" id="mapBody"></div>
+      </section>
+      <section class="panel" id="pnlGoals">
+        <h2>目标与成就 <span class="hint" id="uiGoalSummary"></span></h2>
+        <div class="segs" id="goalSegs">
+          <button data-goaltab="chains" class="active">目标</button>
+          <button data-goaltab="challenges">挑战</button>
+          <button data-goaltab="records">记录</button>
+        </div>
+        <div class="goalBody" id="goalBody"></div>
+      </section>
+      <section class="panel" id="pnlRebirth">
+        <h2>无尽与轮回 <span class="hint" id="uiRebirthHint">通关后解锁</span></h2>
+        <div class="rebirthTop">
+          <div class="rbStat"><span>无尽最高</span><b id="uiEndlessBest">—</b></div>
+          <div class="rbStat"><span>裂隙印记</span><b id="uiMarks" class="marks">0</b></div>
+          <div class="rbStat"><span>轮回次数</span><b id="uiRebirths">0</b></div>
+        </div>
+        <div class="rbDesc" id="uiRebirthDesc"></div>
+        <button class="gold" id="btnRebirth" style="width:100%">♻️ 轮回</button>
+        <div class="sectionLabel" style="margin-top:10px"><span>轮回天赋</span><span class="sub">用印记购买，永久生效</span></div>
+        <div id="talentList" class="talentList"></div>
+      </section>
+      <section class="panel" id="pnlSystem">
+        <h2>系统 <span class="hint">每 10 秒自动保存</span></h2>
+        <div class="sysRow">
+          <button class="small" id="btnGuide">新手引导</button>
+          <button class="small" id="btnSaveNow">立即保存</button>
+          <button class="small" id="btnExport">导出存档</button>
+          <button class="small" id="btnImport">导入存档</button>
+          <button class="small red" id="btnResetSave">重置</button>
+        </div>
+        <div class="sysRow">
+          <button class="small" id="btnSfx">🔊 音效开</button>
+        </div>
+        <div class="sysStatus" id="uiSaveStatus">尚未保存</div>
+        <div class="credits">美术素材：<a href="https://0x72.itch.io/dungeontileset-ii" target="_blank" rel="noopener">0x72 DungeonTilesetII</a> · <a href="https://kenney.nl/assets/tiny-dungeon" target="_blank" rel="noopener">Kenney Tiny Dungeon</a> · <a href="https://kenney.nl/assets/1-bit-pack" target="_blank" rel="noopener">Kenney 1-Bit Pack</a> · <a href="https://kenney.nl/assets/game-icons" target="_blank" rel="noopener">Kenney Game Icons</a>（均 CC0）</div>
+      </section>
+    </div>
+  </main>
+
+  <!-- 手机端 APP 壳：操作条（战斗页完整，其他页折叠为 开始/停止 + 打断）与底部导航 -->
+  <div class="actionBar" id="actionBar"></div>
+  <nav class="bottomNav" id="tabbar">
+    <button data-tab="battle"><span class="ico">⚔️</span>战斗</button>
+    <button data-tab="role"><span class="ico">👤</span>角色</button>
+    <button data-tab="gear"><span class="ico">🎒</span>装备<span class="badge" style="display:none"></span></button>
+    <button data-tab="skill"><span class="ico">✨</span>技能</button>
+    <button data-tab="more"><span class="ico">⋯</span>更多</button>
+  </nav>
+</div>
+<script type="module" src="/arcade/boot.js?v=20261029-idle"></script>
+</body>
+</html>

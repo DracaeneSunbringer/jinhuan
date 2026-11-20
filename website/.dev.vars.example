@@ -1,0 +1,7 @@
+# Local use only. Set only the credentials required by your own instance.
+# DEV_LOGIN_KEY=
+# LINUXDO_CLIENT_ID=
+# LINUXDO_CLIENT_SECRET=
+# PASSWORD_PEPPER=
+# LDC_ENCRYPTION_KEY=
+# ADMIN_USER_IDS=

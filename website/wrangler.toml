@@ -1,0 +1,26 @@
+name = "meme-hall"
+main = "src/worker.ts"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = false
+preview_urls = false
+
+[assets]
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/", "/activate", "/music", "/pets", "/slime", "/arcade", "/arcade/*", "/farm", "/chat", "/chat/*", "/road", "/novels", "/novels/*", "/api/*", "/auth/*", "/img/*", "/ext", "/m/*", "/s/*", "/admin/ai", "/admin/flags", "/admin/invites", "/me/invites", "/me/account", "/me/account/email", "/me/account/password", "/login", "/register", "/reset", "/i/*", "/i", "/welcome"]
+
+[triggers]
+crons = ["* * * * *", "0 1 * * *", "*/5 * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "meme-hall-local"
+database_id = "00000000-0000-0000-0000-000000000000"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "meme-hall-local-images"
+
+[vars]
+REGISTER_MODE = "closed"
