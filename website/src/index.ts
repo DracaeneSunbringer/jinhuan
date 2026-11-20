@@ -1,3 +1,4 @@
+import { readSiteUpdates } from '../../contributions/read-updates.mjs'
 import {novels} from './routes/novels'
 import {music} from './routes/music'
 import {mainActivation,mainAccessGate} from './routes/main-activation'
@@ -299,6 +300,7 @@ app.post('/auth/logout', async (c) => {
   return c.json({ ok: true })
 })
 
+app.get('/api/community-updates', () => readSiteUpdates())
 app.get('/api/me', async (c) => {
   const u = c.get('user')
   const [limits, badges, officialTitles, linuxdo, unlocks, farmSave] = u ? await Promise.all([activeLimits(c, u.id), badgesOf(c, u.id), officialTitlesOf(c, u.id),c.env.DB.prepare("SELECT username FROM identities WHERE user_id=? AND provider='linuxdo' LIMIT 1").bind(u.id).first<{username:string}>(),c.env.DB.prepare('SELECT item FROM user_unlocks WHERE user_id=?').bind(u.id).all<{item:string}>(),c.env.DB.prepare('SELECT state FROM farm_saves WHERE user_id=?').bind(u.id).first<{state:string}>()]) : [[], [], [],null,null,null]

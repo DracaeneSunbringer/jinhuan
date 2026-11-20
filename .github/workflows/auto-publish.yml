@@ -1,0 +1,31 @@
+name: 自动合并社区更新
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pull_request:
+        description: 重试已有 PR 的编号
+        required: true
+        type: number
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+concurrency:
+  group: public-site-contribution
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: main
+          persist-credentials: false
+      - name: 检查并合并纯文本更新
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node contributions/auto-merge.mjs
