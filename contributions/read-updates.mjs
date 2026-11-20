@@ -1,32 +1,33 @@
 import { validateSiteUpdates } from './validate-updates.mjs'
 
-const source = 'https://raw.githubusercontent.com/kourou25/jinhuan/main/contributions/site-updates.json'
+const sources = [
+  'https://raw.githubusercontent.com/kourou25/jinhuan/main/contributions/site-updates.json',
+  'https://api.github.com/repos/kourou25/jinhuan/contents/contributions/site-updates.json?ref=main',
+]
+
+async function fetchUpdates(source) {
+  const response = await fetch(source, {
+    headers: { accept: 'application/vnd.github.raw+json', 'user-agent': 'Jinhuan-Community-Updates' },
+    redirect: 'follow',
+    signal: AbortSignal.timeout(6500),
+  })
+  if (!response.ok) throw Error('HTTP ' + response.status)
+  if (Number(response.headers.get('content-length')) > 48000) throw Error('清单过大')
+  const raw = await response.text()
+  if (raw.length > 48000) throw Error('清单过大')
+  return validateSiteUpdates(JSON.parse(raw))
+}
+
 export async function readSiteUpdates() {
-  try {
-    const response = await fetch(source, {
-      redirect: 'error', signal: AbortSignal.timeout(4000),
-      cf: { cacheEverything: true, cacheTtlByStatus: { '200': 60, '400-599': 0 } },
-    })
-    if (!response.ok) throw Error('源文件暂不可用')
-    const stream = response.body?.getReader()
-    if (!stream) throw Error('缺少发布内容')
-    let bytes = 0
-    const decoder = new TextDecoder('utf-8', { fatal: true })
-    let text = ''
-    for (;;) {
-      const { done, value } = await stream.read()
-      if (done) break
-      bytes += value.length
-      if (bytes > 48000) {
-        await stream.cancel()
-        throw Error('发布内容过大')
-      }
-      text += decoder.decode(value, { stream: true })
+  const failures = []
+  for (const source of sources) {
+    try {
+      const data = await fetchUpdates(source)
+      return Response.json(data, { headers: { 'cache-control': 'public, max-age=60', 'x-content-type-options': 'nosniff' } })
+    } catch (error) {
+      failures.push(error.message)
     }
-    text += decoder.decode()
-    const data = validateSiteUpdates(JSON.parse(text))
-    return Response.json(data, { headers: { 'cache-control': 'public, max-age=60', 'x-content-type-options': 'nosniff' } })
-  } catch {
-    return Response.json({ error: '社区更新暂时不可用' }, { status: 503, headers: { 'cache-control': 'no-store' } })
   }
+  console.warn('community_updates_unavailable', failures.join(' / '))
+  return Response.json({ error: '社区更新暂时不可用' }, { status: 503, headers: { 'cache-control': 'no-store' } })
 }
