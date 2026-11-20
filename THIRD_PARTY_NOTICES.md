@@ -1,6 +1,5 @@
 # 第三方声明
 
-- 庄园的 Kenney Nature Kit、Food Kit 和 Animal Pack Remastered 素材按 CC0 1.0 提供。见 [来源说明](website/public/manor/NOTICE.txt)。
-- Rift 游戏沿用 [原 MIT 版权声明](website/public/arcade/rift/LICENSE.txt)。其内嵌瓦片图来源为 0x72 DungeonTilesetII 和 Kenney Tiny Dungeon，原代码保留了 CC0 标注。
-- [Flatpickr](website/public/vendor/flatpickr-4.6.13/LICENSE.md)、[Phaser](website/public/assets/farm/LICENSE.phaser.txt)、[Three.js](website/public/assets/farm/three-0.186.1/LICENSE.txt) 保留了随库提供的版权及许可证。
-- NPM 与 Bun 依赖见各项目的清单、锁文件及依赖自带的许可证。
+- 鱼鱼谷的 Tiny Farm 和 Tiny Town 地图素材由 Kenney 提供，采用 CC0 1.0。随附 [Tiny Farm 许可](website/public/pets/dsh/isle/art/tiny-farm-LICENSE.txt)和 [Tiny Town 许可](website/public/pets/dsh/isle/art/tiny-town-LICENSE.txt)。
+- [Flatpickr](website/public/vendor/flatpickr-4.6.13/LICENSE.md) 保留了原版权和许可。
+- npm 依赖的版本和许可见项目清单、锁文件及各依赖随附的许可。鱼鱼谷小程序构建使用构建者自行提供的平台 SDK。

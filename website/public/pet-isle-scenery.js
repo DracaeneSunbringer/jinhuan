@@ -10,32 +10,11 @@ function logicalSprite(img,w=18,h=18){const c=canvas(w,h);c.getContext('2d').dra
 export function blit(g,img,x,y,{flip=false,alpha=1}={}){g.save();g.imageSmoothingEnabled=!!img.hiRes;g.globalAlpha=alpha;if(flip){g.translate(x+img.width,y);g.scale(-1,1);g.drawImage(img.hiRes||img,0,0,img.width,img.height)}else g.drawImage(img.hiRes||img,x,y,img.width,img.height);g.restore()}
 const cache=new Map(), icons=new Map()
 export const CROP={...B.CROP}, ANIMAL={...B.ANIMAL}, TOOLS={...B.TOOLS}
-export const merchantUrl='/pets/dsh/isle/art/claude-portrait.webp'
+export const merchantUrl='/valley-merchant.svg'
 function crop(image,index,w=16,h=16){const c=canvas(w,h);c.getContext('2d').drawImage(image,index%(image.width/16)*16,Math.floor(index/(image.width/16))*16,w,h,0,0,w,h);return c}
 function sprite(image,index){const c=canvas(18,18);c.getContext('2d').drawImage(crop(image,index),1,1);return c}
 const image=async(path,resolveAsset)=>new Promise(async(resolve,reject)=>{try{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(Error('场景素材加载失败'));i.src=await resolveAsset(path)}catch(e){reject(e)}})
-export function loadArt(resolveAsset=(p)=>p){
- if(promise)return promise
- promise=Promise.all([Promise.all(objectIds.map(async id=>{const p='/pets/dsh/isle/art/objects/'+id+'.webp';objectURLs.set(id,await resolveAsset(p));objectImages.set(id,await image(p,resolveAsset))})).then(()=>B.loadArt(resolveAsset)),...['tiny-town.png','tiny-farm.png','tiny-creatures.png','claude-merchant.webp'].map(n=>image('/pets/dsh/isle/art/'+n,resolveAsset))]).then(([,t,f,c,m])=>{
-  town=t;farm=f;creatures=c;merchant=m;ready=true
-  Object.assign(B.C,{w0:'#286c86',w1:'#368fa3',w2:'#48a5b1',w3:'#64bac0',w4:'#a4d8d0',w5:'#e7f4df',a2:'#e8ca94',a3:'#f2dcac',g3:'#89bb66',g4:'#a6d27d'})
-  Object.assign(CROP,B.CROP)
-  // Ripe crops use the named illustration, never another fruit recolored.
-  for(const id of Object.keys(CROP))if(objectImages.has(id)){
-    const source=objectImages.get(id),stages=[]
-    for(let stage=0;stage<4;stage++){
-      const hi=canvas(144,144),g=hi.getContext('2d'),k=[.3,.48,.72,1][stage]
-      g.drawImage(source,(1-k)*72,(1-k)*134,144*k,144*k)
-      stages.push(logicalSprite(hi))
-    }
-    CROP[id]=stages
-  }
-  for(const id of ['chicken','duck','cow','sheep','pig']){const a=logicalSprite(objectImages.get(id),24,24);ANIMAL[id]=[a,a]}
-  for(const [id,n] of Object.entries({hoe:87,can:84,pick:86,bag:74}))TOOLS[id]=sprite(farm,n)
-  return true
- }).catch(e=>{promise=null;console.warn(e.message);return false})
- return promise
-}
+export function loadArt(resolveAsset) { return B.loadArt(resolveAsset) }
 function memo(key,build){if(!cache.has(key))cache.set(key,build());return cache.get(key)}
 function mosaic(g,image,rows,x=0,y=0,size=16){g.imageSmoothingEnabled=false;rows.forEach((row,r)=>row.forEach((n,c)=>{if(n>=0)g.drawImage(crop(image,n),x+c*size,y+r*size,size,size)}))}
 function shadow(g,x,y,w,h){g.fillStyle='#234d3230';g.beginPath();g.ellipse(x,y,w,h,0,0,Math.PI*2);g.fill()}

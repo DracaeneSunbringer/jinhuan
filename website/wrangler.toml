@@ -8,7 +8,7 @@ preview_urls = false
 [assets]
 binding = "ASSETS"
 not_found_handling = "single-page-application"
-run_worker_first = ["/", "/activate", "/music", "/pets", "/slime", "/arcade", "/arcade/*", "/farm", "/chat", "/chat/*", "/road", "/novels", "/novels/*", "/api/*", "/auth/*", "/img/*", "/ext", "/m/*", "/s/*", "/admin/ai", "/admin/flags", "/admin/invites", "/me/invites", "/me/account", "/me/account/email", "/me/account/password", "/login", "/register", "/reset", "/i/*", "/i", "/welcome"]
+run_worker_first = ["/", "/activate", "/music", "/pets", "/valley", "/chat", "/chat/*", "/road", "/novels", "/novels/*", "/api/*", "/auth/*", "/img/*", "/ext", "/m/*", "/s/*", "/admin/ai", "/admin/flags", "/admin/invites", "/me/invites", "/me/account", "/me/account/email", "/me/account/password", "/login", "/register", "/reset", "/i/*", "/i", "/welcome"]
 
 [triggers]
 crons = ["* * * * *", "0 1 * * *", "*/5 * * * *"]

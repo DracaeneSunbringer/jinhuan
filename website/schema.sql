@@ -3962,3 +3962,228 @@ CREATE TABLE IF NOT EXISTS community_bubble_draws (
  CHECK((won=0 AND item_id IS NULL AND duplicate=0 AND guaranteed=0) OR (won=1 AND item_id IS NOT NULL))
 ) WITHOUT ROWID;
 
+-- 鱼鱼谷空库结构。仅包含表、索引与触发器。
+
+CREATE TABLE pet_progress (
+ user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+ total_xp INTEGER NOT NULL CHECK(total_xp>=0),
+ day TEXT NOT NULL,
+ day_xp INTEGER NOT NULL CHECK(day_xp BETWEEN 0 AND 300),
+ imported_xp INTEGER NOT NULL DEFAULT 0,
+ updated_at INTEGER NOT NULL
+);
+
+CREATE TABLE pet_battles (
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ attacker_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ defender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ operation TEXT NOT NULL,
+ day TEXT NOT NULL,
+ seed INTEGER NOT NULL,
+ attacker_level INTEGER NOT NULL,
+ defender_level INTEGER NOT NULL,
+ winner INTEGER NOT NULL CHECK(winner IN (-1,0,1)),
+ rounds INTEGER NOT NULL,
+ fighters TEXT NOT NULL CHECK(json_valid(fighters)),
+ events TEXT NOT NULL CHECK(json_valid(events)),
+ xp INTEGER NOT NULL DEFAULT 0,
+ created_at INTEGER NOT NULL,
+ UNIQUE(attacker_id,operation),
+ CHECK(attacker_id<>defender_id)
+);
+
+CREATE INDEX idx_pet_battles_attacker_day ON pet_battles(attacker_id,day,defender_id);
+
+CREATE INDEX idx_pet_battles_defender ON pet_battles(defender_id,id);
+
+CREATE TRIGGER pet_progress_no_retired_insert BEFORE INSERT ON pet_progress
+WHEN EXISTS(SELECT 1 FROM account_retirements WHERE source_id=NEW.user_id)
+BEGIN SELECT RAISE(ABORT,'retired_account'); END;
+
+CREATE TRIGGER pet_battles_no_retired_insert BEFORE INSERT ON pet_battles
+WHEN EXISTS(SELECT 1 FROM account_retirements WHERE source_id IN (NEW.attacker_id,NEW.defender_id))
+BEGIN SELECT RAISE(ABORT,'retired_account'); END;
+
+CREATE TABLE pet_items (
+ user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ item TEXT NOT NULL,
+ enh INTEGER NOT NULL DEFAULT 0 CHECK(enh BETWEEN 0 AND 10),
+ source TEXT NOT NULL,
+ created_at INTEGER NOT NULL,
+ PRIMARY KEY(user_id,item)
+);
+
+CREATE TABLE pet_loadout (
+ user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+ weapon TEXT, armor TEXT, charm TEXT,
+ points TEXT NOT NULL DEFAULT '{"str":0,"agi":0,"spd":0,"vit":0}' CHECK(json_valid(points)),
+ updated_at INTEGER NOT NULL
+);
+
+CREATE TABLE pet_daily (
+ user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ day TEXT NOT NULL,
+ trained INTEGER NOT NULL DEFAULT 0 CHECK(trained BETWEEN 0 AND 150),
+ chest INTEGER NOT NULL DEFAULT 0 CHECK(chest IN (0,1)),
+ PRIMARY KEY(user_id,day)
+);
+
+CREATE TABLE pet_ops (
+ user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ operation TEXT NOT NULL,
+ attempt TEXT NOT NULL UNIQUE,
+ kind TEXT NOT NULL,
+ ref TEXT NOT NULL,
+ cost INTEGER NOT NULL CHECK(cost>=0),
+ created_at INTEGER NOT NULL,
+ PRIMARY KEY(user_id,operation)
+);
+
+CREATE TABLE pet_battle_drops (
+ battle_id INTEGER PRIMARY KEY REFERENCES pet_battles(id) ON DELETE CASCADE,
+ item TEXT NOT NULL,
+ upgraded INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TRIGGER pet_items_no_retired_insert BEFORE INSERT ON pet_items
+WHEN EXISTS(SELECT 1 FROM account_retirements WHERE source_id=NEW.user_id)
+BEGIN SELECT RAISE(ABORT,'retired_account'); END;
+
+CREATE TRIGGER pet_ops_no_retired_insert BEFORE INSERT ON pet_ops
+WHEN EXISTS(SELECT 1 FROM account_retirements WHERE source_id=NEW.user_id)
+BEGIN SELECT RAISE(ABORT,'retired_account'); END;
+
+CREATE TABLE pet_train (
+ user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ day TEXT NOT NULL,
+ xp INTEGER NOT NULL DEFAULT 0 CHECK(xp BETWEEN 0 AND 300),
+ PRIMARY KEY(user_id,day)
+);
+
+CREATE TABLE pet_duels (
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ inviter_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ invitee_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ operation TEXT NOT NULL,
+ day TEXT NOT NULL,
+ stake INTEGER NOT NULL CHECK(stake BETWEEN 100 AND 20000),
+ status TEXT NOT NULL CHECK(status IN ('open','done','cancelled','declined','expired')),
+ battle_id INTEGER REFERENCES pet_battles(id),
+ winner_id INTEGER,
+ payout INTEGER NOT NULL DEFAULT 0,
+ rake INTEGER NOT NULL DEFAULT 0,
+ flag INTEGER NOT NULL DEFAULT 0,
+ created_at INTEGER NOT NULL,
+ expires_at INTEGER NOT NULL,
+ settled_at INTEGER,
+ UNIQUE(inviter_id,operation),
+ CHECK(inviter_id<>invitee_id)
+);
+
+CREATE INDEX idx_pet_duels_invitee ON pet_duels(invitee_id,status);
+
+CREATE INDEX idx_pet_duels_inviter ON pet_duels(inviter_id,status);
+
+CREATE INDEX idx_pet_duels_day ON pet_duels(day,inviter_id,invitee_id);
+
+CREATE TRIGGER pet_duels_no_retired_insert BEFORE INSERT ON pet_duels
+WHEN EXISTS(SELECT 1 FROM account_retirements WHERE source_id IN (NEW.inviter_id,NEW.invitee_id))
+BEGIN SELECT RAISE(ABORT,'retired_account'); END;
+
+CREATE TABLE pet_world (
+ user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+ rev INTEGER NOT NULL,
+ state TEXT NOT NULL CHECK(json_valid(state)),
+ op TEXT NOT NULL DEFAULT '',
+ updated_at INTEGER NOT NULL
+);
+
+CREATE TABLE pet_market_volume (
+ day TEXT NOT NULL,
+ item TEXT NOT NULL,
+ n INTEGER NOT NULL DEFAULT 0,
+ PRIMARY KEY(day,item)
+);
+
+CREATE TRIGGER pet_world_no_retired_insert BEFORE INSERT ON pet_world
+WHEN EXISTS(SELECT 1 FROM account_retirements WHERE source_id=NEW.user_id)
+BEGIN SELECT RAISE(ABORT,'retired_account'); END;
+
+CREATE TABLE manor (
+  user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  rev INTEGER NOT NULL DEFAULT 1,
+  state TEXT NOT NULL,
+  op TEXT,
+  updated_at INTEGER NOT NULL DEFAULT 0,
+  active_at INTEGER NOT NULL DEFAULT 0,
+  ripe_at INTEGER NOT NULL DEFAULT 0,
+  help_at INTEGER NOT NULL DEFAULT 0,
+  lv INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE INDEX manor_ripe_at ON manor(ripe_at);
+
+CREATE INDEX manor_active_at ON manor(active_at);
+
+CREATE INDEX pet_world_updated_at ON pet_world(updated_at DESC,user_id DESC);
+
+CREATE TABLE pet_world_social_ops (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  op TEXT NOT NULL,
+  request TEXT NOT NULL,
+  result TEXT NOT NULL CHECK(json_valid(result)),
+  created_at INTEGER NOT NULL,
+  PRIMARY KEY(user_id,op)
+);
+
+CREATE TABLE pet_world_social_daily (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  day TEXT NOT NULL,
+  attempts INTEGER NOT NULL DEFAULT 0 CHECK(attempts BETWEEN 0 AND 20),
+  fines INTEGER NOT NULL DEFAULT 0 CHECK(fines BETWEEN 0 AND 1000),
+  PRIMARY KEY(user_id,day)
+);
+
+CREATE TABLE pet_world_social_targets (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  day TEXT NOT NULL,
+  attempts INTEGER NOT NULL DEFAULT 0 CHECK(attempts BETWEEN 0 AND 2),
+  PRIMARY KEY(user_id,owner_id,day)
+);
+
+CREATE TABLE pet_world_social_rounds (
+  owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  round TEXT NOT NULL,
+  visitor_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  op TEXT NOT NULL,
+  caught INTEGER NOT NULL CHECK(caught IN (0,1)),
+  item TEXT NOT NULL,
+  quantity INTEGER NOT NULL CHECK(quantity IN (0,1)),
+  created_at INTEGER NOT NULL,
+  PRIMARY KEY(owner_id,round,visitor_id)
+);
+
+CREATE TABLE pet_world_manor_policy (
+  id INTEGER PRIMARY KEY CHECK(id=1),
+  closed_at INTEGER NOT NULL
+);
+
+CREATE TABLE pet_world_manor_transfers (
+  user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  op TEXT NOT NULL,
+  policy_version TEXT NOT NULL,
+  manor_rev INTEGER NOT NULL,
+  world_rev INTEGER NOT NULL,
+  manor_snapshot TEXT NOT NULL CHECK(json_valid(manor_snapshot)),
+  quote TEXT NOT NULL CHECK(json_valid(quote)),
+  credit INTEGER NOT NULL CHECK(credit>=0),
+  created_at INTEGER NOT NULL
+);
+
+CREATE TABLE pet_xp_daily (
+ user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ day TEXT NOT NULL,
+ xp INTEGER NOT NULL DEFAULT 0 CHECK(xp BETWEEN 0 AND 5000),
+ PRIMARY KEY(user_id, day)
+);

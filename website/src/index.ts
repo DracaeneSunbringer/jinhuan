@@ -1,15 +1,11 @@
 import {novels} from './routes/novels'
 import {music} from './routes/music'
 import {mainActivation,mainAccessGate} from './routes/main-activation'
-import {runFarmFarewell} from './farm/farewell'
-import {farmClosed} from './farm/lifecycle'
-import {gameHub} from './routes/game-hub'
 import {runLuckybags} from './games/guess-luckybag'
 import {resources} from './routes/resources'
 import {runCronTasks} from './services/cron-tasks'
 import {cleanupSidebar} from './games/sidebar-retention'
 import {importHistoryWords} from './games/word-library'
-import {sharedRoutes} from './routes/guess-shared'
 import {settlePredictions} from './ldc/predictions'
 import {syncCommunityGrowth} from './community-growth'
 import {settleCloseVotes} from './ldc/cancel'
@@ -39,15 +35,11 @@ import { platform } from './routes/platform'
 import { aiAdmin } from './routes/ai-admin'
 import { aiChat } from './routes/ai-chat'
 import {webPush} from './routes/web-push'
-import {farm} from './routes/farm'
-import {slime} from './routes/slime'
-import {arcade} from './routes/arcade'
 import {petSaves} from './routes/pet-saves'
 import {petBattle} from './routes/pet-battle'
 import {petWorld} from './routes/pet-world'
 import {petWorldSocial} from './routes/pet-world-social'
 import {authExtra} from './routes/auth-extra'
-import {manor} from './routes/manor'
 import {meWallet} from './routes/me-wallet'
 import {settleCoinPools} from './ldc/coin-funding'
 import {createCoinPacket,claimCoinPacket,coinPacketView,settleCoinPackets} from './farm/coin-packets'
@@ -65,7 +57,6 @@ import {xMediaUrl} from './services/social-x'
 import { titleRaffle } from './routes/title-raffle'
 import { instantCards } from './routes/instant-cards'
 import { communityBubblePool } from './community-bubble-pool'
-import {huancai} from './routes/huancai'
 import {runHuancaiDue,randomInt} from './huancai'
 import {settleDailyHuancai} from './huancai-daily'
 import { drawDueTitleRaffle, raffleTitleId, raffleTitleEnabled } from './title-raffle'
@@ -108,9 +99,6 @@ import {fishFunding} from './routes/fish-funding'
 import {nativeLdc,handleNativeGameMessage,claimNative,settlePendingEscalationAwards,settlePacketDraws,settleCompensationAwards} from './routes/native-ldc'
 import {nativeCreation,nativeView,puzzleRewardCreation,type NativePacket} from './ldc/packets'
 import {expireGuessGames} from './ldc/expiry'
-import {settleFarmLeases} from './farm/leases'
-import {settleMarket} from './farm/market'
-import {settleConflicts} from './farm/conflict'
 import {runGuessQueue} from './ldc/queue'
 import {runGuessEscalation} from './ldc/escalation'
 import { OFFICIAL_TITLES, officialTitleId } from './official-titles'
@@ -192,7 +180,6 @@ app.use('*', async (c, next) => {
   await next()
 })
 
-app.route('/',gameHub)
 app.use('*', async (c, next) => {
   c.set('user', null)
   // These two read-only media routes are public and never consume identity.
@@ -228,7 +215,6 @@ app.use('*', async (c, next) => {
 // ---------- Linux.DO 登录 ----------
 app.route('/',mainActivation)
 app.use('*',mainAccessGate)
-app.route('/',sharedRoutes)
 
 
 app.route('/', authLinuxdo)
@@ -3788,7 +3774,6 @@ app.route('/', socialPreview)
 app.route('/', titleRaffle)
 app.route('/', instantCards)
 app.route('/', communityBubblePool)
-app.route('/', huancai)
 app.route('/', aiImages)
 app.route('/', invites)
 app.route('/',randomImage)
@@ -3799,16 +3784,12 @@ app.route('/', accountMerge)
 app.route('/', account)
 app.route('/', avatarSettings)
 app.route('/', webPush)
-app.route('/', farm)
-app.route('/', arcade)
 app.route('/', petSaves)
 app.route('/', petBattle)
 app.route('/', petWorld)
 app.route('/',petWorldSocial)
 app.route('/', authExtra) // GitHub 登录 / 关联 + 账号密码登录（2026-11-04）
-app.route('/', manor) // 肥鱼庄园（2026-11-05）
 app.route('/', meWallet)
-app.route('/', slime)
 app.route('/', music)
 app.all('/api/*', (c) => c.json({ error: '接口不存在' }, 404))
 app.get('*',c=>c.env.ASSETS.fetch(c.req.raw))
@@ -3838,12 +3819,7 @@ export default {
         {name:'coin_pools',run:()=>settleCoinPools(env.DB,t)},
         {name:'title_raffle',run:()=>drawDueTitleRaffle(env.DB,Math.floor(Date.now()/1000))},
         {name:'web_push',run:()=>runWebPush(env,t)},
-        {name:'farm_farewell',run:()=>runFarmFarewell(env.DB,t)},
-        ...(!farmClosed(Math.max(t,Math.floor(Date.now()/1000)))?[
-          {name:'farm_lease',run:()=>settleFarmLeases(env.DB,t)},
-          {name:'farm_market',run:()=>settleMarket(env.DB,t)},
-          {name:'farm_conflict',run:()=>settleConflicts(env.DB,t)},
-        ]:[]),
+
         {name:'history_words',every:5,offset:1,run:()=>importHistoryWords(env)},
         {name:'sidebar_retention',every:15,offset:2,run:()=>cleanupSidebar(env)},
         {name:'content_rewards_retry',every:5,offset:3,run:()=>settleContentRewards(env.DB,t)},

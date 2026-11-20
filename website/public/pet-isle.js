@@ -194,8 +194,6 @@ export async function mountIsle(root, { toast, onOpen, user } = {}) {
   const ctx = cv.getContext('2d')
   const whaleImg = new Image(); let whaleMeta = null
   const hiRes = () => !!whaleMeta && whaleImg.complete && whaleImg.naturalWidth > 0
-  whaleImg.decoding = 'async'; whaleImg.src = '/pets/dsh/isle/whale.webp?v=1'
-  fetch('/pets/dsh/isle/whale.json?v=1').then((r) => r.json()).then((m) => { whaleMeta = m }).catch(() => {})
   try { await load() } catch (e) { wrap.replaceChildren(el('div', { class: 'isle-error' }, el('b', { text: '小岛暂时打不开' }), el('p', { text: e.message }), el('button', { class: 'isle-btn', type: 'button', onclick: () => location.reload() }, '重试'))); return { destroy() {} } }
 
   // ---------- 场景资源 ----------
@@ -1169,7 +1167,6 @@ export async function mountIsle(root, { toast, onOpen, user } = {}) {
   else if (R.autoDue(srv, now())) setTimeout(() => autoPost().catch((e) => say(e.message, 'err')), 400)
   camX = whaleX - vw / 2; camY = whaleY - vh / 2; clampCam()
   raf = requestAnimationFrame(loop)
-  if (/isledebug/.test(location.search)) window.__isle = { walkableAt, startFishing, toScreen, local, plotXY, critters, TRAP_POS, LAYOUT, get scene() { return scene }, get cave() { return cave }, get fishing() { return fishing }, get queue() { return queue }, get whale() { return [whaleX, whaleY] }, walkTo: (x, y) => { tasks.length = 0; task = null; follow = true; goDo(x, y, null, 2) }, setScale: (n) => { forceScale = n; resize() }, setWeather: (w) => { weather = w; dirty() }, setSeason: (x) => { season = x; dirty(); drawBar() }, setHour: (h) => { const cur = R.hourOf(now()); skew += ((h - cur + 24) % 24) * 3600; dirty() } }
   // 新手引导：第一次进来时提示怎么玩
   try { if (!localStorage.getItem('isleTip')) { localStorage.setItem('isleTip', '1'); setTimeout(() => { hint.textContent = '点空地种菜，熟了再点一下收获；手指划过一排地块能连着种。点Claude 娘店主卖货，点码头钓鱼，点矿洞挖矿。'; hint.classList.add('show'); setTimeout(() => hint.classList.remove('show'), 7000) }, 800) } } catch {}
 

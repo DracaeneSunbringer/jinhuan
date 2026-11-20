@@ -1,0 +1,10 @@
+@import '../../website/public/pet-isle.css';
+/* 网站的 style.css 有这条全局规则，小程序没引入；没有它 .isle-bubble{display:grid} 会压过 hidden，气泡关不掉。 */
+[hidden]{display:none!important}
+:root{--surface:#fff8e9;--surface-2:#f4e6c8;--surface-3:#e3d5bb;--text:#3c4336;--text-2:#716d5b;--line:#d2bc96;--primary:#48795c;--accent:#bd8c4c;--bg:#fff8e9;color-scheme:light}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;font-family:'Microsoft YaHei','PingFang SC',sans-serif;background:var(--bg);color:var(--text)}
+.mini-shell{height:100dvh;display:grid;grid-template-rows:44px minmax(0,1fr) 24px}.mini-top{display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid var(--line);background:var(--surface)}.mini-top button{border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:inherit;padding:6px 10px;cursor:pointer}
+.mini-shell .pets-hub{height:auto;min-height:0;width:100%;margin:0;position:relative}.mini-status{margin:0;padding:4px 10px;font-size:11px;background:var(--surface);white-space:nowrap;text-overflow:ellipsis;overflow:hidden}.mini-loading,.mini-error{padding:24px;line-height:1.7;background:var(--surface)}.mini-menu{display:grid;gap:8px}
+[data-theme=dark]{--surface:#242c2c;--surface-2:#303b36;--surface-3:#35453b;--text:#f0ead6;--text-2:#c4bea8;--line:#66725e;--bg:#202b2a}
+[data-reduced-motion=true] *{animation-duration:.001ms!important;transition-duration:.001ms!important}
+.mini-ask{max-width:min(360px,calc(100vw - 32px));border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--surface);color:var(--text);box-shadow:0 12px 32px rgba(0,0,0,.25)}.mini-ask::backdrop{background:rgba(0,0,0,.35)}.mini-ask-text{margin:0 0 12px;font-size:14px;line-height:1.6;white-space:pre-line}.mini-ask-input{width:100%;margin:0 0 12px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--text);font:inherit}.mini-ask-row{display:flex;justify-content:flex-end;gap:8px}

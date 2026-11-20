@@ -4,7 +4,6 @@ import {createSkinStatusAlerts} from '/skin-status-alerts.js'
 import {communityClass,communityName,loadCommunitySkins} from '/community-skins.js'
 import {mountWallet} from '/me-wallet.js';
 import {attachChatMediaScale,chatMediaScaleSettings} from '/chat-media-scale.js';
-import '/farm-transition.js';
 import {TITLE_COLLECTION,titleStage,TITLE_MAX_LEVEL,TITLE_STAGES,TITLE_STAGE_NAMES,CHICKENGUN_MIN_SIZE,CHICKENGUN_MAX_SIZE,chickengunSizeLimit,chickengunSize} from '/title-collection.js'
 import {titleVisualClass,titleBadgeSource,attachTitleMotion,initializeTitleEffects} from '/title-visuals.js'
 import {createChatBubbleVisibility} from '/bubble-visibility.js'
@@ -2925,7 +2924,7 @@ function markNav() {
   const p = location.pathname
   const cur = p === '/' || p.startsWith('/t/') || p.startsWith('/u/') ? 'wall'
     : p.startsWith('/series') || p.startsWith('/s/') ? 'series'
-      : p.startsWith('/huancai') ? 'huancai' : p.startsWith('/novels') ? 'novels' : p.startsWith('/nsfw') ? 'nsfw' : p.startsWith('/chat') || p.startsWith('/dm') ? 'chat' : p.startsWith('/road') ? 'road' : p.startsWith('/farm') ? 'farm' : p.startsWith('/pets') ? 'pets' : p.startsWith('/me') ? 'me' : ''
+      : p.startsWith('/novels') ? 'novels' : p.startsWith('/nsfw') ? 'nsfw' : p.startsWith('/chat') || p.startsWith('/dm') ? 'chat' : p.startsWith('/road') ? 'road' : (p.startsWith('/valley') || p.startsWith('/pets')) ? 'valley' : p.startsWith('/me') ? 'me' : ''
   if (p.startsWith('/m/')) return
   document.querySelectorAll('[data-nav]').forEach((a) => a.classList.toggle('on', a.dataset.nav === cur))
   const title=document.getElementById('mobile-page-title')
@@ -8276,36 +8275,7 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
   const st = { first: 0, last: 0, more: true, busy: false, olderFailed: false, since: 0, items: [], unreadAt: null, sentRead: 0, stick: true, done: false }
   const positionKey = `${S.me?.id || 0}:${g.id}`
   let positionTimer = 0
-  let aiPanel, aiLoading, guessPanel, guessLoading, huancaiPanel, huancaiLoading, gamePanel, gameLoading, vipPanel, vipLoading, sideMode='', bagTimer=0, bagLast=0, bagBusy=false, bagQueued=false
-  async function openGuess(mid = 0) {
-    sideMode='guess';huancaiPanel?.close();gamePanel?.close()
-    try {
-      guessLoading ||= import('/guess-room.js?v=20261020layout').then(({ createGuessRoom }) => {
-        if (!st.destroyed) guessPanel = createGuessRoom({ pane: el, chat: chatColumn, scroller, opener: guessOpen, gid: g.id, userId: S.me?.id, h, icon, api, onMode:g.id===1?openGameMode:null,
-          create: anchor => redpackDialog(anchor, { group:g, autoGuess:{amount:''}, onSent:()=>{poll();guessPanel?.refresh(true)} }) })
-      }).catch(error => { guessLoading = null; throw error })
-      await guessLoading
-      if (!st.destroyed&&sideMode==='guess') guessPanel.open(mid)
-    } catch (error) { if (!st.destroyed) toast(error.message, 'err') }
-  }
-  function openHuancai(){navigate('/huancai')}
-  async function openGameMode(mode,roomId='') {
-    if(mode==='arena'||mode==='drawing'){toast('AI对抗和卧底画家已下线，已返回普通猜词');return openGuess()}
-    if(mode==='guess')return openGuess()
-    if(g.id!==1)return
-    if(mode==='outside'){
-      try{
-        vipLoading ||= import('/vip-chat-dock.js').then(({createVipChatDock})=>{if(!st.destroyed)vipPanel=createVipChatDock({pane:el,scroller,opener:outsideOpen,api,emojiPicker:(anchor,pick)=>openPop(anchor,emojiBoard(k=>{pick(k);closePop()}),{key:'outside-chat-emoji',cls:'pop-stk'}),renderBody:text=>richBody(text,{md:'lite'})})}).catch(error=>{vipLoading=null;throw error})
-        await vipLoading;if(!st.destroyed)vipPanel.open()
-      }catch(error){if(!st.destroyed)toast(error.message,'err')}
-      return
-    }
-    sideMode=mode;guessPanel?.close();huancaiPanel?.close()
-    try{
-      gameLoading ||= import('/game-panel.js?v=20261026').then(({createGamePanel})=>{if(!st.destroyed)gamePanel=createGamePanel({pane:el,chat:chatColumn,scroller,opener:outsideOpen,user:S.me,api,onMode:openGameMode,emojiPicker:(anchor,pick)=>openPop(anchor,emojiBoard(k=>{pick(k);closePop()}),{key:'outside-chat-emoji',cls:'pop-stk'}),renderBody:text=>richBody(text,{md:'lite'})})}).catch(error=>{gameLoading=null;throw error})
-      await gameLoading;if(!st.destroyed&&sideMode===mode)gamePanel.open(mode,roomId)
-    }catch(error){if(!st.destroyed)toast(error.message,'err')}
-  }
+  let aiPanel, aiLoading, bagTimer=0, bagLast=0, bagBusy=false, bagQueued=false
   async function openAi(anchor, mode = 'summary', range = '200') {
     try {
       aiLoading ||= import('/ai-chat.js').then(({ createAiChat }) => {
@@ -8442,7 +8412,6 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
     if (doc.hidden) { savePosition(); if (!st.blur) { st.hiddenAt = Date.now(); st.awayEnd = 0; dropAway(); st.awayDismissed = false } return }
     if (st.blur && doc.hasFocus()) st.blur = false // 有的浏览器切回标签页不发 focus
     if (!st.blur) back()
-    guessPanel?.refresh()
     refreshBagBadge()
   }
   // 失焦只看主窗口：弹出的小窗本来就是给「切到别处也一直看得到」用的，照常跟着滚
@@ -8717,7 +8686,6 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
   }
   // 编辑 / 撤回 / 表情 / 回应 / 转帖 / 轮询 changed：同步原消息和引用它的摘要。
   const update = (m) => {
-    guessPanel?.signal([m])
     histView?.apply(m)
     updateReferences(mainView, m)
     if (histView) updateReferences(histView, m)
@@ -8814,7 +8782,6 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
       if (st.destroyed || !scroller.isConnected || revision !== listRevision) { more = false; return }
       more = !!d.more && d.items.length > 0
       st.since = d.now
-      guessPanel?.signal(d.items)
       const wasFollowing = st.stick && !st.followPaused
       d.changed.forEach(update)
       if (st.after) { more = false; return } // 在跳转窗口里，最新的消息等回到底部再拉
@@ -9464,7 +9431,7 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
     input.focus()
     if (q0) { input.value = q0; run() }
   }
-  function destroy() { drawLifetime.abort(); savePosition(); st.destroyed = true; bubbleMotion.destroy(); histMotion?.destroy(); histMotion = null; aiPanel?.destroy(); guessPanel?.destroy(); huancaiPanel?.destroy(); gamePanel?.destroy(); vipPanel?.destroy(); st.done = false; CHAT.panes.delete(api_); clearTimeout(positionTimer); clearTimeout(awayT); clearTimeout(st.catchupT); st.stopOwnPoll?.(); clearInterval(st.readT); clearInterval(bagTimer); doc.removeEventListener('visibilitychange', onVis); doc.defaultView?.removeEventListener('pagehide', savePosition); win?.removeEventListener('blur', onBlur); win?.removeEventListener('focus', onFocus); doc.defaultView?.removeEventListener('title-raffle-update', refreshTitleRaffles); offNotice(); offUnread() }
+  function destroy() { drawLifetime.abort(); savePosition(); st.destroyed = true; bubbleMotion.destroy(); histMotion?.destroy(); histMotion = null; aiPanel?.destroy(); st.done = false; CHAT.panes.delete(api_); clearTimeout(positionTimer); clearTimeout(awayT); clearTimeout(st.catchupT); st.stopOwnPoll?.(); clearInterval(st.readT); clearInterval(bagTimer); doc.removeEventListener('visibilitychange', onVis); doc.defaultView?.removeEventListener('pagehide', savePosition); win?.removeEventListener('blur', onBlur); win?.removeEventListener('focus', onFocus); doc.defaultView?.removeEventListener('title-raffle-update', refreshTitleRaffles); offNotice(); offUnread() }
 
   // 群公告：顶上一条，点 × 收起（记住这一版），右上角留个小「公告」随时再打开；公告改了会重新弹出来
   const noticeEl = h('div', { class: 'cm-notice-wrap' })
@@ -9519,7 +9486,6 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
 
   pendingSlot()
   stage.append(pill, latestBtn)
-  const guessOpen = h('button', { type:'button', class:'cm-guess-open', title:'猜词专区 / 分屏', 'aria-label':'猜词专区 / 分屏', 'aria-expanded':'false', onclick:()=>openGuess() }, h('img',{src:'/ai-avatar.svg',class:'cm-guess-icon',alt:'',width:24,height:24}), h('span',{class:'cm-guess-label'},'猜词'), h('span',{'aria-hidden':'true'},'↗'))
   const bagOpen = h('button', {type:'button',class:'cm-bag-open',title:'群红包袋','aria-label':'群红包袋',onclick:e=>redpackDialog(e.currentTarget,{archiveGroup:g,onUpdate:update,onClose:()=>refreshBagBadge(true)})},
     icon('packetBag','i tiny'),h('span',null,'群红包袋'),h('span',{class:'cm-bag-alert','aria-hidden':'true'},'还有红包'))
   const updatesOpen=h('button',{type:'button',class:'cm-updates-open',title:'最近更新','aria-label':'最近更新',onclick:async e=>{
@@ -9550,8 +9516,7 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
   }
   const chatColumn = h('div', { class:'cm-chat-column' }, noticeEl, rafflePin, stage, compose)
   const previewOpen=h('button',{type:'button',class:'cm-bag-open',title:'预览本地投稿装扮','aria-label':'装扮预览',onclick:async e=>{const anchor=e.currentTarget;try{if(!document.querySelector('link[data-community-preview]'))document.head.append(h('link',{rel:'stylesheet',href:'/community-preview.css','data-community-preview':''}));const {openCommunityPreview}=await import('/community-preview.js');if(!st.destroyed)openCommunityPreview(anchor,{h,icon,avatar,user:S.me,titleEl,badgeEl,bubbleView})}catch(error){toast(error.message,'err')}}},icon('sparkle','i tiny'),h('span',null,'装扮预览'))
-  const outsideOpen=h('button',{type:'button',class:'cm-bag-open cm-outside-open',hidden:g.id!==1,title:'分屏查看VIP聊天','aria-label':'VIP聊天','aria-expanded':'false',onclick:()=>openGameMode('outside')},icon('chat','i tiny'),h('span',null,'VIP聊天'))
-  const el = h('div', { class: 'cm-pane' }, h('div',{class:'cm-guess-bar'},bagOpen,updatesOpen,previewOpen,guessOpen,outsideOpen), chatColumn)
+  const el = h('div', { class: 'cm-pane' }, h('div',{class:'cm-guess-bar'},bagOpen,updatesOpen,previewOpen), chatColumn)
   onRemoval(el,attachChatMediaScale(el,{uid:S.me?.id,scroller,list}))
   if(g.id===1){const invite=new URL(targetDocument.defaultView.location.href);if(['arena','drawing'].includes(invite.searchParams.get('game')))queueMicrotask(()=>{if(!st.destroyed)openGameMode(invite.searchParams.get('game'),invite.searchParams.get('room')||'')})}
   const syncBagReminder=(event)=>{
@@ -9573,7 +9538,7 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
     if (before.endsWith('@' + username + ' ')) return ta.focus()
     insertAtCursor(ta, (/\S$/.test(before) ? ' ' : '') + '@' + username + ' ')
   }
-  const api_ = { el, poll, destroy, update, setReply, setEdit, recalled, quoteMsg, jumpTo, gallery, search, atUser, openGuess, send: (t) => send(t), focus: () => ta.focus(), group: g, st }
+  const api_ = { el, poll, destroy, update, setReply, setEdit, recalled, quoteMsg, jumpTo, gallery, search, atUser, send: (t) => send(t), focus: () => ta.focus(), group: g, st }
   mainView.pane = api_
   // 消息上的右键 / 左滑：委托在整个 pane 上（跟着 pane 进小窗 document），按消息所在列表找视图和消息。
   // 发送中的占位不在任何列表里，自然不管
@@ -9863,7 +9828,7 @@ function chatMsg(m, { cont, pane, pending } = {}) {
     const edited = m.edited_at && h('span', { class: 'cm-edited', title: '编辑于 ' + new Date(m.edited_at * 1000).toLocaleString('zh-CN', { hour12: false }) }, '（已编辑）')
     if (m.road_id) body.push(h('a', { class: 'cm-road', href: `/road?item=${m.road_id}`, 'data-link': '' }, `已转到鞭打 #${m.road_id}`))
     if (m.redpack) body.push(h('button', { type: 'button', class: 'cm-redpack' + (m.redpack.solved ? ' is-open' : ''), 'aria-label': '打开红包',
-      onclick: (e) => pane && ['guess','clues'].includes(m.redpack.ldc_mode) ? pane.openGuess(m.id) : redpackDialog(e.currentTarget, { message: m, claimOnOpen:true, onUpdate: (fresh) => pane?.update(fresh) }) },
+      onclick: (e) => redpackDialog(e.currentTarget, { message: m, claimOnOpen:true, onUpdate: (fresh) => pane?.update(fresh) }) },
       m.redpack.cover && deferChatImage(h('img',{class:'cm-redpack-cover',alt:'红包封面',onerror:e=>{if(e.currentTarget.isConnected)e.currentTarget.remove()}}),m.redpack.cover),
       h('span', { class: 'cm-redpack-seal'+((m.redpack.provider==='coin52'||m.redpack.payment_provider==='coin52')?' is-dcoin':''), 'aria-hidden': 'true' }, (m.redpack.provider==='coin52'||m.redpack.payment_provider==='coin52')?dcoinIcon(h):icon('redpack')),
       h('span', { class: 'cm-redpack-copy' }, h('strong', null, m.redpack.prompt || (m.redpack.game==='free_guess'?'一起猜词吧':'给你一个红包')),
@@ -12015,38 +11980,17 @@ async function renderDmRoute() {
       h('button', { class: 'btn btn-primary sm', type: 'button', onclick: renderDmRoute }, '重试')))
   }
 }
-async function renderFarmRoute(){
-  if(!S.me){main.replaceChildren(pageHead('欢欢农场','登录后拥有自己的田园，进度随账号保存。'),h('a',{class:'btn btn-primary',href:loginHref()},'登录并进入农场'));return}
-  let left=false
-  onPageLeave(()=>{left=true})
-  main.replaceChildren(loadingBox())
-  try{
-    const farewell=await api('/farm/farewell'),{farewellPanel}=await import('/farm-farewell.js')
-    if(left)return
-    const farewellBanner=farewellPanel(farewell,{reload:()=>route(),onLeave:onPageLeave})
-    if(farewell.closed){main.replaceChildren(farewellBanner);return}
-    const css=new Promise((resolve,reject)=>{
-      let link=document.getElementById('farm-styles')
-      if(link?.sheet){resolve();return}
-      link?.remove();link=h('link',{id:'farm-styles',rel:'stylesheet',href:'/farm.css',onload:resolve,onerror:()=>{link.remove();reject(Error('农场样式加载失败'))}});document.head.append(link)
-    })
-    const [{mountFarm}]=await Promise.all([import('/farm.js'),css])
-    if(left)return
-    mountFarm(main,{userId:S.me.id,onLeave:onPageLeave})
-    main.prepend(farewellBanner)
-  }catch{if(!left)main.replaceChildren(emptyState('农场暂时打不开','请重试，云端进度仍然保留',h('button',{class:'btn btn-primary',type:'button',onclick:renderFarmRoute},'重试')))}
-}
 async function renderMusicRoute(){
  let left=false;onPageLeave(()=>{left=true});main.replaceChildren(loadingBox())
  try{const {mountMusic}=await import('/music.js');if(!left)await mountMusic(main,{user:S.me,onLeave:onPageLeave})}catch(e){if(!left)main.replaceChildren(emptyState('音乐暂时无法打开',e.message,h('button',{class:'btn',onclick:renderMusicRoute},'重试')))}
 }
-async function renderPetsRoute(){
+async function renderValleyRoute(){
   let left=false;onPageLeave(()=>{left=true});main.replaceChildren(loadingBox())
   try{
     if(!document.getElementById('pets-styles'))document.head.append(h('link',{id:'pets-styles',rel:'stylesheet',href:'/pets.css'}))
-    const {mountPets}=await import('/pets.js');if(left)return
-    await mountPets(main,{user:S.me,api,h,onLeave:onPageLeave,navigate,toast})
-  }catch(e){if(!left)main.replaceChildren(emptyState('站宠暂时打不开',e.message,h('button',{class:'btn',onclick:renderPetsRoute},'重试')))}
+    const {mountValley}=await import('/valley.js');if(left)return
+    await mountValley(main,{user:S.me,api,onLeave:onPageLeave,navigate,toast})
+  }catch(e){if(!left)main.replaceChildren(emptyState('鱼鱼谷暂时打不开',e.message,h('button',{class:'btn',onclick:renderValleyRoute},'重试')))}
 }
 async function renderNovelRoute(){
   let left=false;onPageLeave(()=>{left=true})
@@ -12065,16 +12009,9 @@ async function renderResourceRoute(){
   let left=false;onPageLeave(()=>{left=true});main.replaceChildren(loadingBox())
   try{if(!document.getElementById('resource-styles'))document.head.append(h('link',{id:'resource-styles',rel:'stylesheet',href:'/resources.css'}));const {mountResources}=await import('/resources.js');if(!left)await mountResources(main,{user:S.me,api,h,onLeave:onPageLeave,navigate,mediaTray,toast,icon})}catch(e){if(!left)main.replaceChildren(emptyState('资源社区暂时无法打开',e.message,h('button',{class:'btn',onclick:renderResourceRoute},'重试')))}
 }
-async function renderHuancaiRoute(){
- let left=false,instance=null;onPageLeave(()=>{left=true;instance?.destroy()});main.replaceChildren(loadingBox())
- if(!S.me){main.replaceChildren(emptyState('请先登录','欢彩向群聊成员开放',h('a',{href:loginHref(),class:'btn btn-primary'},'登录')));return}
- try{const {createHuancaiPage}=await import('/huancai-page.js');if(left)return;const shell=h('div',{class:'hc-page-shell'});main.replaceChildren(shell);instance=createHuancaiPage({pane:shell,userId:S.me.id,h,api});instance.open()}catch(e){if(!left)main.replaceChildren(emptyState('欢彩暂时无法打开',e.message,h('button',{class:'btn',onclick:renderHuancaiRoute},'重试')))}
-}
 const ROUTES = [
-  [/^\/huancai$/, () => renderHuancaiRoute()],
-  [/^\/slime$/, () => location.assign('/slime')],
   [/^\/music$/, () => renderMusicRoute()],
-  [/^\/pets$/, () => renderPetsRoute()],
+  [/^\/(?:valley|pets)$/, () => renderValleyRoute()],
   [/^\/novels(?:\/[-a-zA-Z0-9]+){0,2}$/, () => renderNovelRoute()],
   [/^\/nsfw(?:\/(?:new|settings|\d+))?$/, () => renderNsfw()],
   [/^\/$/, () => renderWall({})],
@@ -12083,7 +12020,6 @@ const ROUTES = [
   [/^\/(puzzles|tools)$/, () => navigate('/', { replace: true })],
   [/^\/me$/, () => renderMe()],
   [/^\/road$/, () => renderRoad()],
-  [/^\/farm$/, () => renderFarmRoute()],
   [/^\/dm(?:\/(?:\d+|new\/-?\d+))?$/, () => renderDmRoute()],
   [/^\/chat(?:\/(\d+))?$/, (m) => renderChat(Number(m[1]) || 0)],
   [/^\/u\/(.+)$/, (m) => renderWall({ author: decodeURIComponent(m[1]) })],
@@ -12098,15 +12034,14 @@ function navigate(path, { replace = false } = {}) {
 }
 
 function route() {
-  if(/^\/(?:slime|arcade(?:\/(?:mole|rift))?)$/.test(location.pathname)){location.replace(location.pathname);return}
   document.dispatchEvent(new Event('bubbleeffectreset'))
   dockSync()
-  if ((location.pathname.startsWith('/dm') || location.pathname==='/farm' || location.pathname==='/huancai') && S.skin) {
+  if ((location.pathname.startsWith('/dm')) && S.skin) {
     sessionStorage.setItem('dmReturnSkin',S.skin)
     setSkin('')
     return
   }
-  if (!location.pathname.startsWith('/dm') && location.pathname!=='/farm' && location.pathname!=='/huancai' && !S.skin) {
+  if (!location.pathname.startsWith('/dm') && !S.skin) {
     const previousSkin=sessionStorage.getItem('dmReturnSkin')
     if (previousSkin) { sessionStorage.removeItem('dmReturnSkin'); setSkin(previousSkin); return }
   }
@@ -12170,8 +12105,7 @@ function pageTitle(path, search) {
   if (q) return `搜索：${q}`
   if (path.startsWith('/novels')) return '小说'
   if (path.startsWith('/music')) return '音乐'
-  if (path.startsWith('/pets')) return '站宠'
-  if (path.startsWith('/huancai')) return '欢彩'
+  if (path.startsWith('/valley') || path.startsWith('/pets')) return '鱼鱼谷'
   if (path.startsWith('/nsfw')) return 'RZP'
   if (path.startsWith('/series')) return '图集'
   if (path.startsWith('/s/')) return dec(path.slice(3)) + ' · 图集'
@@ -12181,7 +12115,6 @@ function pageTitle(path, search) {
   if (path.startsWith('/dm')) return '私信'
   if (path.startsWith('/me')) return '我的'
   if (path.startsWith('/road')) return '鞭打模块'
-  if (path.startsWith('/farm')) return '欢欢农场'
   if (path.startsWith('/u/')) return '@' + dec(path.slice(3))
   if (path.startsWith('/t/')) return '#' + dec(path.slice(3))
   return ''
