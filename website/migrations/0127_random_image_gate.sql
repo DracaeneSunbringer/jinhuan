@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS random_image_gate (
+ id INTEGER PRIMARY KEY CHECK(id=1),
+ window_start INTEGER NOT NULL DEFAULT 0,
+ requests INTEGER NOT NULL DEFAULT 0,
+ next_at INTEGER NOT NULL DEFAULT 0,
+ paused_until INTEGER NOT NULL DEFAULT 0
+);
+INSERT OR IGNORE INTO random_image_gate(id) VALUES(1);

@@ -29,3 +29,10 @@
 .wealth-rank li[data-place="2"] .wealth-place{color:var(--wallet-silver)}.wealth-rank li[data-place="3"] .wealth-place{color:var(--wallet-bronze)}
 .wealth-name{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}.wealth-name:hover{text-decoration:underline}.wealth-value{text-align:right;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;color:var(--text)}.wealth-value small{font-size:11px;font-weight:400;margin-left:5px;color:var(--text-2);white-space:nowrap}
 @media(max-width:480px){.me-wallet{padding:18px 14px}.me-wallet-identity{gap:12px}.me-wallet-identity .wallet-coin{width:44px;height:44px}.me-wallet-figures>strong{font-size:25px}.me-wallet-summary{gap:16px}.me-wallet-actions{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.me-wallet-actions .btn{padding:8px 4px;font-size:13px}.me-wallet-ledger strong{font-size:13px}.wealth-rank{padding:0 16px 10px}.wealth-rank-header{margin:0 -16px 16px;padding:16px;gap:10px}.wealth-rank-header .wallet-coin{width:36px;height:36px}.wealth-rank h2{font-size:19px}.wealth-rank li{gap:8px;grid-template-columns:28px minmax(0,1fr) minmax(0,auto)}.wealth-value{font-size:14px}.wealth-value small{display:block;margin:0;font-size:10px}.wealth-name{font-size:13px}.wealth-rank-header button{padding:8px 10px}}
+
+.hb-key-panel{margin-top:16px;padding-top:14px;border-top:1px solid var(--wallet-line)}
+.hb-key-panel[hidden],.hb-key-value[hidden]{display:none}
+.hb-key-panel h3{margin:0 0 6px;font-size:16px}
+.hb-key-panel p{margin:0 0 10px;color:var(--text-2);font-size:14px;line-height:1.55}
+.hb-key-panel .me-wallet-message:empty{display:none}
+.hb-key-value{display:block;box-sizing:border-box;width:100%;margin-top:10px;padding:9px 10px;border:1px solid var(--wallet-line);border-radius:8px;background:var(--surface);color:var(--text);font:14px ui-monospace,monospace}

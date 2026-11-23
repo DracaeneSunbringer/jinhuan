@@ -119,3 +119,15 @@
  .pa-num{font-size:22px}.pa-num.crit{font-size:28px}.pa-combo{font-size:24px;right:8%}
  .pa-ticker{bottom:52px;max-width:92%}.pa-scene-tag{display:none}.pa-res-title{font-size:40px}
 }
+
+.whale-mark{min-width:36px;min-height:34px;padding:5px!important;font-size:18px!important}.whale-mark[aria-pressed=true]{border-color:#3b8b96!important;background:#d9f4f5!important;color:#163d43!important}.pb-mark-groups{display:flex;gap:8px;margin:8px 0}.pb-mark-groups [aria-pressed=true],.isle-tabs [aria-pressed=true]{font-weight:700;border-color:#368384!important}
+
+/* b15c：列表与外层共用一个纵向滚动容器 */
+.pb-body{overscroll-behavior:contain;scrollbar-gutter:stable}
+.pb-grid{align-items:start;grid-template-columns:minmax(210px,.9fr) minmax(300px,1.2fr) minmax(240px,1fr)}
+.pb-grid .pb-list{max-height:none;overflow:visible}
+.pb-xp{display:grid;gap:6px;margin:12px 0;font-size:12px;line-height:1.5}.pb-xp progress{display:block;width:100%;height:12px;accent-color:var(--accent)}
+.pb-level-filter{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:12px}.pb-level-filter label{display:flex;align-items:center;gap:6px}.pb-level-filter input{width:64px;min-width:0;padding:6px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:inherit;font:inherit}
+.pb-item{min-width:0}.pb-item>span{min-width:0}.pb-shop-items{grid-template-columns:repeat(auto-fill,minmax(195px,1fr))}.pb-shop-items .pb-item{grid-template-columns:48px minmax(0,1fr);align-items:start}.pb-shop-items .pb-item img{width:48px;height:48px}.pb-shop-items .pb-btn{max-width:100%;white-space:normal;overflow-wrap:anywhere;box-sizing:border-box;line-height:1.4}
+.pb-gear-detail .pb-detail{align-items:center}.pb-gear-detail .pb-actions{margin-top:16px;gap:10px}.pb-gear-detail+.pb-filter{padding-top:4px;margin-bottom:14px}.pb-detail h3{flex-wrap:wrap;align-items:start}.pb-detail .pb-btn{white-space:normal}
+@media(max-width:1000px){.pb-grid{grid-template-columns:1fr}.pb-shop-items{grid-template-columns:repeat(2,minmax(0,1fr))}.pb-shop-items .pb-item{grid-template-columns:1fr}.pb-shop-items .pb-item img{justify-self:center}.pb-top{flex-wrap:wrap}.pb-top-info{margin-left:0}.pb-close{margin-left:auto}}

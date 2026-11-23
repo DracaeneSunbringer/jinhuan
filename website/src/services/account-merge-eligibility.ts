@@ -3,7 +3,6 @@ export type MergeEligibilityReason='ok'|'ineligible'|'identity_conflict'|'creden
 
 // 每个用户关联列必须明确处理。MG05实施时复用此清单验收迁移/撤销，不能将清单视为已实现事务。
 export const MERGE_RELATION_POLICY={
-  arcade_saves:{user_id:'block'},
   pet_saves:{user_id:'block'},
   pet_progress:{user_id:'block'},pet_battles:{attacker_id:'block',defender_id:'block'},
   pet_world:{user_id:'block'},
@@ -11,14 +10,11 @@ export const MERGE_RELATION_POLICY={
   pet_world_social_targets:{user_id:'block',owner_id:'block'},
   pet_world_social_rounds:{owner_id:'block',visitor_id:'block'},
   pet_world_manor_transfers:{user_id:'block'},
-  coin52_wealth:{user_id:'starter-only'},
-  slime_saves:{user_id:'block'},
   novel_works:{user_id:'block'},novel_reading_progress:{user_id:'latest-progress'},novel_ai_calls:{user_id:'transfer'},
   farm_action_limits:{user_id:'block'},farm_market_accounts:{user_id:'block'},farm_market_lots:{owner_id:'block'},farm_market_receipts:{user_id:'block'},
   farm_conflict_members:{user_id:'block'},farm_conflict_stakes:{user_id:'block'},farm_conflict_budgets:{user_id:'block'},farm_conflicts:{attacker_id:'block',defender_id:'block'},farm_uprising_members:{user_id:'block'},farm_conflict_receipts:{user_id:'block'},farm_conflict_events:{user_id:'block',actor_id:'block'},
   huancai_usage:{user_id:'block'},huancai_orders:{user_id:'block'},huancai_tickets:{user_id:'block'},
   instant_card_progress:{user_id:'block'},instant_card_batches:{user_id:'block',owner_id:'block'},
-  community_bubble_progress:{user_id:'block'},community_bubble_draws:{user_id:'block',owner_id:'block'},
   farm_loss_totals:{user_id:'block'},farm_lease_offers:{owner_id:'block'},farm_leases:{owner_id:'block',tenant_id:'block'},farm_lease_actions:{actor_id:'block'},
   content_coin_rewards:{user_id:'block'},
   activity_honor_events:{user_id:'block'},
@@ -58,7 +54,7 @@ export const MERGE_RELATION_POLICY={
 const contentTables:Record<string,string>={guess_free_rounds:'owner_id',guess_room_messages:'user_id',memes:'author_id',comments:'user_id',chat_boosts:'user_id',road_items:'user_id',
   road_comments:'user_id',short_replies:'user_id',reactions:'user_id',chat_reactions:'user_id',likes:'user_id',
   favorites:'user_id',chat_sticker_favorites:'user_id',road_votes:'user_id',chat_groups:'created_by',invites:'inviter_id',dm_messages:'sender_id'}
-const assetsTables:Record<string,string>={rank_placements:'user_id',chat_activity_stats:'user_id',packet_sender_stats:'user_id',packet_luck_wins:'user_id',guess_free_rounds:'winner_id',guess_free_questions:'user_id',guess_wins:'user_id',packet_draw_entries:'user_id',packet_events:'user_id',packet_coin_escrows:'owner_id',fish_accounts:'user_id',ldc_accounts:'user_id',ldc_packets:'owner_id',ldc_awards:'recipient_id',ldc_questions:'user_id',uploads:'user_id',ai_jobs:'user_id',puzzle_attempts:'user_id',puzzle_codes:'claimed_by',
+export const assetsTables:Record<string,string>={rank_placements:'user_id',chat_activity_stats:'user_id',packet_sender_stats:'user_id',packet_luck_wins:'user_id',guess_free_rounds:'winner_id',guess_free_questions:'user_id',guess_wins:'user_id',packet_draw_entries:'user_id',packet_events:'user_id',packet_coin_escrows:'owner_id',fish_accounts:'user_id',ldc_accounts:'user_id',ldc_packets:'owner_id',ldc_awards:'recipient_id',ldc_questions:'user_id',uploads:'user_id',ai_jobs:'user_id',puzzle_attempts:'user_id',puzzle_codes:'claimed_by',
   puzzles:'creator_id',chat_redpack_external_views:'user_id',chat_redpack_opens:'user_id',chat_redpack_successes:'user_id',chat_title_raffle_entries:'user_id',user_unlocks:'user_id'}
 // 平衡OR树保留短路点查，避免线性链的深度和UNION分支数限制。
 export function mergeAnySql(parts:string[]):string{
@@ -69,11 +65,10 @@ export function mergeAnySql(parts:string[]):string{
 }
 const existsAny=(tables:Record<string,string>)=>mergeAnySql(Object.entries(tables).map(([table,column])=>`EXISTS(SELECT 1 FROM ${table} WHERE ${column}=b.id)`))
 assetsTables.upload_operations='user_id'
-assetsTables.slime_saves='user_id'
-assetsTables.arcade_saves='user_id'
 assetsTables.pet_saves='user_id'
 assetsTables.pet_progress='user_id'
 assetsTables.pet_world='user_id'
+assetsTables.pet_world_manor_transfers='user_id'
 assetsTables.farm_market_accounts='user_id';assetsTables.farm_conflict_members='user_id'
 assetsTables.huancai_usage='user_id';assetsTables.huancai_orders='user_id';assetsTables.huancai_tickets='user_id'
 assetsTables.instant_card_progress='user_id';assetsTables.instant_card_batches='user_id'

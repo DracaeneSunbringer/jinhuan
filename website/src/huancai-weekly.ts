@@ -1,3 +1,4 @@
+import {HUANCAI_RETIRED} from './shared/huancai-rules'
 import {ensureAiBot,AI_BOT_ID} from './ai/images'
 
 export function completedWeek(t:number){
@@ -7,8 +8,9 @@ export function completedWeek(t:number){
  const week=new Date((closes-6*86400+28800)*1000).toISOString().slice(0,10)
  return {week,closes,starts:Date.parse(week+'T00:00:00+08:00')/1000,until:new Date((closes+28800)*1000).toISOString().slice(0,10)}
 }
-const eligible=`u.kind='user' AND u.disabled=0 AND EXISTS(SELECT 1 FROM chat_members WHERE group_id=1 AND user_id=u.id) AND NOT EXISTS(SELECT 1 FROM chat_bans WHERE group_id=1 AND user_id=u.id) AND NOT EXISTS(SELECT 1 FROM account_retirements WHERE source_id=u.id)`
+export const eligible=`u.kind='user' AND u.disabled=0 AND EXISTS(SELECT 1 FROM chat_members WHERE group_id=1 AND user_id=u.id) AND NOT EXISTS(SELECT 1 FROM chat_bans WHERE group_id=1 AND user_id=u.id) AND NOT EXISTS(SELECT 1 FROM account_retirements WHERE source_id=u.id)`
 export async function settleWeekly(db:D1Database,t:number,random:(n:number)=>number){
+ if(HUANCAI_RETIRED)return // 欢彩已下线（b19），每周保底不再结算
  const w=completedWeek(t)
  if(w.until<'2026-10-25'||await db.prepare('SELECT 1 FROM huancai_weekly WHERE week=?').bind(w.week).first())return
  if(await db.prepare("SELECT 1 FROM huancai_rounds WHERE closes_at<=? AND state!='paid' LIMIT 1").bind(w.closes).first())return

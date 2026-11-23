@@ -85,7 +85,7 @@ window.addEventListener('message', async event => {
   // Tampermonkey 的 window 是沙箱代理；MessageEvent.source 指向文档所属的真实窗口。
   // 仍严格校验同一窗口和本站来源，不能仅删除 source 检查。
   const pageWindow=window.document?.defaultView || window
-  if(event.source!==pageWindow || event.origin!==location.origin || location.origin!=='https://jinhuan.example')return
+  if(event.source!==pageWindow || event.origin!==location.origin || location.origin!=='https://52dmeme.com')return
   const data=event.data
   if(data?.type!=='meme-redpacket-request' || !/^[a-f0-9-]{36}$/i.test(data.id))return
   const reply=(result,error,creation)=>pageWindow.postMessage({type:'meme-redpacket-result',id:data.id,result,error,creation},location.origin)

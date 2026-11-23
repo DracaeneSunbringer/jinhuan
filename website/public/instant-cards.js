@@ -1,7 +1,7 @@
-import {shiguangCeremony} from '/shiguang-host.js'
-import {dcoinAmount} from '/dcoin.js'
-import {titleBadgeSource} from '/title-visuals.js'
-import {owner52Identity} from '/owner52.js'
+import {shiguangCeremony} from '/shiguang-host.js?v=472f7fbf'
+import {dcoinAmount} from '/dcoin.js?v=472f7fbf'
+import {titleBadgeSource} from '/title-visuals.js?v=472f7fbf'
+import {owner52Identity} from '/owner52.js?v=472f7fbf'
 const BASE='/instant-cards'
 const money=(h,n)=>dcoinAmount(h,n)
 const permanent=r=>r.reward_kind==='title'||(!r.reward_kind&&!!r.won)
@@ -9,7 +9,7 @@ const maxedRefund=r=>r.reward_kind==='coin'&&!!r.reward_id
 const date=t=>new Date(t*1000).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})
 export function openInstantCards({anchor,api,h,legacy,preview,dress,initialTab='draw'}){
  const doc=anchor.ownerDocument;if(doc.querySelector('.ic-dialog'))return
- if(!doc.querySelector('link[data-instant-cards]'))doc.head.append(h('link',{rel:'stylesheet',href:'/instant-cards.css?v=20261021','data-instant-cards':''}))
+ if(!doc.querySelector('link[data-instant-cards]'))doc.head.append(h('link',{rel:'stylesheet',href:'/instant-cards.css?v=472f7fbf','data-instant-cards':''}))
  const body=h('div',{class:'ic-body'}),nav=h('nav',{class:'ic-tabs','aria-label':'抽卡分类'}),dialog=h('dialog',{class:'ic-dialog','aria-label':'抽卡'},h('header',null,h('h2',null,'抽卡'),h('button',{class:'ic-close','aria-label':'关闭抽卡',onclick:()=>dialog.close()},'×')),nav,body)
  let data,selected='',tab=initialTab==='bubbles'?'bubbles':'draw',poolKind='standard',busy=false,pending=null,cleanup=()=>{},epoch=0,trialRequest=null
  const storage=()=>`instant-card-pending:${data.user_id}`
@@ -57,7 +57,7 @@ export function openInstantCards({anchor,api,h,legacy,preview,dress,initialTab='
    actions.append(...(pendingBubble?[btn('恢复上一笔',()=>payBubble(pendingBubble),{class:'ic-primary'})]:[single,batch]))
    const hero=h('section',{class:'ic-bubble-hero'},h('div',null,h('span',{class:'ic-bubble-kicker'},'52B · LIMITED RUN'),h('h3',null,'白虎巡展 · 角色卡与气泡'),h('p',null,'每一次抽取都会留下卡片记录。连抽可以随时停止，已完成的抽取不会回滚。')),h('div',{class:'ic-bubble-odds'},h('strong',null,'5%'),h('span',null,'固定命中率')))
    const stats=h('div',{class:'ic-bubble-stat-grid'},h('div',null,h('small',null,'当前余额'),h('strong',null,`${state.balance} D币`)),h('div',null,h('small',null,'未命中次数'),h('strong',null,`${state.pity}/${state.pity_limit}`)),h('div',null,h('small',null,'保底倒计时'),h('strong',null,`${Math.max(1,state.pity_limit-state.pity)} 抽`)))
-   body.replaceChildren(h('section',{class:'ic-bubble-pool'},hero,stats,status,progressBox,run,actions,sample,h('p',{class:'ic-note ic-bubble-rule'},'固定 5% 命中率，不受金手指影响。未命中随机补偿 12—100000 D币，并获得一张角色卡；重复卡会记录重复次数。'),state.items.length?h('div',{class:'ic-bubble-list'},state.items.map(item=>h('article',null,h('div',null,h('strong',null,item.name),h('small',null,item.author+(item.owned?' · 已获得':''))),btn('预览',()=>sample.replaceChildren(h('div',{class:'ic-preview-heading'},h('strong',null,item.name),btn('关闭预览',()=>sample.replaceChildren())),h('div',{class:'ic-actual-preview'},item.id==='owner-52di'?owner52Identity(doc):h('span',{class:'cm-text cskin-bubble cskin-bubble-'+item.id},'这是气泡预览'))))))):h('p',{class:'ic-trial-empty'},'限定气泡池暂未上新。')))
+   body.replaceChildren(h('section',{class:'ic-bubble-pool'},hero,stats,status,progressBox,run,actions,sample,h('p',{class:'ic-note ic-bubble-rule'},'固定 5% 命中率，不受金手指影响。未命中随机补偿 12—100000 D币，并获得一张角色卡；重复卡会记录重复次数。'),state.items.length?h('div',{class:'ic-bubble-list'},state.items.map(item=>h('article',null,h('div',null,h('strong',null,item.name),h('small',null,item.author+(item.owned?' · 已获得':''))),btn('预览',()=>sample.replaceChildren(h('div',{class:'ic-preview-heading'},h('strong',null,item.name),btn('关闭预览',()=>sample.replaceChildren())),h('div',{class:'ic-actual-preview'},item.id==='owner-52di'?owner52Identity(doc):item.id==='owner-52b'?owner52Identity(doc,{id:'owner-52b'}):h('span',{class:'cm-text cskin-bubble cskin-bubble-'+item.id},'这是气泡预览'))))))):h('p',{class:'ic-trial-empty'},'限定气泡池暂未上新。')))
   }catch(e){if(live()&&n===epoch)body.replaceChildren(errorBox(e,()=>bubbles()))}
  }
  async function pay(payload){

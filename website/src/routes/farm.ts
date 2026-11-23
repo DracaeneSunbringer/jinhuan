@@ -19,12 +19,10 @@ import {ANIMALS,RANCH_RULES} from '../farm/ranch'
 import {FISH,PIGS,LEISURE_RULES} from '../farm/leisure'
 import {FISHING_ITEMS,FISHING_RODS,FISHING_LOOT_RULES} from '../farm/fishing-catalog'
 import {newFarm,projectFarm,CROPS,TREE_KINDS,ACHIEVEMENTS,EXPANSIONS,type FarmState} from '../farm/rules'
-import {farmClosed,FARM_CLOSE_AT} from '../farm/lifecycle'
-import {farmFarewell} from './farm-farewell'
+import {farewellRelease} from '../legacy/live-app.js'
 type Save={revision:number;state:string;updated_at:number;balance?:number}
 export const farm=new Hono<Ctx>()
-farm.use('/api/farm/*',async(c,next)=>{needUser(c);c.header('cache-control','no-store');if(farmClosed(now())&&!['/api/farm/wallet','/api/farm/farewell'].includes(c.req.path))return c.json({error:'农场已暂别，资产与补偿正在按批次结算，请查看纪念页。',code:'farm_closed',closes_at:FARM_CLOSE_AT},410);await next()})
-farm.route('/',farmFarewell)
+farm.use('/api/farm/*',async(c,next)=>{needUser(c);c.header('cache-control','no-store');if(farewellRelease.farmClosed(now())&&!['/api/farm/wallet','/api/farm/farewell'].includes(c.req.path))return c.json({error:'农场已暂别，资产与补偿正在按批次结算，请查看纪念页。',code:'farm_closed',closes_at:farewellRelease.FARM_CLOSE_AT},410);await next()})
 farm.route('/',farmSocial)
 farm.route('/',farmLeases)
 farm.route('/',farmMarket)

@@ -1,3 +1,4 @@
+import {b33Internal} from '../legacy/live-app.js'
 import {independentGuessRequest,guessBansSql} from './guess-access'
 import type {C} from '../types'
 import {needUser} from './auth'
@@ -17,6 +18,7 @@ export async function needMember(c:C,gid:number,_legacyJoinDefault=false){
   return {u,g:{...g!,joined_at:0,history_floor:0,last_read:0,away_from:null}}
  }
  if(g!.last_read==null){
+  if(await b33Internal(c.env.DB,gid))fail(404,'群不存在')
   const ban=await c.env.DB.prepare('SELECT kind FROM chat_bans WHERE group_id=? AND user_id=?').bind(gid,u.id).first<{kind:string}>()
   if(ban)fail(403,ban.kind==='left'?'你已自行退出群聊，请保持看图的纯粹':'群聊已临时关闭')
   fail(403,'请先在群聊页面申请加入，管理员通过后可查看消息')

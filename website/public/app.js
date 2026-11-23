@@ -1,30 +1,68 @@
-import {parseNovelExcerpt,novelExcerptCard} from '/novel-excerpt.js'
-import {shiguangNameplate,shiguangSticker,animateShiguangMessage} from '/shiguang-host.js'
-import {createSkinStatusAlerts} from '/skin-status-alerts.js'
-import {communityClass,communityName,loadCommunitySkins} from '/community-skins.js'
-import {mountWallet} from '/me-wallet.js';
-import {attachChatMediaScale,chatMediaScaleSettings} from '/chat-media-scale.js';
-import {TITLE_COLLECTION,titleStage,TITLE_MAX_LEVEL,TITLE_STAGES,TITLE_STAGE_NAMES,CHICKENGUN_MIN_SIZE,CHICKENGUN_MAX_SIZE,chickengunSizeLimit,chickengunSize} from '/title-collection.js'
-import {titleVisualClass,titleBadgeSource,attachTitleMotion,initializeTitleEffects} from '/title-visuals.js'
-import {createChatBubbleVisibility} from '/bubble-visibility.js'
-import {titleSymbol} from '/title-symbols.js'
+;(() => {
+if (window.siteConfirm) return
+const css = '.site-ask{max-width:min(380px,calc(100vw - 32px));width:380px;border:1px solid var(--line,#d9dfd5);border-radius:16px;padding:20px 18px 16px;background:var(--surface,#fff);color:var(--text,#172d25);box-shadow:0 24px 64px rgba(0,0,0,.22);font:inherit;font-family:var(--font,system-ui,sans-serif)}'
+  + '.site-ask::backdrop{background:rgba(10,20,16,.42)}.site-ask p{margin:0 0 14px;font-size:14px;line-height:1.65;white-space:pre-line;word-break:break-word}'
+  + '.site-ask input{display:block;width:100%;box-sizing:border-box;margin:0 0 14px;padding:9px 11px;border:1px solid var(--line,#d9dfd5);border-radius:10px;background:var(--surface-2,#f3f4f0);color:inherit;font:inherit;font-size:14px}'
+  + '.site-ask .site-ask-acts{display:flex;justify-content:flex-end;gap:8px}.site-ask button{min-width:72px;padding:8px 14px;border-radius:10px;border:1px solid var(--line,#d9dfd5);background:transparent;color:inherit;font:inherit;font-size:13px;font-weight:600;cursor:pointer}'
+  + '.site-ask button.site-ask-ok{border-color:transparent;background:var(--primary,#1f6b4f);color:var(--primary-ink,#fff)}.site-ask button:focus-visible{outline:2px solid var(--primary,#1f6b4f);outline-offset:2px}'
+let styled = false
+function ask(text, mode, value) {
+  return new Promise((resolve) => {
+    if (!styled) { styled = true; const s = document.createElement('style'); s.textContent = css; document.head.append(s) }
+    const d = document.createElement('dialog'); d.className = 'site-ask'; d.setAttribute('aria-label', '确认')
+    const p = document.createElement('p'); p.textContent = String(text ?? '')
+    const input = mode === 'prompt' ? Object.assign(document.createElement('input'), { type: 'text', value: value == null ? '' : String(value) }) : null
+    const acts = document.createElement('div'); acts.className = 'site-ask-acts'
+    const ok = Object.assign(document.createElement('button'), { type: 'button', className: 'site-ask-ok', textContent: mode === 'alert' ? '知道了' : '确定' })
+    const no = mode === 'alert' ? null : Object.assign(document.createElement('button'), { type: 'button', textContent: '取消' })
+    let done = false
+    const prev = document.activeElement
+    const end = (v) => { if (done) return; done = true; try { d.close() } catch {} d.remove(); try { prev && prev.focus && prev.focus() } catch {} resolve(v) }
+    const cancel = () => end(mode === 'confirm' ? false : mode === 'prompt' ? null : undefined)
+    ok.onclick = () => end(mode === 'confirm' ? true : mode === 'prompt' ? input.value : undefined)
+    if (no) no.onclick = cancel
+    d.addEventListener('cancel', (e) => { e.preventDefault(); cancel() })
+    d.addEventListener('click', (e) => { if (e.target !== d) return; const r = d.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) cancel() })
+    if (input) input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); ok.click() } })
+    if (no) acts.append(no); acts.append(ok)
+    d.append(p); if (input) d.append(input); d.append(acts)
+    document.body.append(d)
+    try { d.showModal() } catch { d.setAttribute('open', '') }
+    ;(input || ok).focus(); if (input) input.select()
+  })
+}
+window.siteConfirm = (text) => ask(text, 'confirm')
+window.sitePrompt = (text, value) => ask(text, 'prompt', value)
+window.siteAlert = (text) => { void ask(text, 'alert') }
+})();
+import {parseNovelExcerpt,novelExcerptCard} from '/novel-excerpt.js?v=472f7fbf'
+import {shiguangNameplate,shiguangSticker,animateShiguangMessage} from '/shiguang-host.js?v=472f7fbf'
+import {createSkinStatusAlerts} from '/skin-status-alerts.js?v=472f7fbf'
+import {communityClass,communityName,loadCommunitySkins} from '/community-skins.js?v=472f7fbf'
+import {mountWallet} from '/me-wallet.js?v=472f7fbf';
+import '/farm-transition.js?v=472f7fbf';
+import {attachChatMediaScale,chatMediaScaleSettings} from '/chat-media-scale.js?v=472f7fbf';
+import {TITLE_COLLECTION,titleStage,TITLE_MAX_LEVEL,TITLE_STAGES,TITLE_STAGE_NAMES,CHICKENGUN_MIN_SIZE,CHICKENGUN_MAX_SIZE,chickengunSizeLimit,chickengunSize} from '/title-collection.js?v=472f7fbf'
+import {titleVisualClass,titleBadgeSource,attachTitleMotion,initializeTitleEffects} from '/title-visuals.js?v=472f7fbf'
+import {createChatBubbleVisibility} from '/bubble-visibility.js?v=472f7fbf'
+import {titleSymbol} from '/title-symbols.js?v=472f7fbf'
 // 尽欢前端：无构建、无框架
-import { settingsSections } from '/settings-sections.js'
-import {dcoinIcon} from '/dcoin.js'
-import {seenCoverage,seenIntersects,seenPostCoverage} from '/seen-visibility.js'
-import {badgeArt} from '/badge-art.js'
-import { normalizeAnimationFile } from '/animation-loop.js'
-import {avatarImage,refreshAvatar} from '/avatar-view.js?v=20261019a'
-import { stickerPreviews } from '/sticker-preview.js?v=20261017auto'
-import { onRemoval, windowContent, wakeWindowContent, observeResourceDocument } from '/resource-memory.js?v=20261020layout'
-import {focusChatMessage,captureChatScroll} from '/chat-scroll-anchor.js'
-import {refreshMessageReference} from '/message-reference.js'
-import {mediaUrl,deferChatImage,beginChatMessageFetch} from '/chat-media-load.js'
-import { socialCards } from '/social-preview.js?v=20261017native2'
-import { socialLink,socialLinks,socialMessageText,canSocialPost,isOfficialEmbed } from '/social-links.js?v=20261017native2'
-import { PERSONAL_TITLES as LEGACY_PERSONAL_TITLES } from '/personal-catalog.js?v=20261014a'
-import { PERSONAL_V2_TITLES } from '/personal-v2-catalog.js?v=20261014a'
-import {OWNER52_ID,OWNER52_TITLE,OWNER52B_ID,OWNER52B_TITLE,owner52Identity,owner52Badge} from '/owner52.js'
+import { settingsSections } from '/settings-sections.js?v=472f7fbf'
+import {dcoinIcon} from '/dcoin.js?v=472f7fbf'
+import {seenCoverage,seenIntersects,seenPostCoverage} from '/seen-visibility.js?v=472f7fbf'
+import {badgeArt} from '/badge-art.js?v=472f7fbf'
+import { normalizeAnimationFile } from '/animation-loop.js?v=472f7fbf'
+import {avatarImage,refreshAvatar} from '/avatar-view.js?v=472f7fbf'
+import { stickerPreviews } from '/sticker-preview.js?v=472f7fbf'
+import { onRemoval, windowContent, wakeWindowContent, observeResourceDocument } from '/resource-memory.js?v=472f7fbf'
+import {focusChatMessage,captureChatScroll} from '/chat-scroll-anchor.js?v=472f7fbf'
+import {refreshMessageReference} from '/message-reference.js?v=472f7fbf'
+import { socialCards } from '/social-preview.js?v=472f7fbf'
+import { socialLink,socialLinks,socialMessageText,canSocialPost,isOfficialEmbed } from '/social-links.js?v=472f7fbf'
+import { PERSONAL_TITLES as LEGACY_PERSONAL_TITLES } from '/personal-catalog.js?v=472f7fbf'
+import { PERSONAL_V2_TITLES } from '/personal-v2-catalog.js?v=472f7fbf'
+import {mediaUrl,deferChatImage,beginChatMessageFetch} from '/chat-media-load.js?v=472f7fbf'
+import {OWNER52_ID,OWNER52_TITLE,OWNER52B_ID,OWNER52B_TITLE,owner52Identity,owner52Badge} from '/owner52.js?v=472f7fbf'
 const PERSONAL_TITLES = { ...LEGACY_PERSONAL_TITLES, ...PERSONAL_V2_TITLES, [OWNER52_ID]:OWNER52_TITLE, [OWNER52B_ID]:OWNER52B_TITLE }
 const isOwner52Suit=id=>id===OWNER52_ID||id===OWNER52B_ID
 const S = { me: null, emojis: [], minPostTL: 1, bgKey: null, modal: null, wall: null, meSt: null, folders: null, viewer: null }
@@ -60,7 +98,7 @@ const nodes = (...kids) => kids.flat(Infinity).filter((k) => k != null && k !== 
 
 const ICON = {
   randomDice: '<svg viewBox="0 0 24 24" aria-hidden="true"><image href="/assets/random-dice-20261028.png" x="0" y="0" width="24" height="24"/></svg>',
-  music:'<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13M9 8l12-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="18" cy="16" rx="3" ry="2"/></svg>',
+ music:'<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13M9 8l12-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="18" cy="16" rx="3" ry="2"/></svg>',
   sprout: '<svg viewBox="0 0 24 24"><path d="M12 21V11M12 13C4 14 3 8 3 5c6-1 9 3 9 8ZM12 10c0-6 4-8 9-7 0 6-3 9-9 9M6 21h12"/></svg>',
   swap: '<svg viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>',
   zoom: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5M8 11h6M11 8v6"/></svg>',
@@ -204,7 +242,7 @@ const STICKER_RE = /\[([a-z]+):([a-z0-9_]+)\]/g
 const sticker = (pack, name, cls = 'stk') => {
   const ext = STICKER_EXT[pack] || 'png'
   return h('img', {
-    class: cls, src: `/stickers/${pack}/${name}.${ext}${pack === 'heartgif' ? '?v=20261017loop' : pack==='qq'&&['1','3','taiji_boy'].includes(name)?'?v=20261018loop':''}`, alt: `[${pack}:${name}]`, title: name, loading: 'lazy',
+    class: cls, src: `/stickers/${pack}/${name}.${ext}${pack === 'heartgif' ? '' : pack==='qq'&&['1','3','taiji_boy'].includes(name)?'':''}`, alt: `[${pack}:${name}]`, title: name, loading: 'lazy',
     onerror: (e) => {
       const alternatives=['png','gif','webp'].filter(x=>x!==ext),attempt=Number(e.target.dataset.retry||0)
       if(attempt<alternatives.length){e.target.dataset.retry=attempt+1;e.target.src=`/stickers/${pack}/${name}.${alternatives[attempt]}`}
@@ -220,7 +258,7 @@ function emo(key, preview = false) {
   if (preview && /^heartgif:heartgif_\d{3}$/.test(key)) {
     const name=key.split(':')[1],thumb=`/stickers/heartgif/thumbs/${name}.webp`
     return h('img',{class:'stk emo',src:thumb,alt:`[${key}]`,title:name,loading:'lazy',decoding:'async',
-      'data-poster':thumb,'data-animation':`/stickers/heartgif/previews/${name}.webp?v=20261017loop`})
+      'data-poster':thumb,'data-animation':`/stickers/heartgif/previews/${name}.webp`})
   }
   if (key === '+1') return h('span', { class: 'emo emo-plus1' }, '+1')
   const i = key.indexOf(':')
@@ -258,7 +296,7 @@ function linkify(text) {
     else if (m[2]) out.push(sticker(m[2], m[3]))
     else if (m[1]) {
       // linux.do 表情短码，直接引用其 CDN
-      out.push(h('img', { class: 'emoji', src: `https://cdn.ldstatic.com/images/emoji/twemoji/${m[1]}.png?v=15`, alt: m[0], title: m[0],
+      out.push(h('img', { class: 'emoji', src: `https://cdn.ldstatic.com/images/emoji/twemoji/${m[1]}.png`, alt: m[0], title: m[0],
         referrerpolicy: 'no-referrer', loading: 'lazy', onerror: (e) => e.target.replaceWith(m[0]) }))
     } else if (m[0].startsWith(location.origin + '/')) {
       // 站内链接：不新开页，交给前端路由（伪装模式下会跳到对应的楼 / 消息）
@@ -277,7 +315,7 @@ let packsP
 // dupes.json 由 scripts/sticker-dupes.mjs 生成：{ 重复的代码: 保留的代码 }；只在选择器里隐藏，文件不删，老消息照常显示
 let STICKER_DUPES = {}
 const loadPacks = () => (packsP ||= Promise.all([
-  fetch('/stickers/packs.json?v=20261017heartfast').then((r) => r.json()),
+  fetch('/stickers/packs.json').then((r) => r.json()),
   fetch('/stickers/dupes.json').then((r) => (r.ok ? r.json() : {})).catch(() => ({})),
 ]).then(([ps, dupes]) => {
   ps.forEach((p) => { STICKER_EXT[p.key] ||= p.ext })
@@ -291,7 +329,7 @@ const recentEmos = () => { try { return JSON.parse(localStorage.getItem('emo-rec
 const pushRecent = (k) => localStorage.setItem('emo-recent', JSON.stringify([k, ...recentEmos().filter((x) => x !== k)].slice(0, 24)))
 
 let emojiWordsP
-const loadEmojiWords = () => emojiWordsP ||= fetch('/emoji-search.json?v=ca8246e7').then(r => {
+const loadEmojiWords = () => emojiWordsP ||= fetch('/emoji-search.json').then(r => {
   if (!r.ok) throw Error('词库加载失败')
   return r.json()
 }).catch(e => { emojiWordsP = null; throw e })
@@ -1615,16 +1653,16 @@ function replyChip(m, r, manage) {
   avatar(r.avatar, who, 22))
   const text = h('button', { class: 'rp-t', type: 'button',
     title: r.mine ? '我的回应 · 点击撤回' : `${who}${r.n > 1 ? ` · ${r.n} 人都这么说` : ''} · 点击 +1 同感`,
-    onclick: () => {
+    onclick: async () => {
       if (r.mine) {
-        if (confirm('撤回这句回应？')) act(m, null, () => api(`/memes/${m.id}/reply`, { method: 'DELETE' }))
+        if (await window.siteConfirm('撤回这句回应？')) act(m, null, () => api(`/memes/${m.id}/reply`, { method: 'DELETE' }))
       } else act(m, null, () => api(`/memes/${m.id}/reply`, { method: 'PUT', body: { text: r.text } }))
     } }, BOOST_PRESETS.includes(r.text) ? boostText(r.text) : linkify(r.text))
   const chip = h('span', bubbleView(r, 'rp boost-sent' + (r.mine ? ' mine' : ''), 'post', true), face, text)
   // 管理删除按「这句话」删（同样的话一起删）
   if (manage && m.can_manage) {
     chip.append(h('button', { class: 'rp-del', type: 'button', title: `删除所有人的这句（${r.n || 1} 条）`, 'aria-label': '删除这句',
-      onclick: () => { if (confirm(`删除所有人的「${r.text}」（${r.n || 1} 条）？`)) act(m, null, () => api(`/memes/${m.id}/replies?text=${encodeURIComponent(r.text)}`, { method: 'DELETE' })) } },
+      onclick: async () => { if (await window.siteConfirm(`删除所有人的「${r.text}」（${r.n || 1} 条）？`)) act(m, null, () => api(`/memes/${m.id}/replies?text=${encodeURIComponent(r.text)}`, { method: 'DELETE' })) } },
     icon('close', 'i tiny')))
   }
   return chip
@@ -1830,7 +1868,7 @@ function titleEl(u, where) {
 const BADGES = {
   luck_king:{name:'手气王',tier:'fun',g:'♛',desc:'本站拼手气红包确认结束后金额最多；并列同奖，1 / 3 / 10 / 30 / 100 次升级'},
   luck_last:{name:'手气亡',tier:'epic',g:'☾',desc:'本站拼手气红包确认结束后金额最少；至少两人且金额有高低，1 / 3 / 10 / 30 / 100 次升级'},
-  guess: {name:'猜词星章',tier:'legend',g:'✧',desc:'累计猜中 1 / 3 / 10 / 30 / 100 轮（多人局每位猜中者均计入），解锁五级称号、徽章与鎏金气泡'},
+  guess: {name:'猜词星章',tier:'legend',g:'✧',desc:'累计猜中 1 / 3 / 10 / 30 / 100 轮，解锁五级称号、徽章与鎏金气泡'},
   guide: {name:'引路人',tier:'rare',g:'🧭',desc:'邀请好友满 7 天并活跃互动；1 / 3 / 10 / 30 人升级'},
   newbie: { name: '初来乍到', tier: 'fun', g: '🌱', desc: '通过好友邀请加入尽欢' },
   elder: { name: '太上长老', tier: 'legend', g: '☯', desc: '2026-10-01 开站当天进站的元老' },
@@ -2180,7 +2218,7 @@ function decoEditor(initialTrial=null) {
       field('称号',t,'显示在昵称后面'),
       h('div',{class:'deco-grid'},h('div',{class:'field'},h('span',{class:'field-label'},'颜色'),h('div',{class:'deco-colors'},color('c','字'),color('c2','底'),color('bc','边框'))),h('div',{class:'field'},h('span',{class:'field-label'},'字体'),font)),
       field('形状',seg('sh',DECO_SHAPE)),field('填充',seg('fill',DECO_FILL)),field('动效',seg('fx',DECO_FX)),
-      field('炫彩昵称配色',fancyBox,S.me.fancy?'只换颜色，流动效果不变':'你现在没有炫彩昵称（TL3以上或管理员授予后才有），配色先存着，有了就生效'),
+      field('炫彩昵称配色',fancyBox,S.me.fancy?'只换颜色，流动效果不变':'配色先保存，获得炫彩昵称后生效'),
     ]},
     {id:'badges',label:'徽章',keywords:'成就 图标 佩戴 位置 范围',nodes:[
       showcaseBox,
@@ -2207,7 +2245,7 @@ function decoEditor(initialTrial=null) {
     finally{saveBusy=false;syncSaved()}
   }},'保存装扮')
   const clearButton=h('button',{class:'btn btn-ghost sm',type:'button',onclick:async()=>{
-    if(saveBusy||!confirm('清掉所有装扮？'))return
+    if(saveBusy||!await window.siteConfirm('清掉所有装扮？'))return
     saveBusy=true;syncSaved()
     try{const r=await api('/me/profile',{method:'PATCH',body:{deco:null}});S.me.deco=r.deco;USERS.delete(S.me.username);toast('已清掉','ok');meSettings('deco')}
     catch(e){toast(e.message,'err')}
@@ -2254,7 +2292,6 @@ async function userCard(username, anchor) {
       h('div', { class: 'who' },
         h('span', { class: 'ucard-name' }, uName('strong', u, {}, u.name || u.username, 'card')),
         h('span', { class: 'muted' }, '@' + u.username,
-          u.trust_level != null && h('span', { class: 'tl' }, 'TL' + u.trust_level),
           ))),
     h('div', { class: 'ucard-stats' }, stat(u.posts, '发布'), stat(u.replies, '回应'), stat(u.comments, '评论')),
     u.bio && h('div', { class: 'ucard-bio' }, u.bio),
@@ -2266,8 +2303,7 @@ async function userCard(username, anchor) {
       S.me?.owner && h('button', { class: 'btn btn-ghost sm', type: 'button', onclick: () => { closePop(); officialTitleManager(u.username) } }, '授予称号'),
       u.posts > 0 && h('button', { class: 'btn btn-ghost sm', type: 'button', onclick: () => { closePop(); saveWallPrefs({ author: u.username }); navigate('/?author=' + encodeURIComponent(u.username)) } }, '看 TA 的图'),
       S.me?.is_admin && !u.is_admin && u.username !== S.me.username && h('button', { class: 'btn btn-ghost sm', type: 'button', onclick: () => { closePop(); memberAdmin(u.username) } }, '管理'),
-      u.linuxdo_username && h('a', { class: 'btn btn-ghost sm', href: `https://linux.do/u/${encodeURIComponent(u.linuxdo_username)}/activity`, target: '_blank', rel: 'noopener' },
-        'linux.do 主页', icon('ext', 'i tiny')))))
+      null)))
   placePop(anchor, POP.el, 'left')
 }
 
@@ -2306,7 +2342,7 @@ function replyForm(m) {
 
 // 删除自己发的（管理员可删任何人的）；在详情页删完回首页，在列表里就地拿掉卡片
 async function deleteMeme(m) {
-  if (!confirm(`确定删除「${m.title || m.text || ((m.kind === 'text') ? '这帖' : '这张图')}」？删了就找不回来了。`)) return false
+  if (!await window.siteConfirm(`确定删除「${m.title || m.text || ((m.kind === 'text') ? '这帖' : '这张图')}」？删了就找不回来了。`)) return false
   try {
     await api(`/memes/${m.id}`, { method: 'DELETE' })
   } catch (e) { toast(e.message, 'err'); return false }
@@ -2692,7 +2728,7 @@ document.documentElement.dataset.mobileNav = localStorage.getItem(MOBILE_NAV_KEY
 function mobilePages(anchor) {
   const cur = document.querySelector('.mobile-nav [data-nav].on')?.dataset.nav
   const pages = [['wall', '图廊', 'image', '/'],
-    ['chat', '群聊', 'chat', '/chat'], ...(S.me ? [['road', '鞭打', 'pen', '/road']] : []), ['novels','小说','book','/novels'], ['music','音乐','music','/music'], ['huancai','欢彩','sparkle','/huancai'], ['games','游戏','apps','https://play.jinhuan.example'], ['me', '我的', 'contacts', '/me']]
+    ['chat', '群聊', 'chat', '/chat'], ...(S.me ? [['road', '鞭打', 'pen', '/road']] : []), ['novels','小说','book','/novels'], ['pets','鱼鱼谷','sparkle','/pets'], ['me', '我的', 'contacts', '/me']]
   openPop(anchor, h('nav', { class: 'mobile-more mobile-pages', 'aria-label': '切换页面' }, pages.map(([key, label, ic, path]) =>
     h('button', { class: 'mobile-more-item' + (cur === key ? ' on' : ''), type: 'button',
       'aria-current': cur === key ? 'page' : null, onclick: () => { closePop(); if(path.startsWith('https://'))window.open(path,'_blank','noopener');else navigate(path) } }, icon(ic), label, key === 'chat' && chatBadge()))),
@@ -2725,7 +2761,7 @@ const NOTIF_VERB = { packet:'红包提醒', like: '喜欢了', emoji: '回应了
   mention: '在评论里 @ 了你', chat_at: '在群聊里 @ 了你', chat_reply: '在群聊里回复了你', post_at: '在帖子里 @ 了你', join_req: '申请加入群聊', badge: '你获得了徽章' }
 // 提醒分类
 const NOTIF_TABS = [['all', '全部', null], ['like', '喜欢', ['like']], ['rx', '回应', ['emoji', 'reply']], ['cmt', '评论', ['comment', 'creply']],
-  ['at', '@我', ['mention', 'chat_at', 'post_at']], ['chat', '群聊', ['chat_at', 'chat_reply', 'join_req','packet']], ['post', '新帖', ['post']]]
+  ['at', '@我', ['mention', 'chat_at', 'post_at']], ['chat', '群聊', ['chat_at', 'chat_reply', 'join_req','packet','chat_idle']], ['post', '新帖', ['post']]]
 const isChatNotif = (n) => n.kind === 'chat_at' || n.kind === 'chat_reply' || n.kind === 'packet'
 // 提醒设置：后端存，登录时随 /me 带回来
 const NOTIF_PREFS = [['packet','红包参与与开奖结果'],['like', '有人喜欢我的图'], ['emoji', '有人给我的图回应表情'], ['reply', '有人给我的图一句回应'], ['comment', '有人评论我的图'], ['creply', '有人回复我的评论'], ['post', '有人发了新帖'], ['mention', '有人在评论里 @ 我'], ['chat_at', '有人在群聊里 @ 我'], ['chat_reply', '有人在群聊里回复我'],
@@ -2734,7 +2770,7 @@ const notifOn = (k) => S.me?.notif_prefs?.[k] !== false
 NOTIF_PREFS.unshift(['farm_conflict','农场攻防预警与结算'])
 NOTIF_PREFS.unshift(['release','系统通知提醒'])
 NOTIF_TABS.push(['farm','农场',['farm_conflict']])
-NOTIF_TABS.push(['system','系统',['release','skin_alert']])
+NOTIF_TABS.push(['system','系统',['release','skin_alert','pet_refund']])
 function syncNotifBadge() {
   const n = NOTIF.unread
   document.querySelectorAll('[data-notif-badge]').forEach((el) => { el.textContent = n > 99 ? '99+' : n; el.hidden = !n })
@@ -2748,15 +2784,15 @@ async function loadNotifs() {
   const sequence = ++notifSequence, uid = S.me.id
   NOTIF.at = Date.now()
   try {
-    const [d,skinAlerts] = await Promise.all([api('/notifs?system=1'),S.me?.owner&&notifOn('release')?skinStatusAlerts.list():Promise.resolve([])])
+    const [d,skinAlerts,refundItems] = await Promise.all([api('/notifs?system=1'),S.me?.owner&&notifOn('release')?skinStatusAlerts.list():Promise.resolve([]),Date.now()<1793808000000?import('/pet-refund.js?v=472f7fbf').then((m)=>m.refundNotifs()).catch(()=>[]):Promise.resolve([])])
     if (sequence !== notifSequence || S.me?.id !== uid) return
-    Object.assign(NOTIF, { unread: Math.min(100,d.unread+skinAlerts.filter(x=>x.unread).length), items: [...d.items,...skinAlerts].sort((a,b)=>Number(b.unread)-Number(a.unread)||b.at-a.at).slice(0,60) })
+    Object.assign(NOTIF, { unread: Math.min(100,d.unread+skinAlerts.filter(x=>x.unread).length+refundItems.filter(x=>x.unread).length), items: [...d.items,...skinAlerts,...refundItems].sort((a,b)=>Number(b.unread)-Number(a.unread)||b.at-a.at).slice(0,60) })
     syncNotifBadge()
     if (POP?.key === 'notif') NOTIF.draw?.()
   } catch {}
 }
-setInterval(() => { if (S.me && !document.hidden && Date.now() - NOTIF.at > 60000) loadNotifs() }, 15000)
-document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - NOTIF.at > 20000) loadNotifs() })
+setInterval(() => { if (S.me && !document.hidden && Date.now() - NOTIF.at > 180000) loadNotifs() }, 30000)
+document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - NOTIF.at > 60000) loadNotifs() })
 // 点哪条只标哪条已读；其它保持未读
 async function persistNotifRead(body) {
   ++notifSequence; ++notifWrites
@@ -2796,6 +2832,7 @@ function openChatMsg(gid, id) {
 function notifRow(n) {
   const who = n.name || n.username || '有人'
   if(n.kind==='skin_alert')return h('a',{class:'notif-row'+(n.unread?' unread':''),href:n.url,target:'_blank',rel:'noopener noreferrer',onclick:()=>{readNotif(n);closePop()}},h('i',{class:'notif-dot','aria-hidden':'true'}),icon('bell'),h('div',{class:'notif-main'},h('strong',null,'装扮投稿状态'),h('div',{class:'notif-val clip'},n.val),h('time',{class:'muted'},fmtTime(n.at))))
+  if(n.kind==='pet_refund')return h('button',{class:'notif-row'+(n.unread?' unread':''),type:'button',onclick:()=>{if(n.unread){n.unread=false;NOTIF.unread=Math.max(0,NOTIF.unread-1);syncNotifBadge()}closePop();import('/pet-refund.js?v=472f7fbf').then((m)=>m.openRefund({onDone:()=>location.pathname==='/pets'?location.reload():null}))}},h('i',{class:'notif-dot','aria-hidden':'true'}),icon('bell'),h('div',{class:'notif-main'},h('strong',null,'鱼鱼谷 · 今日可一键回收'),h('div',{class:'notif-val muted'},n.val),h('time',{class:'muted'},'今天 24 点前有效')))
   if(n.kind==='release')return h('button',{class:'notif-row'+(n.unread?' unread':''),type:'button',onclick:()=>{readNotif(n);closePop();releaseNoticeDetail(n.val)}},h('i',{class:'notif-dot','aria-hidden':'true'}),icon('bell'),h('div',{class:'notif-main'},h('strong',null,'系统更新 · 请刷新界面'),h('div',{class:'notif-val clip'},n.val),h('time',{class:'muted'},fmtTime(n.at))))
   if(n.kind==='farm_conflict')return h('a',{class:'notif-row'+(n.unread?' unread':''),href:'/farm?panel=conflict',onclick:e=>{e.preventDefault();readNotif(n);closePop();navigate('/farm?panel=conflict')}},h('i',{class:'notif-dot','aria-hidden':'true'}),icon('shield'),h('div',{class:'notif-main'},h('strong',null,'农场攻防'),h('div',{class:'notif-val muted'},n.val),h('time',{class:'muted'},fmtTime(n.at))))
   if(n.kind==='ai_alert'){
@@ -2816,6 +2853,11 @@ function notifRow(n) {
         b && h('div', { class: 'notif-val muted' }, (n.val==='guide'?(guideN?'当前 Lv'+badgeLv('guide',guideN)+' · 合格邀请 '+guideN+' 人':'邀请已作废，徽章暂未点亮'):b.desc) + ' · 查看徽章墙'),
         h('time', { class: 'muted' }, fmtTime(n.at))))
   }
+  if (n.kind === 'chat_idle') return h('a', { class: 'notif-row' + (n.unread ? ' unread' : ''), href: `/chat/${n.gid}`, onclick: (e) => { e.preventDefault(); readNotif(n); closePop(); navigate(`/chat/${n.gid}`) } },
+    h('i', { class: 'notif-dot', 'aria-hidden': 'true' }), icon('bell'),
+    h('div', { class: 'notif-main' }, h('strong', null, '你已被移出「' + (n.group_name || '群聊') + '」'),
+      h('div', { class: 'notif-val muted' }, '原因：超过 10 天没有登录网站，系统自动清理。点这里回到群聊，勾选确认即可直接重新加入，不用审核。'),
+      h('time', { class: 'muted' }, fmtTime(n.at))))
   if (n.kind === 'join_req') {
     return h('a', { class: 'notif-row' + (n.unread ? ' unread' : ''), href: `/chat/${n.gid}`, onclick: (e) => { e.preventDefault(); readNotif(n); closePop(); groupPanel({ id: n.gid, name: n.group_name || '群聊' }, { outside: true }) } },
       h('i', { class: 'notif-dot', 'aria-hidden': 'true' }),
@@ -2915,7 +2957,7 @@ function notifSettings(list, back) {
     h('div', { class: 'row-end' }, h('button', { class: 'btn-text sm', type: 'button', onclick: back }, '返回提醒'))))
   const host=h('div',{class:'device-push-host'})
   list.querySelector('.notif-prefs').append(host)
-  import('/device-push.js?v=20261018').then(({devicePushSettings})=>{
+  import('/device-push.js?v=472f7fbf').then(({devicePushSettings})=>{
     if(host.isConnected)host.replaceChildren(devicePushSettings({api,h,userId:S.me.id}))
   }).catch(()=>{if(host.isConnected)host.textContent='设备通知设置加载失败，请重新打开。'})
 }
@@ -2924,12 +2966,12 @@ function markNav() {
   const p = location.pathname
   const cur = p === '/' || p.startsWith('/t/') || p.startsWith('/u/') ? 'wall'
     : p.startsWith('/series') || p.startsWith('/s/') ? 'series'
-      : p.startsWith('/novels') ? 'novels' : p.startsWith('/nsfw') ? 'nsfw' : p.startsWith('/chat') || p.startsWith('/dm') ? 'chat' : p.startsWith('/road') ? 'road' : (p.startsWith('/valley') || p.startsWith('/pets')) ? 'valley' : p.startsWith('/me') ? 'me' : ''
+      : p.startsWith('/huancai') ? 'huancai' : p.startsWith('/novels') ? 'novels' : p.startsWith('/nsfw') ? 'nsfw' : p.startsWith('/chat') || p.startsWith('/dm') ? 'chat' : p.startsWith('/road') ? 'road' : p.startsWith('/farm') ? 'farm' : p.startsWith('/pets') ? 'pets' : p.startsWith('/manor') ? 'manor' : p.startsWith('/me') ? 'me' : ''
   if (p.startsWith('/m/')) return
   document.querySelectorAll('[data-nav]').forEach((a) => a.classList.toggle('on', a.dataset.nav === cur))
   const title=document.getElementById('mobile-page-title')
   if(title) {
-    title.textContent=p.startsWith('/dm')?'私信':({wall:'图廊',series:'图集',chat:'群聊',road:'鞭打',farm:'农场',pets:'站宠',novels:'小说',huancai:'欢彩',nsfw:'RZP',me:'我的'})[cur] || '尽欢'
+    title.textContent=p.startsWith('/dm')?'私信':({wall:'图廊',series:'图集',chat:'群聊',road:'鞭打',farm:'农场',pets:'鱼鱼谷',manor:'肥鱼庄园',novels:'小说',huancai:'欢彩',nsfw:'RZP',me:'我的'})[cur] || '尽欢'
     title.setAttribute('aria-label', '切换页面，当前' + title.textContent)
     title.append(chatBadge('chat-badge mobile-chat-badge'))
   }
@@ -3812,7 +3854,7 @@ function setAnchors(list) {
 }
 async function addAnchor(m) {
   if (!requireLogin('加锚点')) return
-  const note = prompt('给这个锚点写句备注（可不填，20 字以内）', '')
+  const note = await window.sitePrompt('给这个锚点写句备注（可不填，20 字以内）', '')
   if (note === null) return
   try {
     setAnchors((await api(`/anchors/${m.id}`, { method: 'PUT', body: { note } })).anchors)
@@ -4043,7 +4085,7 @@ async function renderRoad() {
   const backfillStatus = h('span', { class: 'muted sm', role: 'status', 'aria-live': 'polite' })
   let backfillAfter = 0, backfillUpto = null, scanned = 0, matched = 0
   const backfill = S.me?.is_admin && h('button', { class: 'btn btn-ghost sm road-backfill', type: 'button', onclick: async () => {
-    if (!confirm('将群聊历史中带 #需求 / #bug 的消息转入鞭打，内容与图片会在鞭打公开显示。确认回填？')) return
+    if (!await window.siteConfirm('将群聊历史中带 #需求 / #bug 的消息转入鞭打，内容与图片会在鞭打公开显示。确认回填？')) return
     backfill.disabled = true
     try {
       let more
@@ -4102,7 +4144,7 @@ function roadCard(it, reload) {
   const removeLabel = it.mine ? '撤回' : '删除'
   const remove = (it.mine || S.me?.is_admin) && h('button', { class: 'btn-text sm danger rd-remove', type: 'button',
     'aria-label': `${removeLabel}鞭打 #${it.id}`, onclick: async () => {
-      if (!confirm(`${removeLabel}鞭打「${it.title}」？${it.source_msg_id ? '原群聊消息会保留。' : ''}`)) return
+      if (!await window.siteConfirm(`${removeLabel}鞭打「${it.title}」？${it.source_msg_id ? '原群聊消息会保留。' : ''}`)) return
       try { await api(`/road/${it.id}`, { method: 'DELETE' }); reload() } catch (e) { toast(e.message, 'err') }
     } }, removeLabel)
   return h('article', { class: 'rd-card st-' + it.status, id: 'road-' + it.id },
@@ -4244,17 +4286,17 @@ async function renderMe() {
     folderRow.replaceChildren(...nodes(
       h('a', { class: 'chip' + (!st.folder ? ' on' : ''), href: '/me', 'data-link': '' }, '全部'),
       ...fs.map((f) => h('a', { class: 'chip' + (st.folder === f.id ? ' on' : ''), href: `/me?folder=${f.id}`, 'data-link': '' }, f.name, h('span', { class: 'n' }, f.n))),
-      h('button', { class: 'chip ghost', onclick: () => {
-        const name = prompt('新收藏夹的名字（12 字以内）')
+      h('button', { class: 'chip ghost', onclick: async () => {
+        const name = await window.sitePrompt('新收藏夹的名字（12 字以内）')
         if (name?.trim()) edit(() => api('/folders', { method: 'POST', body: { name } }))
       } }, icon('plus', 'i tiny'), '新建'),
       cur && h('span', { class: 'folder-ops' },
-        h('button', { class: 'btn-text sm', onclick: () => {
-          const name = prompt('改个名字', cur.name)
+        h('button', { class: 'btn-text sm', onclick: async () => {
+          const name = await window.sitePrompt('改个名字', cur.name)
           if (name?.trim() && name !== cur.name) edit(() => api(`/folders/${cur.id}`, { method: 'PATCH', body: { name } }))
         } }, '重命名'),
         h('button', { class: 'btn-text sm danger', onclick: async () => {
-          if (!confirm(`删除收藏夹「${cur.name}」？里面的收藏会一起移除。`)) return
+          if (!await window.siteConfirm(`删除收藏夹「${cur.name}」？里面的收藏会一起移除。`)) return
           try { await api(`/folders/${cur.id}`, { method: 'DELETE' }); S.folders = null; navigate('/me', { replace: true }) } catch (e) { toast(e.message, 'err') }
         } }, '删除'))))
   }
@@ -4276,15 +4318,13 @@ async function renderMe() {
   },icon(ic),h('span',null,h('strong',null,label),h('small',null,description)),icon(action.external?'ext':'chevR','i tiny'))
   const services=h('div',{class:'me-service-list'},
     entry('账号安全','登录方式、绑定账号与安全设置','lock',{href:'/me/account'}),
-    entry('个人猜词 AI','模型、密钥与猜词专用提示词','sparkle',{href:'https://play.jinhuan.example/me/ai',external:true}),
-    entry('LDC 应用与记录','应用连接、余额与发放记录','redpack',{onclick:e=>redpackDialog(e.currentTarget,{accountOnly:true})}),
-    entry('生成邀请码','主站激活邀请码、邀请记录与奖励','users',{href:'/me/invites'}),
     entry('52B 集卡包','查看已获得的角色卡片与卡包进度','sparkle',{onclick:e=>owner52CardsDialog(e.currentTarget)}),
-    u.linuxdo_username&&entry('linux.do 主页','已绑定 @'+u.linuxdo_username,'ext',{href:`https://linux.do/u/${encodeURIComponent(u.linuxdo_username)}/activity`,external:true}),
+    entry('生成邀请码','主站激活邀请码、邀请记录与奖励','users',{href:'/me/invites'}),
     entry('个人设置','资料、外观、AI 小伙伴与消息偏好','gear',{onclick:()=>meSettings()}))
   const administration=h('div',{class:'me-service-list'},
     (u.is_admin||u.owner)&&entry('生成邀请码','站长和管理员生成、复制、撤销主站邀请码','users',{href:'/me/invites'}),
-    u.owner&&entry('随机图片设置','启用摇图与禁用标签','image',{onclick:async()=>{const {openRandomImageSettings}=await import('/random-image.js');openRandomImageSettings({doc:document})}}),
+    u.owner&&entry('访问监控','每日网站与小程序打开次数、登录活跃人数','monitor',{onclick:async()=>{try{const {openSiteMonitor}=await import('/site-monitor.js?v=472f7fbf');openSiteMonitor({api})}catch(e){toast(e.message||'监控加载失败','err')}}}),
+    u.owner&&entry('随机图片设置','启用摇图与禁用标签','image',{onclick:async()=>{const {openRandomImageSettings}=await import('/random-image.js?v=472f7fbf');openRandomImageSettings({doc:document})}}),
     u.can_manage_ai&&entry('AI 接入与设置','独立连接、用途分配、思考与流式设置','sparkle',{href:'/admin/ai'}),
     u.is_admin&&entry('公告设置','发布与维护站点公告','bell',{onclick:noticeAdmin}),
     u.is_admin&&entry('成员管理','查找用户、角色与访问限制','users',{onclick:()=>memberAdmin()}))
@@ -4299,12 +4339,12 @@ async function renderMe() {
     if(key==='content')startContent()
   },sections:[
     {id:'content',label:'我的内容',keywords:'收藏 喜欢 回应 评论 发布 最近 看过 搜索 收藏夹',nodes:[tabs,h('div',{class:'me-tools'},h('h2',null,TABS.find(([k])=>k===tab)[1],' ',st.totalEl),h('span',{class:'grow'}),sf,sortSel),folderRow,st.feedback,st.list,st.moreBtn]},
-    {id:'account',label:'账号与服务',keywords:'安全 登录 绑定 LDC 应用 余额 记录 邀请 设置 外观 退出',nodes:[services,h('div',{class:'me-session'},h('span',{class:'muted sm'},'当前登录：@'+u.username),logout)]},
+    {id:'account',label:'账号与服务',keywords:'安全 登录 绑定 邀请 设置 外观 退出',nodes:[services,h('div',{class:'me-session'},h('span',{class:'muted sm'},'当前登录：@'+u.username),logout)]},
     {id:'admin',label:'管理工具',keywords:'AI 接入 模型 参数 公告 成员 用户 权限 限制 邀请码 生成',available:()=>!!(u.can_manage_ai||u.is_admin||u.owner),nodes:[administration]},
   ]})
   main.replaceChildren(h('div',{class:'me-page me-hub'},
     h('section',{class:'me-head'},avatar(u.avatar,u.username,60),
-      h('div',{class:'me-who'},h('h1',null,u.name||u.username),h('span',{class:'muted'},`@${u.username} · TL${u.trust_level}`),u.bio&&h('span',{class:'me-bio'},u.bio),
+      h('div',{class:'me-who'},h('h1',null,u.name||u.username),h('span',{class:'muted'},`@${u.username}${u.created_at ? ` · ${fmtDay(u.created_at)}加入尽欢` : ''}`),u.bio&&h('span',{class:'me-bio'},u.bio),
         S.limits?.length?h('span',{class:'me-limits'},'你当前被限制：',...S.limits.map(l=>h('span',{class:'badge danger'},`${LIMIT_KINDS.find(k=>k[0]===l.kind)?.[1]||l.kind} ${untilText(l.until)}${l.reason?`（${l.reason}）`:''}`))):null),
       h('div',{class:'me-quick'},h('button',{class:'btn btn-ghost sm',type:'button',onclick:()=>meSettings('profile')},icon('gear','i tiny'),'编辑资料'),h('button',{class:'btn btn-ghost sm',type:'button',onclick:()=>meSettings('deco')},icon('sparkle','i tiny'),'我的装扮'),h('button',{class:'btn btn-ghost sm',type:'button',onclick:e=>instantCardDialog(e.currentTarget)},icon('raffle','i tiny'),'抽卡'))),wallet,categories.element))
   if(section==='content')startContent()
@@ -4549,7 +4589,7 @@ function meRow(raw) {
     } else if (a.kind === 'comment') {
       chip = h('span', { class: 'act-chip wide' }, h('em', null, '我的评论'), h('span', { class: 'clip' }, linkify(a.val)))
       undoBtn = undo('删除评论', async () => {
-        if (!confirm('删除这条评论？')) return false
+        if (!await window.siteConfirm('删除这条评论？')) return false
         try {
           await api(`/comments/${a.ref}`, { method: 'DELETE' })
           syncItem({ ...x, comment_count: Math.max(0, x.comment_count - 1) })
@@ -4607,7 +4647,7 @@ function commentsSection(meme, { compact = false } = {}) {
           h('span', { class: 'muted' }, fmtTime(c.created_at)),
           setReply && c.id > 0 && h('button', { class: 'btn-text small', type: 'button', onclick: () => setReply(c) }, '回复'),
           c.can_delete && h('button', { class: 'btn-text small', onclick: async () => {
-            if (!confirm('删除这条评论？')) return
+            if (!await window.siteConfirm('删除这条评论？')) return
             try {
               await api(`/comments/${c.id}`, { method: 'DELETE' })
               dropComment(el, c.id)
@@ -4793,12 +4833,12 @@ function puzzleBox(meme) {
     box.append(h('div', { class: 'winners' },
       h('span', { class: 'muted' }, '解开的佬友'),
       h('div', { class: 'avatars' }, pz.winners.map((w) =>
-        h('a', { href: `https://linux.do/u/${encodeURIComponent(w.username)}`, target: '_blank', rel: 'noopener', title: w.username },
+        h('button', { type: 'button', class: 'avatar-btn', title: w.username, onclick: e => userCard(w.username,e.currentTarget) },
           avatar(w.avatar, w.username, 24))))))
   }
   if (pz.is_owner) {
     box.append(h('button', { class: 'btn-text danger small', onclick: async () => {
-      if (!confirm('撤下这个谜题？已发出的奖励不受影响。')) return
+      if (!await window.siteConfirm('撤下这个谜题？已发出的奖励不受影响。')) return
       try {
         await api(`/puzzles/${pz.id}`, { method: 'DELETE' })
         meme.puzzle = null
@@ -4864,7 +4904,7 @@ const CIPHER_NAME = { shou: '兽音译者', fo: '与佛论禅', emoji: 'emoji �
   rail: '栅栏密码', vigenere: '维吉尼亚', aes: 'AES', zwsp: '隐形字', stego: '图片藏字',
   base58: 'Base58', base62: 'Base62', base85: 'Ascii85', decimal: '十进制码点', html: 'HTML 实体', rot47: 'ROT47', affine: '仿射密码',
   bacon: '培根密码', polybius: '棋盘密码', qwerty: '键盘密码', autokey: '自动密钥', rc4: 'RC4', xor: 'XOR 异或' }
-const loadCipher = () => import('/cipher.js?v=4dda7dbd')
+const loadCipher = () => import('/cipher.js?v=472f7fbf')
 
 function rewardView(pz, label) {
   const isLink = pz.reward_type === 'link'
@@ -5350,7 +5390,6 @@ function chatMediaMenu(media, e, openMedia, openMessage, copyMessage) {
     url && item('复制链接', 'copy', () => copyText(new URL(url, doc.location.href).href)),
     openMessage && item('消息操作', 'more', openMessage)))
 }
-
 function imageAiControl(off) {
   const input = h('input', { type: 'checkbox', class: 'ai-image-post', checked: off === undefined ? false : !off, disabled: true })
   let touched = false, baseline = input.checked
@@ -5613,9 +5652,9 @@ function openCompose(opts) {
 
 // 发帖弹窗顶上的「发图 / 发文字」切换；有没发的内容先问一句
 function composeKind(cur, dirty) {
-  const go = (k) => {
+  const go = async (k) => {
     if (k === cur) return
-    if (dirty() && !confirm('切换后这里填的内容会丢掉，确定吗？')) return
+    if (dirty() && !await window.siteConfirm('切换后这里填的内容会丢掉，确定吗？')) return
     S.modal.guard = null
     if (k === 'text') openTextCompose()
     else if (k === 'share') openShareCompose()
@@ -6131,8 +6170,8 @@ function looksPanel(anchor) {
         h('div', { class: 'lk-row' },
           file,
           h('button', { class: 'btn btn-ghost sm', onclick: () => file.click() }, icon('image', 'i tiny'), '上传图片'),
-          h('button', { class: 'btn btn-ghost sm', onclick: () => {
-            const u = prompt('图片链接（https 开头）', LOOK.kind === 'url' ? LOOK.url : '')
+          h('button', { class: 'btn btn-ghost sm', onclick: async () => {
+            const u = await window.sitePrompt('图片链接（https 开头）', LOOK.kind === 'url' ? LOOK.url : '')
             if (u == null) return
             if (!/^https?:\/\/\S+$/.test(u.trim())) return toast('链接要以 http(s):// 开头', 'err')
             setLook({ kind: 'url', url: u.trim() })
@@ -6299,6 +6338,7 @@ function imRoute() {
   else if ((m = path.match(/^\/t\/(.+)$/))) imOpen({ key: 't:' + m[1], title: '#' + m[1], params: { tag: m[1], sort: 'new' } })
   else if ((m = path.match(/^\/u\/(.+)$/))) imOpen({ key: 'u:' + m[1], title: m[1], person: true, params: { author: m[1], sort: 'new' } })
   else if (q) imOpen({ key: 'q:' + q, title: `搜索「${q}」`, params: { q, sort: 'new' } })
+  else if (path === '/dm' || path.startsWith('/dm/')) imOpenDm(path)
   else if ((m = path.match(/^\/chat(?:\/(\d+))?$/))) {
     const id = Number(m[1]) || 0
     const go = () => { const c = imGroupConvs().find((x) => !id || x.gid === id); if (c && IM) imOpen(c) }
@@ -6330,7 +6370,7 @@ function imMount() {
     IM.chat, IM.threadEl)
   document.body.append(IM.root)
   IM.drawRail = drawRail
-  IM.offChat = onChat(() => { drawConvs(); drawRail() })
+  IM.offChat = onChat(() => { if (IM.dmUnread !== CHAT.dmUnread) { IM.dmUnread = CHAT.dmUnread; imLoadDms() } drawConvs(); drawRail() })
   drawRail()
   drawTabs()
   imLoadConvs()
@@ -6386,7 +6426,8 @@ async function imLoadConvs() {
   }
   drawConvs()
   drawRail()
-  if (!IM.cur && !location.pathname.match(/^\/(m|t|u|chat)\b/) && !new URLSearchParams(location.search).get('q')) {
+  imLoadDms()
+  if (!IM.cur && !location.pathname.match(/^\/(m|t|u|chat|dm)\b/) && !new URLSearchParams(location.search).get('q')) {
     const all = [...imGroupConvs(), ...IM.convs]
     const last = all.find((c) => c.key === localStorage.getItem('im-last')) || IM.convs[0] || all[0]
     if (last && innerWidth > 760) imOpen(last)
@@ -6404,7 +6445,7 @@ function drawTabs() {
 
 function drawConvs() {
   if (!IM) return
-  let list = IM.tab === 'tag' ? IM.tags : [...imGroupConvs(), ...IM.convs]
+  let list = IM.tab === 'tag' ? IM.tags : [...imGroupConvs(), ...(IM.dms || []), ...IM.convs]
   if (IM.tab === 'unread') list = list.filter((c) => c.unseen > 0)
   if (IM.kw) list = list.filter((c) => c.title.includes(IM.kw) || c.latest?.text?.includes(IM.kw))
   IM.list.replaceChildren(...(list.length ? list.map(convRow)
@@ -6414,13 +6455,14 @@ function drawConvs() {
 function convRow(c) {
   const sub = c.latest ? `${(c.latest.src ? imFake(c.latest.id) : c.latest.by) || ''}：${previewText(c.latest.text) || '[图片]'}` : c.sub || `${c.n} 条消息`
   return h('button', { class: 'im-conv' + (IM.cur?.key === c.key ? ' on' : ''), type: 'button', 'data-key': c.key, onclick: () => imOpen(c) },
-    groupAvatar(c.title),
+    c.dm ? avatar(c.avatar, c.title, 40) : groupAvatar(c.title),
     h('span', { class: 'im-conv-main' },
-      h('span', { class: 'im-conv-top' }, h('strong', null, c.title), h('time', null, convTime(c.latest?.at))),
+      h('span', { class: 'im-conv-top' }, h('strong', null, c.title), h('time', null, convTime(c.latest?.at ?? c.at))),
       h('span', { class: 'im-conv-sub' }, h('span', null, sub), c.unseen > 0 && h('i', { class: 'im-badge' }, c.unseen > 99 ? '99+' : c.unseen))))
 }
 
 function imOpen(c) {
+  if (c.dm) return navigate('/dm/' + c.dm)
   if (c.gid) return imOpenGroup(c)
   IM.clean.splice(0).forEach((fn) => fn())
   IM.cur = c
@@ -7219,9 +7261,9 @@ function goneView(x, { onBack } = {}) {
     const acknowledge=h('input',{type:'checkbox','aria-label':'已成年并了解群聊内容提示'})
     box.replaceChildren(...nodes(
       h('div', { class: 'cg-mark' + (left ? ' left' : '') }, icon(left ? 'logout' : 'lock')),
-      h('h2', null, fresh ? x.name+' · 全站群聊' : left ? '你已退出群聊' : '群聊已临时关闭'),
-      h('p', { class: 'muted' }, '群聊为自愿加入。群内可能包含没品、变态、地狱笑话及 18 禁内容，请按自身接受程度选择。申请通过前不会展示群消息。'),
-      x.req!==0&&!findGroup(x.id)&&h('label',{class:'set-check'},acknowledge,'我已成年，已了解上述内容提示并自愿申请加入'),
+      h('h2', null, fresh ? x.name+(x.internal?'':' · 全站群聊') : left ? '你已退出群聊' : x.idle ? '你因 10 天未登录被移出群聊' : '群聊已临时关闭'),
+      h('p', { class: 'muted' }, x.internal?'这是内部群聊，提交申请后由站长审核，通过后才能看到群消息。':(x.idle?'你超过 10 天没有登录网站，系统已自动把你移出。勾选下面的确认就能直接回来，不用等审核。\n':'')+'群聊为自愿加入。群内可能包含没品、变态、地狱笑话及 18 禁内容，请按自身接受程度选择。勾选确认后直接入群，不用等审核。超过 10 天未登录网站的普通成员会被自动移出并收到提醒，回来后可直接重新加入；站长、管理员和群管不受此规则影响。'),
+      x.req!==0&&!findGroup(x.id)&&h('label',{class:'set-check'},acknowledge,x.internal?'我已成年，自愿申请加入':'我已成年，已了解内容提示及10天未登录自动移出规则，自愿加入'),
       findGroup(x.id) ? h('button', { class: 'btn btn-primary', type: 'button', onclick: () => openGroup(x.id) }, '你已经回到群里，进去看看')
         : x.req === 0 ? h('button', { class: 'btn btn-ghost', type: 'button', disabled: true }, '已申请，等管理员处理')
           : h('button', { class: 'btn btn-primary', type: 'button', onclick: async (e) => {
@@ -7229,12 +7271,13 @@ function goneView(x, { onBack } = {}) {
             b.disabled = true
             try {
               if(!acknowledge.checked)throw Error('请先勾选成年及内容知悉确认')
-              await api(`/chat/groups/${x.id}/join-req`, { method: 'POST',body:{adult_content_ack:true} })
+              const joined = await api(`/chat/groups/${x.id}/join-req`, { method: 'POST',body:{adult_content_ack:true} })
+              if (joined?.joined) { toast('已加入群聊', 'ok'); await loadGroups(); openGroup(x.id); return }
               x.req = 0
               toast('已申请，管理员会收到提醒', 'ok')
               draw()
             } catch (err) { b.disabled = false; toast(err.message, 'err') }
-          } }, '申请加入群聊'),
+          } }, x.internal || x.kind === 'kick' && !x.idle ? '申请加入群聊' : '加入群聊'),
       x.req === 2 && !findGroup(x.id) && h('p', { class: 'muted sm' }, '上次申请没通过，过一会儿可以再申请'),
       h('div', { class: 'cg-acts' },
         onBack && h('button', { class: 'btn-text', type: 'button', onclick: onBack }, '返回'),
@@ -7430,6 +7473,27 @@ function fullDate(ts) {
   const d = new Date(ts * 1000)
   const y = d.getFullYear() === new Date().getFullYear() ? '' : d.getFullYear() + '-'
   return `${y}${pad(d.getMonth() + 1)}-${pad(d.getDate())} 周${WEEK[d.getDay()]} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+// 跳到某条消息后，附近图片 / 视频晚加载会把它挤走：2 秒内内容尺寸变化就重新居中，用户一动就停
+function settleChatFocus(root, el) {
+  focusChatMessage(root, el)
+  const win = root.ownerDocument.defaultView
+  if (!win.ResizeObserver) return
+  const events = ['wheel', 'touchstart', 'pointerdown', 'keydown']
+  let done = false, timer = 0, frame = 0
+  const stop = () => {
+    if (done) return
+    done = true; observer.disconnect(); clearTimeout(timer); win.cancelAnimationFrame(frame)
+    events.forEach((e) => root.removeEventListener(e, stop))
+  }
+  const observer = new win.ResizeObserver(() => {
+    if (done || !el.isConnected) return
+    win.cancelAnimationFrame(frame)
+    frame = win.requestAnimationFrame(() => { if (!done && el.isConnected) focusChatMessage(root, el) })
+  })
+  for (const child of root.children) observer.observe(child)
+  events.forEach((e) => root.addEventListener(e, stop, { passive: true }))
+  timer = setTimeout(stop, 2000)
 }
 function flashMsg(el, m) {
   flashEl(el)
@@ -8275,10 +8339,23 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
   const st = { first: 0, last: 0, more: true, busy: false, olderFailed: false, since: 0, items: [], unreadAt: null, sentRead: 0, stick: true, done: false }
   const positionKey = `${S.me?.id || 0}:${g.id}`
   let positionTimer = 0
-  let aiPanel, aiLoading, bagTimer=0, bagLast=0, bagBusy=false, bagQueued=false
+  let aiPanel, aiLoading, guessPanel, guessLoading, huancaiPanel, huancaiLoading, gamePanel, gameLoading, vipPanel, vipLoading, sideMode='', bagTimer=0, bagLast=0, bagBusy=false, bagQueued=false
+  async function openGuess(mid = 0) {
+    sideMode='guess';huancaiPanel?.close();gamePanel?.close()
+    try {
+      guessLoading ||= import('/guess-room.js?v=472f7fbf').then(({ createGuessRoom }) => {
+        if (!st.destroyed) guessPanel = createGuessRoom({ pane: el, chat: chatColumn, scroller, opener: guessOpen, gid: g.id, userId: S.me?.id, h, icon, api, onMode:null,
+          create: anchor => redpackDialog(anchor, { group:g, autoGuess:{amount:''}, onSent:()=>{poll();guessPanel?.refresh(true)} }) })
+      }).catch(error => { guessLoading = null; throw error })
+      await guessLoading
+      if (!st.destroyed&&sideMode==='guess') guessPanel.open(mid)
+    } catch (error) { if (!st.destroyed) toast(error.message, 'err') }
+  }
+  function openHuancai(){navigate('/huancai')}
+  function openGameMode(mode){if(mode==='outside'){toast('VIP聊天已下线');return}return openGuess()}
   async function openAi(anchor, mode = 'summary', range = '200') {
     try {
-      aiLoading ||= import('/ai-chat.js').then(({ createAiChat }) => {
+      aiLoading ||= import('/ai-chat.js?v=472f7fbf').then(({ createAiChat }) => {
         if (!st.destroyed) aiPanel = createAiChat({ pane: el, gid: g.id, h, icon, api })
       }).catch(error => { aiLoading = null; throw error })
       await aiLoading
@@ -8412,6 +8489,7 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
     if (doc.hidden) { savePosition(); if (!st.blur) { st.hiddenAt = Date.now(); st.awayEnd = 0; dropAway(); st.awayDismissed = false } return }
     if (st.blur && doc.hasFocus()) st.blur = false // 有的浏览器切回标签页不发 focus
     if (!st.blur) back()
+    guessPanel?.refresh()
     refreshBagBadge()
   }
   // 失焦只看主窗口：弹出的小窗本来就是给「切到别处也一直看得到」用的，照常跟着滚
@@ -8592,7 +8670,7 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
   let refreshTitleRaffles = () => {}
   const drawLifetime=new AbortController()
   let drawQueue=Promise.resolve()
-  const add = (items, where, advance = true) => {
+  const add = (items, where, advance = true, fresh = null) => {
     if (where === 'live' && advance && items.length) st.last = Math.max(st.last, ...items.map(m => m.id))
     items = items.filter((m) => !rows.has(m.id))
     if (!items.length) return
@@ -8600,7 +8678,7 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
     if(where==='live')for(const m of items.filter(m=>m.system_kind==='redpack_due'&&!m.deleted).slice(0,3)){
       drawQueue=drawQueue.then(async()=>{
         if(drawLifetime.signal.aborted||doc.hidden)return
-        const {syncPacketDraw}=await import('/redpacket.js?v=20261017d')
+        const {syncPacketDraw}=await import('/redpacket.js?v=472f7fbf')
         await syncPacketDraw({id:Number(m.system_ref),api,signal:drawLifetime.signal,onUpdate:update})
       }).catch(()=>{})
     }
@@ -8632,7 +8710,10 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
     st.first = st.items[0].id
     if (where !== 'live') st.last = Math.max(st.last, st.items[st.items.length - 1].id)
     // 新到的回复（轮询 / 自己刚发的）：已加载的原消息「N 条回复」跟着 +1；历史批次服务端已经算好，不用加
+    // 同一批里的原消息、或这次轮询刚从服务端刷新过的原消息，回复数已经包含这条，跳过
+    const counted = where === 'live' ? new Set([...items.map((x) => x.id), ...(fresh || [])]) : null
     if (where === 'live') items.forEach((m) => {
+      if (m.reply_to && counted.has(m.reply_to.id)) return
       // 原消息开在历史层里的也一样 +1
       const hi = m.reply_to && !m.deleted && histView ? histView.items.findIndex((x) => x.id === m.reply_to.id) : -1
       if (hi >= 0) { histView.items[hi] = { ...histView.items[hi], reply_count: (histView.items[hi].reply_count || 0) + 1 }; redrawIn(histView, hi) }
@@ -8686,6 +8767,7 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
   }
   // 编辑 / 撤回 / 表情 / 回应 / 转帖 / 轮询 changed：同步原消息和引用它的摘要。
   const update = (m) => {
+    guessPanel?.signal([m])
     histView?.apply(m)
     updateReferences(mainView, m)
     if (histView) updateReferences(histView, m)
@@ -8782,6 +8864,7 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
       if (st.destroyed || !scroller.isConnected || revision !== listRevision) { more = false; return }
       more = !!d.more && d.items.length > 0
       st.since = d.now
+      guessPanel?.signal(d.items)
       const wasFollowing = st.stick && !st.followPaused
       d.changed.forEach(update)
       if (st.after) { more = false; return } // 在跳转窗口里，最新的消息等回到底部再拉
@@ -8813,7 +8896,7 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
         if (duringAway.length) st.awayIds = [...new Set([...st.awayIds, ...duringAway.map((m) => m.id)])]
         // 手机网络抖动时 POST 已经到了服务器、回包丢了：轮询拿到同内容的自己的消息，就把「发送中 / 没发出去」那条收掉
         d.items.forEach((m) => m.mine && inflight.find((j) => !j.done && !j.tray && j.body === (m.body || '') && Number(j.reply?.id||0) === Number(m.reply_to?.id||0) && !(m.media?.length || m.image))?.settle(m))
-        add(d.items, 'live')
+        add(d.items, 'live', true, d.changed.map((m) => m.id))
         trimLive(stick)
         if (stick && !st.followPaused) toBottom(false)
         else {
@@ -8859,7 +8942,7 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
       if (!el) return false
       if (view !== histView) closeHist()
       pauseFollow()
-      focusChatMessage(view.scrollRoot,el)
+      settleChatFocus(view.scrollRoot,el)
       flashMsg(el, view.find(id))
       return true
     }
@@ -8949,11 +9032,11 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
       hv.more = d.more
       hv.after = !!d.more_after
       const t = d.items.find((m) => m.id === id)
-      if (!t) { close(); return toast('原消息找不到了') }
+      if (!t) { close(); return toast(id < (d.items[0]?.id || Infinity) ? '原消息早于你入群的时间，看不到原文' : '原消息找不到了') }
       title.textContent = '历史消息 · ' + fullDate(t.created_at)
       draw()
       const r = hv.rows.get(id)?.querySelector('.cm-msg')
-      if(r)focusChatMessage(box,r)
+      if(r)settleChatFocus(box,r)
       if (r) flashMsg(r, t)
     } catch (e) { if (histView === hv) close(); toast(e.message, 'err') }
   }
@@ -9270,8 +9353,10 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
           } }, '撤回到输入框'))
       } finally { job.busy = false }
     }
-    go()
+    // 按发送顺序排队提交；单条最多等 15 秒，避免一条卡住拖住后面所有消息
+    sendChain = sendChain.then(() => Promise.race([go(), new Promise((r) => setTimeout(r, 15000))])).catch(() => {})
   }
+  let sendChain = Promise.resolve()
   const inflight = []
   const pending = h('div', { class: 'cm-pending' })
   function swapTray() {
@@ -9310,7 +9395,7 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
   }
   const key = 'cmstk' + g.id
   const favoriteBoard = async anchor => {
-    const {openChatFavorites}=await import('/chat-favorites.js')
+    const {openChatFavorites}=await import('/chat-favorites.js?v=472f7fbf')
     if(st.destroyed||!scroller.isConnected)return
     openChatFavorites(anchor,{h,icon,api,openPop,closePop,toast,onRemoval,blurAll:()=>S.blurAll,view:(media)=>{const item={...media,u:mediaUrl(media.u),...(media.v?{v:mediaUrl(media.v)}:{}),...(media.o?{o:mediaUrl(media.o)}:{})};openViewer({id:-1,image:item.u,images:[item],image_count:1,title:'消息收藏',seen_at:1},0,{doc})},send:async job=>{
       if(st.destroyed||!scroller.isConnected)throw Error('聊天窗口已关闭')
@@ -9342,7 +9427,6 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
           closePop();att.add([new File([blob],`表情-${item.message_id}-${item.index}.${blob.type.split('/')[1]}`,{type:blob.type})]);ta.focus({preventScroll:true})
         }}), { key, cls: 'pop-stk', up: true }), { 'data-pop': key }),
         tb('image', '发图片 / 视频', () => att.pick()),
-        tb('randomDice', '随机摇图', async()=>{try{const {openRandomImage}=await import('/random-image.js');if(st.destroyed)return;openRandomImage({doc,groupId:g.id,signal:drawLifetime.signal,onPick:file=>{if(st.destroyed)throw Error('聊天窗口已关闭');if(att.items.length>=MAX_FILES)throw Error('发送框附件已满，请先发送或移除附件');const before=att.items.length;att.add([file]);for(const item of att.items.slice(before))item.blur=true;att.redraw();ta.focus({preventScroll:true});toast('已加入发送框，点击发送即可')}})}catch(e){toast(e.message,'err')}},{class:'cm-ibtn cm-random-image','aria-label':'随机摇图'}),
         tb('bookmark', '消息收藏', e => favoriteBoard(e.currentTarget.closest('.cm-compose')||e.currentTarget).catch(e=>toast(e.message,'err'))),
         tb('redpack', '发红包', (e) => redpackDialog(e.currentTarget.getClientRects().length ? e.currentTarget : compose.querySelector('.cm-mobile-more'), { group: g, onSent: (message) => {
           const follow = st.stick && !st.followPaused && nearBottom() && !histEl, fromHistory=!!histEl||!!st.after
@@ -9351,22 +9435,19 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
           else {add([message], 'live', false);if (follow && !st.followPaused) toBottom(false);else drawDown()}
         } }), { class: 'cm-ibtn cm-redpack-btn' }),
         tb('raffle', '抽卡', (e) => instantCardDialog(e.currentTarget)),
-        tb('doc', '发文件（20MB 以内）', () => fileIn.click()),
-        tb('at', '@ 某人', () => { insertAtCursor(ta, (/\S$/.test(ta.value.slice(0, ta.selectionStart)) ? ' ' : '') + '@') }),
-        tb('quote', '引用', () => { const id=Number(selMsgId(doc));const m = histView?.find(id) || mainView.find(id) || st.reply || st.items[st.items.length - 1]; if (m) quoteMsg(m) }),
-        tb('link', '引用帖子（插入 No.编号，会带预览卡）', (e) => postPicker(e.currentTarget.closest('.cm-compose') || e.currentTarget, (m) => {
-          insertAtCursor(ta, (/\S$/.test(ta.value.slice(0, ta.selectionStart)) ? ' ' : '') + `No.${m.id} `)
-        }, 'cmpost' + g.id), { 'data-pop': 'cmpost' + g.id }),
-        tb('search', '搜索聊天记录', () => search()),
-        tb('smile', '欢欢助手', (e) => huanTools(e.currentTarget.getClientRects().length ? e.currentTarget : compose.querySelector('.cm-mobile-more')), { class: 'cm-ibtn cm-ai-open' }),
-        tb('download', '导出 / 让 AI 总结', (e) => pickRange(e.currentTarget), { 'data-pop': 'cmrange' }),
+        
+        
+        
+        
+        
+        
         h('span', { class: 'grow' }),
         sendBtn), mention.el)
     : h('a', { class: 'cm-compose ghost', href: loginHref() }, '登录 Linux.DO 后加入「迷友」聊天')
   if (S.me) acceptImages(compose, ta, { add: (fs) => att.add(fs) })
   if (S.me) {
     const bar = compose.querySelector('.cm-bar')
-    const extras = [...bar.querySelectorAll('button')].filter(b => ['发红包', '群红包袋', '称号抽奖', '发文件（20MB 以内）', '@ 某人', '引用', '引用帖子（插入 No.编号，会带预览卡）', '搜索聊天记录', '欢欢助手'].includes(b.title))
+    const extras = [...bar.querySelectorAll('button')].filter(b => ['发红包', '群红包袋', '称号抽奖', '发文件（20MB 以内）'].includes(b.title))
     extras.forEach(b => b.classList.add('cm-secondary'))
     bar.querySelector('[data-pop="cmrange"]')?.classList.add('desktop-only')
     const more = tb('more', '更多聊天操作', e => openPop(e.currentTarget,
@@ -9431,7 +9512,7 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
     input.focus()
     if (q0) { input.value = q0; run() }
   }
-  function destroy() { drawLifetime.abort(); savePosition(); st.destroyed = true; bubbleMotion.destroy(); histMotion?.destroy(); histMotion = null; aiPanel?.destroy(); st.done = false; CHAT.panes.delete(api_); clearTimeout(positionTimer); clearTimeout(awayT); clearTimeout(st.catchupT); st.stopOwnPoll?.(); clearInterval(st.readT); clearInterval(bagTimer); doc.removeEventListener('visibilitychange', onVis); doc.defaultView?.removeEventListener('pagehide', savePosition); win?.removeEventListener('blur', onBlur); win?.removeEventListener('focus', onFocus); doc.defaultView?.removeEventListener('title-raffle-update', refreshTitleRaffles); offNotice(); offUnread() }
+  function destroy() { drawLifetime.abort(); savePosition(); st.destroyed = true; bubbleMotion.destroy(); histMotion?.destroy(); histMotion = null; aiPanel?.destroy(); guessPanel?.destroy(); huancaiPanel?.destroy(); gamePanel?.destroy(); vipPanel?.destroy(); st.done = false; CHAT.panes.delete(api_); clearTimeout(positionTimer); clearTimeout(awayT); clearTimeout(st.catchupT); st.stopOwnPoll?.(); clearInterval(st.readT); clearInterval(bagTimer); doc.removeEventListener('visibilitychange', onVis); doc.defaultView?.removeEventListener('pagehide', savePosition); win?.removeEventListener('blur', onBlur); win?.removeEventListener('focus', onFocus); doc.defaultView?.removeEventListener('title-raffle-update', refreshTitleRaffles); offNotice(); offUnread() }
 
   // 群公告：顶上一条，点 × 收起（记住这一版），右上角留个小「公告」随时再打开；公告改了会重新弹出来
   const noticeEl = h('div', { class: 'cm-notice-wrap' })
@@ -9486,11 +9567,12 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
 
   pendingSlot()
   stage.append(pill, latestBtn)
+  const guessOpen = h('button', { type:'button', class:'cm-guess-open', title:'猜词专区 / 分屏', 'aria-label':'猜词专区 / 分屏', 'aria-expanded':'false', onclick:()=>openGuess() }, h('img',{src:'/ai-avatar.svg',class:'cm-guess-icon',alt:'',width:24,height:24}), h('span',{class:'cm-guess-label'},'猜词'), h('span',{'aria-hidden':'true'},'↗'))
   const bagOpen = h('button', {type:'button',class:'cm-bag-open',title:'群红包袋','aria-label':'群红包袋',onclick:e=>redpackDialog(e.currentTarget,{archiveGroup:g,onUpdate:update,onClose:()=>refreshBagBadge(true)})},
     icon('packetBag','i tiny'),h('span',null,'群红包袋'),h('span',{class:'cm-bag-alert','aria-hidden':'true'},'还有红包'))
   const updatesOpen=h('button',{type:'button',class:'cm-updates-open',title:'最近更新','aria-label':'最近更新',onclick:async e=>{
     const anchor=e.currentTarget;if(anchor.disabled)return;anchor.disabled=true
-    try{const {openRecentUpdates}=await import('/recent-updates.js');if(anchor.isConnected)openRecentUpdates(anchor)}
+    try{const {openRecentUpdates}=await import('/recent-updates.js?v=472f7fbf');if(anchor.isConnected)openRecentUpdates(anchor)}
     catch{toast('更新记录加载失败，请重试','err')}finally{anchor.disabled=false}
   }},icon('clock','i tiny'),h('span',null,'最近更新'))
   async function refreshBagBadge(force=false) {
@@ -9515,8 +9597,7 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
     finally {bagBusy=false;if(bagQueued){bagQueued=false;refreshBagBadge(true)}}
   }
   const chatColumn = h('div', { class:'cm-chat-column' }, noticeEl, rafflePin, stage, compose)
-  const previewOpen=h('button',{type:'button',class:'cm-bag-open',title:'预览本地投稿装扮','aria-label':'装扮预览',onclick:async e=>{const anchor=e.currentTarget;try{if(!document.querySelector('link[data-community-preview]'))document.head.append(h('link',{rel:'stylesheet',href:'/community-preview.css','data-community-preview':''}));const {openCommunityPreview}=await import('/community-preview.js');if(!st.destroyed)openCommunityPreview(anchor,{h,icon,avatar,user:S.me,titleEl,badgeEl,bubbleView})}catch(error){toast(error.message,'err')}}},icon('sparkle','i tiny'),h('span',null,'装扮预览'))
-  const el = h('div', { class: 'cm-pane' }, h('div',{class:'cm-guess-bar'},bagOpen,updatesOpen,previewOpen), chatColumn)
+  const el = h('div', { class: 'cm-pane' }, h('div',{class:'cm-guess-bar'},bagOpen,guessOpen), chatColumn)
   onRemoval(el,attachChatMediaScale(el,{uid:S.me?.id,scroller,list}))
   if(g.id===1){const invite=new URL(targetDocument.defaultView.location.href);if(['arena','drawing'].includes(invite.searchParams.get('game')))queueMicrotask(()=>{if(!st.destroyed)openGameMode(invite.searchParams.get('game'),invite.searchParams.get('room')||'')})}
   const syncBagReminder=(event)=>{
@@ -9538,7 +9619,7 @@ function chatPane(g, { onHead, targetDocument = document } = {}) {
     if (before.endsWith('@' + username + ' ')) return ta.focus()
     insertAtCursor(ta, (/\S$/.test(before) ? ' ' : '') + '@' + username + ' ')
   }
-  const api_ = { el, poll, destroy, update, setReply, setEdit, recalled, quoteMsg, jumpTo, gallery, search, atUser, send: (t) => send(t), focus: () => ta.focus(), group: g, st }
+  const api_ = { el, poll, destroy, update, setReply, setEdit, recalled, quoteMsg, jumpTo, gallery, search, atUser, openGuess, send: (t) => send(t), focus: () => ta.focus(), group: g, st }
   mainView.pane = api_
   // 消息上的右键 / 左滑：委托在整个 pane 上（跟着 pane 进小窗 document），按消息所在列表找视图和消息。
   // 发送中的占位不在任何列表里，自然不管
@@ -9658,7 +9739,7 @@ function cmImgBox(w, h, max = 320) {
 async function redpackDialog(anchor, options) {
   try {
     closePop()
-    const { openRedpacket } = await import('/redpacket.js?v=20261018mute')
+    const { openRedpacket } = await import('/redpacket.js?v=472f7fbf')
     if (anchor.isConnected) openRedpacket({ anchor, ...options, userId:S.me?.id, h, icon, api, bagReminderSettings:packetBagReminderSettings, uploadCover: async (file,signal) => {
       const error=checkFile(file)
       if(error || isVid(file))throw Error(error || '封面请选择图片')
@@ -9671,14 +9752,14 @@ async function redpackDialog(anchor, options) {
   } catch (e) { toast(e.message, 'err') }
 }
 async function instantCardDialog(anchor,initialTab='draw') {
-  try {closePop();const {openInstantCards}=await import('/instant-cards.js?v=20261024');openInstantCards({anchor,api,h,initialTab,dress:id=>meSettings('deco',id),preview:(id,level)=>{const u={deco:{ft:id,fn:level}};return h('div',{class:'ic-actual-preview'},h('div',{class:'ic-identity'},titleEl(u,'chat'),badgeEl(u,'chat',true)),h('div',bubbleView(u,'cm-text'),h('span',{class:'rt-copy'},'每次相遇，都留有光芒。')))},legacy:()=>titleRaffleDialog(anchor,null,null,true)})}
+  try {closePop();const {openInstantCards}=await import('/instant-cards.js?v=472f7fbf');openInstantCards({anchor,api,h,initialTab,dress:id=>meSettings('deco',id),preview:(id,level)=>{const u={deco:{ft:id,fn:level}};return h('div',{class:'ic-actual-preview'},h('div',{class:'ic-identity'},titleEl(u,'chat'),badgeEl(u,'chat',true)),h('div',bubbleView(u,'cm-text'),h('span',{class:'rt-copy'},'每次相遇，都留有光芒。')))},legacy:()=>titleRaffleDialog(anchor,null,null,true)})}
   catch(e){toast(e.message,'err')}
 }
 async function owner52CardsDialog(anchor) {
   if (!anchor?.isConnected) return
   closePop()
   const doc=anchor.ownerDocument
-  if(!doc.querySelector('link[data-instant-cards]'))doc.head.append(h('link',{rel:'stylesheet',href:'/instant-cards.css?v=20261031','data-instant-cards':''}))
+  if(!doc.querySelector('link[data-instant-cards]'))doc.head.append(h('link',{rel:'stylesheet',href:'/instant-cards.css?v=472f7fbf','data-instant-cards':''}))
   const dialog=h('dialog',{class:'ic-dialog ic-card-pack-dialog','aria-label':'52B 集卡包'},h('header',null,h('h2',null,'集卡包'),h('button',{class:'ic-close','aria-label':'关闭集卡包',onclick:()=>dialog.close()},'×')))
   const body=h('div',{class:'ic-body'},h('p',{role:'status'},'正在读取卡包…'))
   dialog.append(body);dialog.addEventListener('close',()=>{dialog.remove();anchor.isConnected&&anchor.focus()},{once:true});doc.body.append(dialog);dialog.showModal()
@@ -9711,7 +9792,7 @@ async function titleRaffleDialog(anchor, packetId = null, raffleId = null, legac
   if(!packetId&&!raffleId&&!legacy)return instantCardDialog(anchor)
   try {
     closePop()
-    const { openTitleRaffle } = await import('/title-raffle.js?v=20261021cards')
+    const { openTitleRaffle } = await import('/title-raffle.js?v=472f7fbf')
     openTitleRaffle({ anchor, packetId, raffleId, api, h, icon })
   } catch (e) { toast(e.message, 'err') }
 }
@@ -9727,8 +9808,13 @@ async function matchRedpackMessage(message,g,pane,attempt=0) {
     const enqueue=()=>{
       let seen=[];try{seen=JSON.parse(localStorage.getItem('redpackAutoSeen') || '[]')}catch{}
       if(seen.includes(key))return
+      let done=[];try{done=JSON.parse(localStorage.getItem('redpackAutoPackets') || '[]')}catch{}
+      const uid=S.me?.id||0,queued=new Set(REDPACK_AUTO.queue.map(x=>x.message.id))
+      const fresh=d.items.filter(m=>!m.redpack?.solved&&!queued.has(m.id)&&!done.includes(uid+':'+m.id))
       localStorage.setItem('redpackAutoSeen',JSON.stringify([...seen.slice(-79),key]))
-      REDPACK_AUTO.queue.push(...d.items.map(m=>({message:m,pane,at:Date.now()})));drainRedpackAuto()
+      if(!fresh.length)return
+      localStorage.setItem('redpackAutoPackets',JSON.stringify([...done,...fresh.map(m=>uid+':'+m.id)].slice(-200)))
+      REDPACK_AUTO.queue.push(...fresh.map(m=>({message:m,pane,at:Date.now()})));drainRedpackAuto()
     }
     if(navigator.locks)await navigator.locks.request('redpack-auto',enqueue)
     else enqueue()
@@ -9814,9 +9900,7 @@ function chatMsg(m, { cont, pane, pending } = {}) {
   const card = (e) => userCard(m.user.username, e.currentTarget)
   const at = (e) => { if (!canAt) return card(e); e.preventDefault(); pane.atUser(m.user.username) }
   // 右键 / 长按头像 @TA 在 chatPane 的委托里做（主列表、历史层一样）
-  const protected52 = isOwner52Suit(personalOf(m.user, 'chat')?.id)
-  const shieldColor = ['green','blue','purple','black'][Math.abs(Number(m.id || 0)) % 4]
-  const face = h('button', { class: 'cm-face' + (protected52 ? ' di52-protected-face' : ''), type: 'button', title: canAt ? `${who} · 右键或长按 @TA` : who, 'data-pop': 'u' + m.user.username, 'data-di52-protected': protected52 ? 'true' : null, 'data-di52-shield': protected52 ? shieldColor : null, onclick: card }, avatar(m.user.avatar, who, 36), protected52 && h('span', { class: 'di52-shield', 'aria-hidden': 'true' }))
+  const protected52=isOwner52Suit(personalOf(m.user,'chat')?.id);const shieldColor=['green','blue','purple','black'][Math.abs(Number(m.id||0))%4];const face = h('button', { class: 'cm-face'+(protected52?' di52-protected-face':''), type: 'button', title: canAt ? `${who} · 右键或长按 @TA` : who, 'data-pop': 'u' + m.user.username, 'data-di52-protected': protected52?'true':null, 'data-di52-shield': protected52?shieldColor:null, onclick: card }, avatar(m.user.avatar, who, 36), protected52&&h('span',{class:'di52-shield','aria-hidden':'true'}))
   const body = []
   let ref = null
   if (m.deleted) body.push(h('div', { class: 'cm-gone' }, `${m.mine ? '你' : who} 撤回了一条消息`))
@@ -9828,7 +9912,7 @@ function chatMsg(m, { cont, pane, pending } = {}) {
     const edited = m.edited_at && h('span', { class: 'cm-edited', title: '编辑于 ' + new Date(m.edited_at * 1000).toLocaleString('zh-CN', { hour12: false }) }, '（已编辑）')
     if (m.road_id) body.push(h('a', { class: 'cm-road', href: `/road?item=${m.road_id}`, 'data-link': '' }, `已转到鞭打 #${m.road_id}`))
     if (m.redpack) body.push(h('button', { type: 'button', class: 'cm-redpack' + (m.redpack.solved ? ' is-open' : ''), 'aria-label': '打开红包',
-      onclick: (e) => redpackDialog(e.currentTarget, { message: m, claimOnOpen:true, onUpdate: (fresh) => pane?.update(fresh) }) },
+      onclick: (e) => pane && ['guess','clues'].includes(m.redpack.ldc_mode) ? pane.openGuess(m.id) : redpackDialog(e.currentTarget, { message: m, claimOnOpen:true, onUpdate: (fresh) => pane?.update(fresh) }) },
       m.redpack.cover && deferChatImage(h('img',{class:'cm-redpack-cover',alt:'红包封面',onerror:e=>{if(e.currentTarget.isConnected)e.currentTarget.remove()}}),m.redpack.cover),
       h('span', { class: 'cm-redpack-seal'+((m.redpack.provider==='coin52'||m.redpack.payment_provider==='coin52')?' is-dcoin':''), 'aria-hidden': 'true' }, (m.redpack.provider==='coin52'||m.redpack.payment_provider==='coin52')?dcoinIcon(h):icon('redpack')),
       h('span', { class: 'cm-redpack-copy' }, h('strong', null, m.redpack.prompt || (m.redpack.game==='free_guess'?'一起猜词吧':'给你一个红包')),
@@ -9844,8 +9928,8 @@ function chatMsg(m, { cont, pane, pending } = {}) {
     const all = m.redpack && !m.redpack.shared ? [] : m.media?.length ? m.media : m.image ? [{ u: m.image, w: m.width, h: m.height }] : []
     const files = all.filter((x) => x.k === 'f')
     const media = all.filter((x) => x.k !== 'f')
+    const mediaOwner52 = isOwner52Suit(personalOf(m.user, 'chat')?.id)
     if (media.length) {
-      const mediaOwner52 = isOwner52Suit(personalOf(m.user, 'chat')?.id)
       const view = { id: -(m.id || 1), image: media[0].u, images: media, image_count: media.length, title: '', seen_at: 1 }
       const open = (e, i) => pane?.gallery ? pane.gallery(m, i) : openViewer(view, i, { doc: e.currentTarget.ownerDocument })
       // 单张按 w/h 预占位；旧图没有尺寸时保留固定缩略框，完整比例交给看图器。
@@ -10064,7 +10148,7 @@ function whoReacted(anchor, path, key, focus) {
 // 消息操作：悬停工具条、右键菜单共用
 const chatCopy = (m) => copyText(m.body || (m.media?.[0]?.u || m.image) && location.origin + (m.media?.[0]?.u || m.image) || '')
 async function chatDelete(m, pane) {
-  if (!m.mine && !confirm(`删除 ${m.user.username} 的这条消息？`)) return
+  if (!m.mine && !await window.siteConfirm(`删除 ${m.user.username} 的这条消息？`)) return
   try {
     await api(`/chat/messages/${m.id}`, { method: 'DELETE' })
     pane.update({ ...m, deleted: true, body: '', image: null, media: null, reactions: [], can_delete: false, can_edit: false })
@@ -10511,7 +10595,7 @@ async function renderChat(gid, {dmPath='', mountDm} = {}) {
 }
 
 function groupRow(g, on, onclick) {
-  const sub = g.gone ? (g.gone.kind === 'left' ? '你已退出' : '暂时关闭') + (g.gone.req === 0 ? ' · 已申请' : '')
+  const sub = g.gone ? (g.gone.internal ? '内部群 · 可申请' : g.gone.kind === 'left' ? '你已退出' : '暂时关闭') + (g.gone.req === 0 ? ' · 已申请' : '')
     : g.latest ? `${g.latest.by || ''}：${g.latest.text}` : g.is_default ? '所有登录的佬友都在这里' : '还没有消息'
   return h('button', { class: 'chat-gr' + (on ? ' on' : '') + (g.gone ? ' gone' : ''), type: 'button', onclick },
     groupAvatar(g.name, 40),
@@ -10546,7 +10630,7 @@ function chatHead(g, { back, pane } = {}) {
     pane && h('button', { class: 'btn-icon ghost', title: '搜索聊天记录', 'aria-label': '搜索聊天记录', onclick: () => pane.search() }, icon('search')),
     h('a', { class: 'btn-icon ghost chat-dm-shortcut', href: '/dm', 'data-link': true, title: '私信', 'aria-label': '私信', 'data-conversation-kind':'dm' }, icon('chat'),dmBadge()),
     pane && h('button', { class: 'btn-icon ghost', title: '弹出小窗', 'aria-label': '弹出小窗', onclick: () => chatPopout(g) }, icon('popout')),
-    h('button', { class: 'btn btn-ghost sm chat-members', 'aria-label':CHAT.canManage ? '成员与设置' : '成员',title:CHAT.canManage ? '成员与设置' : '成员', onclick: () => groupPanel(g) }, icon('users', 'i tiny'), h('span',{class:'lbl'},CHAT.canManage ? '成员与设置' : '成员'),
+    h('button', { class: 'btn btn-ghost sm chat-members', 'aria-label':CHAT.canManage ? '群管理' : '群设置',title:CHAT.canManage ? '群管理：成员、群资料、移出名单、偏好' : '群设置：成员、提醒、图片大小',onclick: () => groupPanel(g) }, icon('gear', 'i tiny'), h('span',{class:'lbl'},CHAT.canManage ? '群管理' : '群设置'),
       CHAT.canManage && findGroup(g.id)?.reqs > 0 && h('i', { class: 'chat-badge', title: '有人申请加入群聊' }, findGroup(g.id).reqs)))
 }
 
@@ -10627,6 +10711,17 @@ async function chatRankPanel(g) {
   tabs(); await load()
 }
 
+function b33ApplyToggle(g) {
+  const x = findGroup(g.id), state = h('span', { class: 'deco-pref-state' }, x?.apply_open ? '开放中' : '已关闭')
+  const input = h('input', { type: 'checkbox', checked: !!x?.apply_open, onchange: async (e) => {
+    const el = e.currentTarget, open = el.checked; el.disabled = true; state.textContent = '保存中…'
+    try { await api(`/chat/groups/${g.id}/apply`, { method: 'PUT', body: { open } }); const y = findGroup(g.id); if (y) y.apply_open = open; toast(open ? '已开放申请：所有人都能看到「' + g.name + '」并申请加入' : '已关闭申请：只有群里的人能看到，只能你拉人进来', 'ok') }
+    catch (err) { el.checked = !open; toast(err.message, 'err') }
+    finally { el.disabled = false; state.textContent = el.checked ? '开放中' : '已关闭' }
+  } })
+  return h('div', { class: 'gp-sec' }, h('h4', { class: 'gp-h' }, '入群申请通道'), h('label', { class: 'deco-pref-toggle' }, input, h('span', null, '开放申请'), state),
+    h('p', { class: 'muted sm' }, '打开：所有人都能在群聊列表看到这个群并申请，申请由你审批。关闭：只有群里的人能看到，只能你拉人进来。退群或被移出的人看不到这个群。'))
+}
 async function groupPanel(g, { outside, section } = {}) {
   const panel = openModalShell('group-panel group-settings-panel')
   S.modal.kind = 'group'
@@ -10643,7 +10738,7 @@ async function groupPanel(g, { outside, section } = {}) {
   const filesSection = groupFiles(g)
   const changed = async () => { await load(); if (current()) draw(); loadGroups() }
   const leave = async () => {
-    if (!confirm(`退出「${d.group.name}」？${d.group.is_default ? '默认群退了之后，管理员可以再把你拉回来。' : ''}`)) return
+    if (!await window.siteConfirm(`退出「${d.group.name}」？${d.group.is_default ? '默认群退了之后，管理员可以再把你拉回来。' : ''}`)) return
     try {
       await api(`/chat/groups/${g.id}/members/${S.me.id}`, { method: 'DELETE' })
       toast('已退出群聊')
@@ -10652,42 +10747,54 @@ async function groupPanel(g, { outside, section } = {}) {
       afterGroupGone(g.id)
     } catch (e) { toast(e.message, 'err') }
   }
-  // 未入群、主动退群和被踢出分开；未申请的新账号仅展示。
-  let out = null, outOpen = !!outside, outLoading = false, outMoreError = ''
-  const loadOut = async (more=false) => {
-    if(outLoading)return
-    outLoading=true;outMoreError=''
-    try { const data=await api(`/chat/groups/${g.id}/outside?view=membership${more&&out?.next_before?'&before='+out.next_before:''}`);if(current())out=more?{...data,users:[...out.users,...data.users]}:data }
-    catch(e){if(more)outMoreError=e.message;else out={error:e.message}}
-    finally{outLoading=false;if(current())draw()}
+  // 入群申请分组：待审批 / 已注册未入群 / 主动退群 / 被踢出，每组单独加载和翻页（11-07）
+  const OUT_KINDS = [['req', '待审批'], ['new', '已注册未入群'], ['left', '主动退群'], ['kick', '被踢出']]
+  let outKind = 'req', outs = {}, outCounts = null, outOpen = true, outLoading = false, outMoreError = ''
+  const loadOut = async (more = false) => {
+    if (outLoading) return
+    const kind = outKind, cur = outs[kind]
+    outLoading = true; outMoreError = ''
+    try {
+      const data = await api(`/chat/groups/${g.id}/outside?view=membership&kind=${kind}${more && cur?.next_before ? '&before=' + cur.next_before : ''}`)
+      if (data.counts) outCounts = data.counts
+      if (current()) outs[kind] = more && cur?.users ? { ...data, users: [...cur.users, ...data.users] } : data
+    } catch (e) { if (more) outMoreError = e.message; else outs[kind] = { error: e.message } }
+    finally { outLoading = false; if (current()) draw() }
   }
   const outSec = () => {
     if (!admin) return null
-    const head = h('button', { class: 'gp-h gp-fold', type: 'button', 'aria-expanded': String(outOpen), onclick: () => { outOpen = !outOpen; if (outOpen && !out) loadOut(); draw() } },
+    const reqN = outCounts?.req ?? findGroup(g.id)?.reqs ?? 0
+    const head = h('button', { class: 'gp-h gp-fold', type: 'button', 'aria-expanded': String(outOpen), onclick: () => { outOpen = !outOpen; draw() } },
       icon(outOpen ? 'chevD' : 'chevR', 'i tiny'), '不在群里的人', h('span', { class: 'muted sm' }, ' · 只有管理能看到'),
-      findGroup(g.id)?.reqs > 0 && h('i', { class: 'chat-badge' }, findGroup(g.id).reqs + ' 个申请'))
+      reqN > 0 && h('i', { class: 'chat-badge' }, reqN + ' 个申请'))
     if (!outOpen) return h('div', { class: 'gp-sec' }, head)
+    if (!outs[outKind] && !outLoading) queueMicrotask(() => loadOut())
     const act = (u, ok, label, cls) => h('button', { class: `btn-text sm ${cls || ''}`, type: 'button', onclick: async e => {
-      const button=e.currentTarget;button.disabled=true
+      const button = e.currentTarget; button.disabled = true
       try {
         await api(`/chat/groups/${g.id}/join-req/${u.id}`, { method: 'POST', body: { ok } })
         toast(ok ? `${u.username} 已加入群聊` : '已拒绝', 'ok')
-        out = null
+        outs = {}
         await load(); await loadOut(); loadGroups()
-      } catch (e) { toast(e.message, 'err') } finally {button.disabled=false}
+      } catch (e) { toast(e.message, 'err') } finally { button.disabled = false }
     } }, label)
     const row = u => h('div', { class: 'gp-row' + (u.req === 0 ? ' req' : '') },
         h('button', { class: 'gp-face', type: 'button', 'data-pop': 'u' + u.username, onclick: (e) => userCard(u.username, e.currentTarget) }, avatar(u.avatar, u.name || u.username, 32)),
         h('span', { class: 'gp-who' }, h('strong', null, u.name || u.username),
-          h('span', { class: 'muted' }, '@' + u.username, u.kind==='new'?` · ${fmtTime(u.created_at)}注册`:u.gone_at?` · ${fmtTime(u.gone_at)}`:''),
-          u.req === 0 && h('span', { class: 'gp-req' }, `${u.kind==='new'?'首次申请':'申请重新加入'} · ${fmtTime(u.req_at)}`)),
-        u.req === 0 ? [act(u, true, '同意'), act(u, false, '拒绝', 'danger')] : u.kind==='new'?h('span',{class:'muted sm'},u.req===2?'申请已拒绝':'尚未申请'):act(u, true, '拉回'))
-    const list=!out?[h('div',{class:'spinner'})]:out.error?[h('p',{class:'muted'},out.error),h('button',{class:'btn btn-ghost sm',type:'button',onclick:()=>loadOut()},'重试读取申请')]:[
-      ...[['new','已注册未入群'],['left','主动退群'],['kick','被踢出']].map(([kind,label])=>{
-        const users=out.users.filter(u=>u.kind===kind).sort((a,b)=>Number(b.req===0)-Number(a.req===0)||(b.req_at||b.gone_at||b.created_at)-(a.req_at||a.gone_at||a.created_at))
-        return h('section',{class:'gp-sec'},h('h4',{class:'gp-group'},label,h('span',null,users.length)),h('div',{class:'gp-list gp-out'},users.length?users.map(row):h('p',{class:'gp-note muted',style:'padding:10px 12px'},'暂无人员')))
-      }),outMoreError&&h('p',{class:'danger sm'},outMoreError),out.next_before&&h('button',{class:'btn btn-ghost sm',type:'button',disabled:outLoading,onclick:()=>loadOut(true)},outLoading?'加载中…':'加载更多群外账号')]
-    return h('div', { class: 'gp-sec' }, head, list)
+          h('span', { class: 'muted' }, '@' + u.username, u.kind === 'new' ? ` · ${fmtTime(u.created_at)}注册` : u.gone_at ? ` · ${fmtTime(u.gone_at)}` : ''),
+          u.req === 0 && h('span', { class: 'gp-req' }, `${u.kind === 'new' ? '首次申请' : '申请重新加入'} · ${fmtTime(u.req_at)}`)),
+        u.req === 0 ? [act(u, true, '同意'), act(u, false, '拒绝', 'danger')] : u.kind === 'new' ? h('span', { class: 'muted sm' }, u.req === 2 ? '申请已拒绝' : '尚未申请') : act(u, true, '拉回'))
+    const tabs = h('div', { class: 'gp-out-tabs', role: 'tablist', 'aria-label': '群外人员分组' }, OUT_KINDS.map(([k, label]) => {
+      const n = k === 'req' ? reqN : outCounts?.[k]
+      return h('button', { type: 'button', role: 'tab', 'aria-selected': String(k === outKind), class: k === outKind ? 'on' : '', onclick: () => { outKind = k; outMoreError = ''; draw() } },
+        label, n != null && k !== 'new' ? h('span', { class: 'gp-out-n' + (k === 'req' && n ? ' hot' : '') }, String(n)) : null)
+    }))
+    const cur = outs[outKind]
+    const list = !cur ? [h('div', { class: 'spinner' })] : cur.error ? [h('p', { class: 'muted' }, cur.error), h('button', { class: 'btn btn-ghost sm', type: 'button', onclick: () => { outs[outKind] = null; loadOut() } }, '重试')] : [
+      h('div', { class: 'gp-list gp-out' }, cur.users.length ? cur.users.map(row) : h('p', { class: 'gp-note muted', style: 'padding:10px 12px' }, outKind === 'req' ? '没有待审批的申请' : '暂无人员')),
+      outMoreError && h('p', { class: 'danger sm' }, outMoreError),
+      cur.next_before && h('button', { class: 'btn btn-ghost sm', type: 'button', disabled: outLoading, onclick: () => loadOut(true) }, outLoading ? '加载中…' : '加载更多')]
+    return h('div', { class: 'gp-sec' }, head, tabs, ...list)
   }
   const noticeSec = () => {
     const x = findGroup(g.id) || {}
@@ -10712,7 +10819,7 @@ async function groupPanel(g, { outside, section } = {}) {
   const canKick = (u) => admin && u.id !== S.me.id && !u.is_admin && (u.role !== 'gadmin' || S.me.is_admin)
   const canLimit = (u) => S.me?.is_admin && u.id !== S.me.id && !u.is_admin
   const kick = async (u) => {
-    if (!confirm(`把 ${u.username} 移出「${d.group.name}」？${d.group.is_default ? '移出后不会再被自动拉回默认群，除非管理员重新拉人。' : ''}`)) return
+    if (!await window.siteConfirm(`把 ${u.username} 移出「${d.group.name}」？${d.group.is_default ? '移出后不会再被自动拉回默认群，除非管理员重新拉人。' : ''}`)) return
     try {
       await api(`/chat/groups/${g.id}/members/${u.id}`, { method: 'DELETE' })
       toast(`已移出 ${u.username}`)
@@ -10797,14 +10904,14 @@ async function groupPanel(g, { outside, section } = {}) {
     const danger=h('div',{class:'gp-danger'},h('p',{class:'muted sm'},'退出只影响自己；解散会删除整个群，仅站点管理员可操作非默认群。'),
       h('button',{class:'btn-text danger',type:'button',onclick:leave},'退出群聊'),
       S.me.is_admin&&!d.group.is_default&&h('button',{class:'btn-text danger',type:'button',onclick:async()=>{
-        if(!confirm(`解散「${d.group.name}」？聊天记录和图片会一起删除，不能恢复。`))return
+        if(!await window.siteConfirm(`解散「${d.group.name}」？聊天记录和图片会一起删除，不能恢复。`))return
         try{await api(`/chat/groups/${g.id}`,{method:'DELETE'});toast('群已解散');close();await loadGroups();afterGroupGone(g.id)}catch(e){toast(e.message,'err')}
       }},'解散这个群'))
     const categories=settingsSections({h,label:'群设置分类',sections:[
       {id:'members',label:'群成员',keywords:'人员 搜索 昵称 用户名 拉人 限制 移出',nodes:[add,h('div',{class:'gp-mhead'},h('h4',{class:'gp-h'},'成员',count),msearch),listBox,partial]},
-      {id:'info',label:'群资料',keywords:'群名 改名 公告 群规 引用',nodes:[rename,noticeSec()]},
-      {id:'requests',label:'入群申请',keywords:'审批 同意 拒绝 退出 移出 拉回',available:()=>admin,nodes:[outsideBox]},
-      {id:'resources',label:'文件与榜单',keywords:'下载 历史 文件 水群 早起 夜聊 排名',nodes:[filesSection,h('button',{class:'btn sm',type:'button',onclick:()=>chatRankPanel(g)},'水群榜 · 消息 / 早起 / 夜聊')]},
+      {id:'info',label:'群资料',keywords:'群名 改名 公告 群规 引用 申请 开放 通道',nodes:[...(findGroup(g.id)?.owner_ctl?[b33ApplyToggle(g)]:[]),rename,noticeSec()]},
+      {id:'requests',label:'移出与申请',keywords:'审批 同意 拒绝 退出 移出 拉回 申请',available:()=>admin,nodes:[outsideBox]},
+      {id:'resources',label:'水群榜',keywords:'水群 早起 夜聊 排名 榜单',nodes:[h('button',{class:'btn sm',type:'button',onclick:()=>chatRankPanel(g)},'水群榜 · 消息 / 早起 / 夜聊')]},
       {id:'preferences',label:'我的偏好',keywords:'免打扰 红包 提醒 离开 滚动 气泡 动画 装扮 隐藏 媒体 图片 视频 缩小',nodes:[
         h('label',{class:'deco-pref-toggle'},mutedInput,h('span',null,'消息免打扰'),mutedState),
         h('p',{class:'muted sm'},'只影响当前账号在本群的提醒，跨设备同步；开启后只有 @ 我的消息计数和提醒。'),packetBagReminderSettings(g.id),
@@ -10812,6 +10919,7 @@ async function groupPanel(g, { outside, section } = {}) {
       {id:'manage',label:'退出与管理',keywords:'退出 退群 解散 删除',nodes:[danger]},
     ]})
     if(section)categories.select(section)
+    else if(!admin)categories.select('preferences')
     if(outside&&admin)categories.select('requests')
     panel.replaceChildren(h('header',{class:'compose-head'},title,h('button',{class:'btn-icon','aria-label':'关闭',onclick:close},icon('close'))),h('div',{class:'gp-body'},categories.element))
   }
@@ -11264,7 +11372,7 @@ onChat(() => {
 const imGroupConvs = () => [...CHAT.groups.map((g) => ({
   key: 'g:' + g.id, gid: g.id, title: g.name, unseen: g.unread, latest: g.latest,
   sub: g.latest ? null : g.is_default ? '全员群 · 来说第一句吧' : '暂无消息',
-})), ...(CHAT.gone || []).map((x) => ({ key: 'g:' + x.id, gid: x.id, title: goneAsGroup(x).name, unseen: 0, latest: null, sub: x.kind === 'left' ? '你已退出' : '暂时关闭' }))]
+})), ...(CHAT.gone || []).map((x) => ({ key: 'g:' + x.id, gid: x.id, title: goneAsGroup(x).name, unseen: 0, latest: null, sub: x.internal ? '内部群 · 可申请' : x.kind === 'left' ? '你已退出' : '暂时关闭' }))]
 function imOpenGroup(c) {
   IM.clean.splice(0).forEach((fn) => fn())
   IM.cur = c
@@ -11297,6 +11405,57 @@ function imOpenGroup(c) {
     pane.el)
   IM.root.classList.add('chat-open')
   if (innerWidth > 760) pane.focus()
+}
+// 飞书伪装里的私聊：列表用 /dm/threads，右侧直接复用 dm.js（输入框、附件、渲染都和原站一致）
+async function imLoadDms() {
+  if (!S.me || !IM) return
+  try {
+    const { threads } = await api('/dm/threads')
+    if (!IM) return
+    IM.dms = threads.map((t) => ({ key: 'dm:' + t.id, dm: t.id, title: t.peer_name || t.peer_username, avatar: t.peer_avatar, at: t.last_at, unseen: t.unread,
+      sub: t.last_body ? (t.last_sender === S.me.id ? '我：' : '') + (previewText(t.last_body) || '[附件]') : '开始聊天' }))
+    drawConvs()
+  } catch {}
+}
+async function imOpenDm(path) {
+  if (!S.me) return
+  const seq = IM.dmSeq = (IM.dmSeq || 0) + 1
+  const { renderDmPage } = await import('/dm.js?v=472f7fbf')
+  if (!IM || IM.dmSeq !== seq) return
+  IM.clean.splice(0).forEach((fn) => fn())
+  IM.st = null
+  IM.quote = null
+  if (path === '/dm') {
+    IM.cur = null
+    IM.list.querySelectorAll('.im-conv').forEach((el) => el.classList.remove('on'))
+    IM.chat.replaceChildren(h('div', { class: 'im-empty' }, h('span', { class: 'im-empty-mark', html: FS_MARK }), h('p', null, '选择一个会话开始聊天')))
+    IM.root.classList.remove('chat-open')
+    return
+  }
+  const id = Number(path.match(/^\/dm\/(\d+)$/)?.[1] || 0)
+  const c = (IM.dms || []).find((x) => x.dm === id)
+  IM.cur = c || { key: 'dm:new' }
+  IM.list.querySelectorAll('.im-conv').forEach((el) => el.classList.toggle('on', el.dataset.key === IM.cur.key))
+  const title = h('strong', null, c?.title || '单聊')
+  const body = h('div', { class: 'im-dm' })
+  IM.chat.replaceChildren(
+    h('header', { class: 'im-chat-head' },
+      h('button', { class: 'im-ibtn im-back', 'aria-label': '返回', onclick: () => IM.root.classList.remove('chat-open') }, icon('chevL')),
+      avatar(c?.avatar, c?.title || '单聊', 32),
+      h('span', { class: 'im-chat-title' }, title, h('span', { class: 'im-chat-n' }, '单聊')),
+      h('span', { class: 'grow' }),
+      h('button', { class: 'im-ibtn', title: '设置', 'data-pop': 'imset', onclick: (e) => imSettings(e.currentTarget) }, icon('more'))),
+    body)
+  IM.root.classList.add('chat-open')
+  renderDmPage(body, { path, me: S.me, navigate, onLeave: (fn) => IM.clean.push(fn), sidebarHost: h('div'), onRead: () => { loadGroups({ background: true }); imLoadDms() },
+    compose: createDmComposer, renderText: (text) => richBody(text, { md: 'lite' }), renderMedia: dmMedia })
+  // 新建的单聊列表里还没有，标题跟着 dm.js 读到的对方资料走
+  const head = body.querySelector('.dm-pane-head')
+  if (head) {
+    const mo = new MutationObserver(() => { const peer = head.querySelector('strong')?.textContent; if (peer && head.querySelector('.dm-pane-back')) title.textContent = peer })
+    mo.observe(head, { childList: true, subtree: true })
+    IM.clean.push(() => mo.disconnect())
+  }
 }
 function imPlus(anchor) {
   if (!CHAT.canCreate) return openCompose()
@@ -11625,7 +11784,7 @@ function ldComposer() {
     h('div', { class: 'ld-c-bar' },
       tb('quote', '引用', () => { if (target) ta.setRangeText(`[quote="${quoteName(target.m.author_name)}, post:${target.floor}, m:${target.m.id}"]\n${(target.m.title || target.m.text || '[图片]').trim()}\n[/quote]\n`, ta.selectionStart, ta.selectionEnd, 'end'); else wrap('[quote]\n', '\n[/quote]', '引用的内容'); render() }),
       tb('bold', '粗体', () => wrap('**', '**', '粗体')),
-      tb('link', '链接', () => { const u = prompt('链接地址', 'https://'); if (u && /^https?:\/\/\S+$/.test(u)) { ta.setRangeText(u, ta.selectionStart, ta.selectionEnd, 'end'); render() } }),
+      tb('link', '链接', async () => { const u = await window.sitePrompt('链接地址', 'https://'); if (u && /^https?:\/\/\S+$/.test(u)) { ta.setRangeText(u, ta.selectionStart, ta.selectionEnd, 'end'); render() } }),
       tb('eyeOff', '剧透遮挡', () => wrap('[spoiler]', '[/spoiler]', '剧透')),
       tb('image', '上传图片', att.pick),
       tb('smile', '表情', (e) => openPop(e.currentTarget, stickerPicker((k) => { closePop(); insertAtCursor(ta, k); render() }), { key: 'ldstk', cls: 'pop-stk', up: true }))),
@@ -11766,8 +11925,8 @@ function ldSync() {
   }
   if (!LD.q) localStorage.setItem('ld-last', id)
 }
-function ldJumpPrompt() {
-  const v = prompt(`跳到第几楼？（1 - ${LD.total}）`)
+async function ldJumpPrompt() {
+  const v = await window.sitePrompt(`跳到第几楼？（1 - ${LD.total}）`)
   const n = Number.parseInt(v, 10)
   if (n >= 1) ldJump({ offset: Math.min(LD.total, n) - 1 })
 }
@@ -11971,7 +12130,7 @@ async function renderDmRoute() {
   const path = location.pathname
   main.replaceChildren(loadingBox())
   try {
-    const { renderDmPage } = await import('/dm.js')
+    const { renderDmPage } = await import('/dm.js?v=472f7fbf')
     if (seq !== dmRouteSeq || location.pathname !== path) return
     if(S.me)await renderChat(null,{dmPath:path,mountDm:renderDmPage})
     else renderDmPage(main, { path, me: S.me, navigate, onLeave: onPageLeave })
@@ -11980,25 +12139,34 @@ async function renderDmRoute() {
       h('button', { class: 'btn btn-primary sm', type: 'button', onclick: renderDmRoute }, '重试')))
   }
 }
-async function renderMusicRoute(){
- let left=false;onPageLeave(()=>{left=true});main.replaceChildren(loadingBox())
- try{const {mountMusic}=await import('/music.js');if(!left)await mountMusic(main,{user:S.me,onLeave:onPageLeave})}catch(e){if(!left)main.replaceChildren(emptyState('音乐暂时无法打开',e.message,h('button',{class:'btn',onclick:renderMusicRoute},'重试')))}
-}
-async function renderValleyRoute(){
-  let left=false;onPageLeave(()=>{left=true});main.replaceChildren(loadingBox())
+async function renderFarmRoute(){
+  if(!S.me){main.replaceChildren(pageHead('欢欢农场','登录后拥有自己的田园，进度随账号保存。'),h('a',{class:'btn btn-primary',href:loginHref()},'登录并进入农场'));return}
+  let left=false
+  onPageLeave(()=>{left=true})
+  main.replaceChildren(loadingBox())
   try{
-    if(!document.getElementById('pets-styles'))document.head.append(h('link',{id:'pets-styles',rel:'stylesheet',href:'/pets.css'}))
-    const {mountValley}=await import('/valley.js');if(left)return
-    await mountValley(main,{user:S.me,api,onLeave:onPageLeave,navigate,toast})
-  }catch(e){if(!left)main.replaceChildren(emptyState('鱼鱼谷暂时打不开',e.message,h('button',{class:'btn',onclick:renderValleyRoute},'重试')))}
+    const farewell=await api('/farm/farewell'),{farewellPanel}=await import('/farm-farewell.js?v=472f7fbf')
+    if(left)return
+    const farewellBanner=farewellPanel(farewell,{reload:()=>route(),onLeave:onPageLeave})
+    if(farewell.closed){main.replaceChildren(farewellBanner);return}
+    const css=new Promise((resolve,reject)=>{
+      let link=document.getElementById('farm-styles')
+      if(link?.sheet){resolve();return}
+      link?.remove();link=h('link',{id:'farm-styles',rel:'stylesheet',href:'/farm.css?v=472f7fbf',onload:resolve,onerror:()=>{link.remove();reject(Error('农场样式加载失败'))}});document.head.append(link)
+    })
+    const [{mountFarm}]=await Promise.all([import('/farm.js?v=472f7fbf'),css])
+    if(left)return
+    mountFarm(main,{userId:S.me.id,onLeave:onPageLeave})
+    main.prepend(farewellBanner)
+  }catch{if(!left)main.replaceChildren(emptyState('农场暂时打不开','请重试，云端进度仍然保留',h('button',{class:'btn btn-primary',type:'button',onclick:renderFarmRoute},'重试')))}
 }
 async function renderNovelRoute(){
   let left=false;onPageLeave(()=>{left=true})
   onPageLeave(leaveNovelChat)
   main.replaceChildren(loadingBox())
   try{
-    if(!document.getElementById('novel-styles'))document.head.append(h('link',{id:'novel-styles',rel:'stylesheet',href:'/novels.css'}))
-    const {mountNovels}=await import('/novels.js');if(left)return
+    if(!document.getElementById('novel-styles'))document.head.append(h('link',{id:'novel-styles',rel:'stylesheet',href:'/novels.css?v=472f7fbf'}))
+    const {mountNovels}=await import('/novels.js?v=472f7fbf');if(left)return
     await mountNovels(main,{user:S.me,api,onLeave:onPageLeave,navigate,openChat:openNovelChat})
   }catch(e){if(!left)main.replaceChildren(emptyState('书房暂时无法打开',e.message,h('button',{class:'btn',onclick:renderNovelRoute},'重试')))}
 }
@@ -12007,11 +12175,26 @@ function renderNsfw(){
 }
 async function renderResourceRoute(){
   let left=false;onPageLeave(()=>{left=true});main.replaceChildren(loadingBox())
-  try{if(!document.getElementById('resource-styles'))document.head.append(h('link',{id:'resource-styles',rel:'stylesheet',href:'/resources.css'}));const {mountResources}=await import('/resources.js');if(!left)await mountResources(main,{user:S.me,api,h,onLeave:onPageLeave,navigate,mediaTray,toast,icon})}catch(e){if(!left)main.replaceChildren(emptyState('资源社区暂时无法打开',e.message,h('button',{class:'btn',onclick:renderResourceRoute},'重试')))}
+  try{if(!document.getElementById('resource-styles'))document.head.append(h('link',{id:'resource-styles',rel:'stylesheet',href:'/resources.css?v=472f7fbf'}));const {mountResources}=await import('/resources.js?v=472f7fbf');if(!left)await mountResources(main,{user:S.me,api,h,onLeave:onPageLeave,navigate,mediaTray,toast,icon})}catch(e){if(!left)main.replaceChildren(emptyState('资源社区暂时无法打开',e.message,h('button',{class:'btn',onclick:renderResourceRoute},'重试')))}
+}
+async function renderPetsRoute(){
+  let left=false;onPageLeave(()=>{left=true});main.replaceChildren(loadingBox())
+  try{
+    if(!document.getElementById('pets-styles'))document.head.append(h('link',{id:'pets-styles',rel:'stylesheet',href:'/pets.css?v=472f7fbf'}))
+    const {mountPets}=await import('/pets.js?v=472f7fbf');if(left)return
+    await mountPets(main,{user:S.me,api,h,onLeave:onPageLeave,navigate,toast})
+  }catch(e){if(!left)main.replaceChildren(emptyState('鱼鱼谷暂时打不开',e.message,h('button',{class:'btn',onclick:renderPetsRoute},'重试')))}
+}
+async function renderManorRoute(){let left=false;onPageLeave(()=>{left=true});main.replaceChildren(loadingBox());try{const {showManorFarewell}=await import('/manor-farewell.js?v=472f7fbf');if(left)return;await showManorFarewell(main,{h,api,user:S.me,navigate})}catch(e){if(!left)main.replaceChildren(emptyState('肥鱼庄园已下线',e.message,h('button',{class:'btn',onclick:renderManorRoute},'重试')))}}
+function renderMusicRoute(){main.replaceChildren(emptyState('音乐模块已下线','感谢使用。',h('button',{class:'btn',onclick:()=>navigate('/')},'返回图廊')))}
+async function renderHuancaiRoute(){
+ main.replaceChildren(emptyState('欢彩已下线','未开奖的彩票已全额退回 D币；本周保底和当日每日奖已提前开奖。收支明细可在「我的 · D币钱包」查看。',h('a',{href:'/me',class:'btn'},'去我的钱包')))
 }
 const ROUTES = [
+  [/^\/huancai$/, () => renderHuancaiRoute()],
   [/^\/music$/, () => renderMusicRoute()],
-  [/^\/(?:valley|pets)$/, () => renderValleyRoute()],
+  [/^\/pets$/, () => renderPetsRoute()],
+  [/^\/manor$/, () => renderManorRoute()],
   [/^\/novels(?:\/[-a-zA-Z0-9]+){0,2}$/, () => renderNovelRoute()],
   [/^\/nsfw(?:\/(?:new|settings|\d+))?$/, () => renderNsfw()],
   [/^\/$/, () => renderWall({})],
@@ -12020,6 +12203,7 @@ const ROUTES = [
   [/^\/(puzzles|tools)$/, () => navigate('/', { replace: true })],
   [/^\/me$/, () => renderMe()],
   [/^\/road$/, () => renderRoad()],
+  [/^\/farm$/, () => renderFarmRoute()],
   [/^\/dm(?:\/(?:\d+|new\/-?\d+))?$/, () => renderDmRoute()],
   [/^\/chat(?:\/(\d+))?$/, (m) => renderChat(Number(m[1]) || 0)],
   [/^\/u\/(.+)$/, (m) => renderWall({ author: decodeURIComponent(m[1]) })],
@@ -12034,14 +12218,16 @@ function navigate(path, { replace = false } = {}) {
 }
 
 function route() {
+  window.dispatchEvent(new Event('jh:route'))
+  if(/^\/(?:slime|arcade(?:\/(?:mole|rift))?)$/.test(location.pathname)){location.replace(location.pathname);return}
   document.dispatchEvent(new Event('bubbleeffectreset'))
   dockSync()
-  if ((location.pathname.startsWith('/dm')) && S.skin) {
+  if (((location.pathname.startsWith('/dm') && S.skin !== 'feishu') || (location.pathname==='/farm'||location.pathname==='/huancai')) && S.skin) {
     sessionStorage.setItem('dmReturnSkin',S.skin)
     setSkin('')
     return
   }
-  if (!location.pathname.startsWith('/dm') && !S.skin) {
+  if (!location.pathname.startsWith('/dm') && location.pathname!=='/farm' && location.pathname!=='/huancai' && !S.skin) {
     const previousSkin=sessionStorage.getItem('dmReturnSkin')
     if (previousSkin) { sessionStorage.removeItem('dmReturnSkin'); setSkin(previousSkin); return }
   }
@@ -12103,9 +12289,11 @@ function pageTitle(path, search) {
   const q = new URLSearchParams(search).get('q')
   const dec = (x) => { try { return decodeURIComponent(x) } catch { return x } }
   if (q) return `搜索：${q}`
-  if (path.startsWith('/novels')) return '小说'
   if (path.startsWith('/music')) return '音乐'
-  if (path.startsWith('/valley') || path.startsWith('/pets')) return '鱼鱼谷'
+  if (path.startsWith('/pets')) return '鱼鱼谷'
+  if (path.startsWith('/manor')) return '肥鱼庄园'
+  if (path.startsWith('/huancai')) return '欢彩'
+  if (path.startsWith('/novels')) return '小说'
   if (path.startsWith('/nsfw')) return 'RZP'
   if (path.startsWith('/series')) return '图集'
   if (path.startsWith('/s/')) return dec(path.slice(3)) + ' · 图集'
@@ -12115,6 +12303,7 @@ function pageTitle(path, search) {
   if (path.startsWith('/dm')) return '私信'
   if (path.startsWith('/me')) return '我的'
   if (path.startsWith('/road')) return '鞭打模块'
+  if (path.startsWith('/farm')) return '欢欢农场'
   if (path.startsWith('/u/')) return '@' + dec(path.slice(3))
   if (path.startsWith('/t/')) return '#' + dec(path.slice(3))
   return ''
@@ -12265,7 +12454,7 @@ async function noticeAdmin() {
           try { await api(`/admin/notices/${n.id}`, { method: 'PATCH', body: { active: !n.active } }); load(); loadNotices() } catch (e) { toast(e.message, 'err') }
         } }, n.active ? '停用' : '启用'),
         h('button', { class: 'btn-text small danger', type: 'button', onclick: async () => {
-          if (!confirm('删除这条公告？')) return
+          if (!await window.siteConfirm('删除这条公告？')) return
           try { await api(`/admin/notices/${n.id}`, { method: 'DELETE' }); load(); loadNotices() } catch (e) { toast(e.message, 'err') }
         } }, '删除'))))
     } catch (e) { list.replaceChildren(h('p', { class: 'muted' }, e.message)) }
@@ -12473,7 +12662,7 @@ async function memberAdmin(q0 = '') {
   const roleSel = (u, draw, open) => h('select', { class: 'input sm ma-role', 'aria-label': '身份', title: '身份', onchange: async (e) => {
     const v = e.target.value
     const what = v === 'admin' ? '管理员（全站管理）' : v === 'gadmin' ? '群管（只管群聊）' : '普通成员'
-    if (!confirm(`把 ${u.username} 设成${what}？`)) { e.target.value = u.role || ''; return }
+    if (!await window.siteConfirm(`把 ${u.username} 设成${what}？`)) { e.target.value = u.role || ''; return }
     try {
       const r = await api(`/admin/users/${u.id}/role`, { method: 'PUT', body: { role: v || null } })
       u.role = r.role ?? (v || null); u.is_admin = v === 'admin'
@@ -12496,7 +12685,7 @@ async function memberAdmin(q0 = '') {
           h('span', { class: 'gp-who' },
             h('strong', { class: nameCls(u) }, u.name || u.username),
             h('span', { class: 'muted' }, `@${u.username} · TL${u.trust_level} · ${u.posts} 帖 · ${u.comments} 评论`),
-            u.methods?.length ? h('span', { class: 'muted' }, u.methods.map(m => ({ email: '邮箱', google: 'Google', linuxdo: 'Linux.DO', dev: '测试账号' }[m] || m)).join(' / '), u.inviter ? ` · 邀请人 @${u.inviter}` : '') : null),
+            u.methods?.length ? h('span', { class: 'muted' }, u.methods.map(m => ({ email: '邮箱', google: 'Google', linuxdo: 'Linux.DO', dev: '测试账号', github: 'GitHub', password: '账号密码' }[m] || m)).join(' / '), u.inviter ? ` · 邀请人 @${u.inviter}` : '') : null),
           h('span', { class: 'ma-tags' }, u.owner ? h('span', { class: 'role-tag admin' }, '站长') : u.is_admin ? h('span', { class: 'role-tag admin' }, '管理员') : u.role === 'gadmin' ? h('span', { class: 'role-tag gadmin' }, '群管') : null,
             u.disabled ? h('span', { class: 'badge danger' }, '已停用') : null,
             u.silenced ? h('span', { class: 'badge' }, 'L站禁言') : null, ...limitTags(u.limits)),
@@ -12515,10 +12704,10 @@ async function memberAdmin(q0 = '') {
             } catch (err) { toast(err.message, 'err') }
           } }, [['', '炫彩：默认'], ['1', '炫彩：开'], ['0', '炫彩：关']].map(([v, l]) => h('option', { value: v, selected: String(u.fancy_set ?? '') === v }, l))),
           owner && !u.owner && roleSel(u, draw, open),
-          owner && !u.owner && h('button', { class: 'btn btn-ghost sm', type: 'button', onclick: async (e) => {
+          owner && !u.owner && h('button', { class: 'btn btn-ghost sm', type: 'button', onclick: async (e) => { const __askEl = e.currentTarget;
             const disabled = !u.disabled
-            if (!confirm(disabled ? `停用 ${u.username}？该用户的所有登录设备将退出，API 令牌将撤销。内容会保留。` : `重新启用 ${u.username}？用户需要重新登录。`)) return
-            const button = e.currentTarget; button.disabled = true
+            if (!await window.siteConfirm(disabled ? `停用 ${u.username}？该用户的所有登录设备将退出，API 令牌将撤销。内容会保留。` : `重新启用 ${u.username}？用户需要重新登录。`)) return
+            const button = __askEl; button.disabled = true
             try {
               const result = await api(`/admin/users/${u.id}/disabled`, { method: 'PUT', body: { disabled } })
               u.disabled = result.disabled; USERS.delete(u.username); draw(open)
@@ -12538,7 +12727,7 @@ async function memberAdmin(q0 = '') {
             span, reason,
             h('button', { class: 'btn btn-primary sm', type: 'button', onclick: async () => {
               const minutes = Number(span.value)
-              if (!minutes && !confirm(`永久${label} ${u.username}？之后可以随时解除。`)) return
+              if (!minutes && !await window.siteConfirm(`永久${label} ${u.username}？之后可以随时解除。`)) return
               try {
                 const r = await api(`/admin/users/${u.id}/limits`, { method: 'PUT', body: { kind: k, minutes, reason: reason.value } })
                 u.limits = [...u.limits.filter((l) => l.kind !== k), { kind: k, until: r.until, reason: reason.value.trim() || null }]
@@ -12614,8 +12803,8 @@ function meSettings(section, initialTrial=null) {
     ;(S.modal.clean??=[]).push(()=>controller.abort())
     avatarHost.querySelector('button').disabled=true
     try{
-      if(!document.querySelector('link[data-avatar-editor]'))document.head.append(h('link',{rel:'stylesheet',href:'/avatar-editor.css?v=20261019a','data-avatar-editor':'1'}))
-      const {createAvatarEditor}=await import('/avatar-editor.js?v=20261019a')
+      if(!document.querySelector('link[data-avatar-editor]'))document.head.append(h('link',{rel:'stylesheet',href:'/avatar-editor.css?v=472f7fbf','data-avatar-editor':'1'}))
+      const {createAvatarEditor}=await import('/avatar-editor.js?v=472f7fbf')
       if(controller.signal.aborted)return
       const editor=createAvatarEditor({h,api,current:S.me.avatar,name:S.me.name||S.me.username,signal:controller.signal,onSaved:url=>{
         const old=S.me.avatar;S.me.avatar=url;USERS.delete(S.me.username);refreshAvatar(h,old,url,S.me.name||S.me.username)
@@ -12645,7 +12834,7 @@ function meSettings(section, initialTrial=null) {
   const secs = [
     ['profile', '资料', 'user', () => h('section', { class: 'set-sec' }, h('h3', null, '资料'),
       avatarHost,
-      field('站内昵称', nick, '留空就用 linux.do 的名字'),
+      field('站内昵称', nick, '留空就用注册时的名字'),
       field('个签', bio),
       h('div', { class: 'set-save' }, h('button', { class: 'btn btn-primary sm', type: 'button', onclick: async () => {
         try {
@@ -12655,6 +12844,7 @@ function meSettings(section, initialTrial=null) {
           toast('资料已保存', 'ok')
         } catch (e) { toast(e.message, 'err') }
       } }, '保存资料')))],
+    ['miniapp','小程序隐私','user',()=>{const host=h('section',{class:'set-sec'},h('p',{class:'muted'},'正在读取隐私设置…'));import('/miniapp-privacy.js?v=472f7fbf').then(({createMiniappPrivacySettings})=>{if(host.isConnected)host.replaceChildren(createMiniappPrivacySettings({h,api,toast}))}).catch(()=>{host.replaceChildren(h('p',null,'设置加载失败，请重新打开。'))});return host}],
     ['deco', '装扮', 'sparkle', () => decoEditor(initialTrial)],
     ['appearance', '外观', 'palette', () => h('section', { class: 'set-sec' }, h('h3', null, '深浅色'), themeControl())],
     ['ai', 'AI 小伙伴', 'sparkle', () => imageAiSettings()],
@@ -12995,8 +13185,8 @@ function moyuSettings() {
     chk('bar', '顶栏显示今天摸鱼赚了多少钱'),
     h('div', { class: 'field' }, h('span', { class: 'field-label' }, '自己的纪念日 / 节日'), fl,
       h('div', { class: 'my-addf' }, fn, fd, h('button', { class: 'btn btn-ghost sm', type: 'button', onclick: addF }, '加上'))),
-    h('div', { class: 'row-end' }, h('button', { class: 'btn-text sm danger', type: 'button', onclick: () => {
-      if (!confirm('摸鱼计时清零？')) return
+    h('div', { class: 'row-end' }, h('button', { class: 'btn-text sm danger', type: 'button', onclick: async () => {
+      if (!await window.siteConfirm('摸鱼计时清零？')) return
       localStorage.removeItem('moyuT'); toast('清零了', 'ok')
     } }, '计时清零')),
     h('p', { class: 'muted sm' }, '这些数据（包括月薪）只存在这台设备的浏览器里，不会上传。网页在前台就算在摸鱼，开几个标签页也只算一份。'))
@@ -13151,5 +13341,11 @@ async function bootApplication() {
   loadNotices()
   if (fishPrefs().open && FISH_OK() && !S.skin) fishResume()
   window.dispatchEvent(new Event('appready'))
+  if (S.me) setTimeout(() => import('/account-login-prompt.js?v=472f7fbf').then((m) => m.maybePromptLoginPassword()).catch(() => {}), 2500)
+  // b13: 庄园已经下线，不再加载遗留悬浮入口。
+  if (S.me) setTimeout(() => import('/pet-float.js?v=472f7fbf').then((m) => m.mountPetFloat({ user: S.me, api, navigate, toast })).catch((e) => console.warn('站宠悬浮加载失败', e)), 1200)
 }
 void bootApplication().catch(error=>{console.error(error);main.replaceChildren(emptyState('页面加载失败','请重新加载当前页面。',h('button',{class:'btn btn-primary',onclick:()=>location.reload()},'重新加载')))})
+
+// 每次打开网站仅上报一次，不增加图片或游戏操作的统计写入。
+void fetch('/api/site-visit',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:'{}',keepalive:true}).catch(()=>{});

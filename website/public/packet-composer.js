@@ -1,6 +1,6 @@
-import {nativeCreateForm} from '/redpacket-native.js'
-import {packetFundingPanel} from '/packet-funding.js'
-import {dcoinIcon} from '/dcoin.js'
+import {nativeCreateForm} from '/redpacket-native.js?v=472f7fbf'
+import {packetFundingPanel} from '/packet-funding.js?v=472f7fbf'
+import {dcoinIcon} from '/dcoin.js?v=472f7fbf'
 
 export function createPacketComposer(options){
  const {h,api,group,userId,host,signal,uploadCover,onSent,onBusy,autoGuess,preview,makeClue,uploadClue}=options
@@ -28,7 +28,7 @@ export function createPacketComposer(options){
   let paymentProvider=funding.provider(),coin=paymentProvider==='coin52',unit=coin?'D币':'LDC'
   const field=(name,node,help)=>h('label',{class:'rpk-field'},h('span',null,name),node,help&&h('small',null,help)),input=(name,props={})=>h('input',{class:'rpk-input','aria-label':name,...props})
   const nonce=crypto.randomUUID(),info=h('p',{class:'rpk-status',role:'status'})
-  const amount=input('奖励总额 · '+unit,{inputmode:'decimal',placeholder:coin?'1–200000 整数':'0.01–2000',required:true}),count=input('奖励份数',{type:'number',min:1,max:100,value:1,required:true}),minutes=input('有效期 · 分钟',{type:'number',min:1,max:1440,value:1440})
+  const amount=input('奖励总额 · '+unit,{inputmode:'decimal',placeholder:coin?'1–2000000 整数':'0.01–2000',required:true}),count=input('奖励份数',{type:'number',min:1,max:100,value:1,required:true}),minutes=input('有效期 · 分钟',{type:'number',min:1,max:1440,value:1440})
   const kind=h('select',{class:'rpk-input','aria-label':'分配方式'},h('option',{value:'random'},'拼手气'),h('option',{value:'fixed'},'均分'))
   const phrase=h('textarea',{class:'rpk-input','aria-label':'复读内容',rows:3,maxlength:2000,required:mode==='phrase',placeholder:'1–1000字；领取者在群里发送完整复读内容'}),phraseCount=h('small',{class:'rpk-count'},'0 / 1000')
   phrase.addEventListener('input',()=>{phraseCount.textContent=[...phrase.value.normalize('NFC').trim()].length+' / 1000'})
@@ -59,7 +59,7 @@ export function createPacketComposer(options){
    }catch(e){info.textContent=e.message}finally{locked(false)}
   }},mode==='phrase'?field('复读内容',phrase,'在群里发送完整复读内容后领取。'):h('div',null,field('选张图',h('div',{class:'rpk-search-row'},search,find)),results,chosen,field('图中是什么',answer,'这就是领取条件，答对后获得本包奖励。'),field('给参与者的提示',prompt)),mode==='phrase'?phraseCount:null,
    h('div',{class:'rpk-inline-fields'},amountField,field('份数',count)),field('分配方式',kind),extra,h('div',{class:'rpk-create-footer'},info,submit))
-  file.addEventListener('change',async()=>{const f=file.files?.[0];if(!f||formBusy)return;locked(true);try{const {cropPacketCover}=await import('/redpacket-cover.js');const cropped=await cropPacketCover(f,{host,form,doc,h,signal});if(cropped&&!signal.aborted){cover=await uploadCover(cropped,signal);coverPreview.replaceChildren(h('img',{class:'rpk-cover',src:cover.url,alt:'红包封面'}),button('移除封面',()=>{cover=null;coverPreview.replaceChildren()}))}}catch(e){info.textContent=e.message}finally{locked(false);file.value=''}})
+  file.addEventListener('change',async()=>{const f=file.files?.[0];if(!f||formBusy)return;locked(true);try{const {cropPacketCover}=await import('/redpacket-cover.js?v=472f7fbf');const cropped=await cropPacketCover(f,{host,form,doc,h,signal});if(cropped&&!signal.aborted){cover=await uploadCover(cropped,signal);coverPreview.replaceChildren(h('img',{class:'rpk-cover',src:cover.url,alt:'红包封面'}),button('移除封面',()=>{cover=null;coverPreview.replaceChildren()}))}}catch(e){info.textContent=e.message}finally{locked(false);file.value=''}})
   async function findPosts(){
    const ticket=++searchSeq,q=search.value.trim();if(!q){results.textContent='输入帖子编号或关键词后找图';return}find.disabled=true;results.textContent='正在找图…'
    try{const id=q.match(/^(?:No\.|#)?(\d+)$/i),d=await api(id?`/memes/${id[1]}`:`/memes?q=${encodeURIComponent(q)}&limit=6&nsfw=0`);if(ticket!==searchSeq||signal.aborted)return
@@ -73,7 +73,7 @@ export function createPacketComposer(options){
    const windows=h('div',{class:'rpk-windows',role:'group','aria-label':'选择清晰窗口'},...Array.from({length:9},(_,i)=>{const b=button(String(i+1),()=>{const next=maskBits^(1<<i);if(next){maskBits=next;drawChosen()}});b.setAttribute('aria-pressed',String(!!(maskBits&(1<<i))));b.setAttribute('aria-label',`清晰区域 ${i+1}`);return b}))
    chosen.replaceChildren(h('strong',null,`已选 No.${selected.id}`),images,preview({u:selected.images[selectedIndex].u,nsfw:selected.sensitive||selected.spoiler,bits:maskBits,creator:true}),h('div',{class:'rpk-window-row'},h('p',{class:'rpk-help'},'点选清晰区域'),windows))
   }
-  form.setFunding=provider=>{paymentProvider=provider;coin=provider==='coin52';unit=coin?'D币':'LDC';amountField.firstChild.textContent='总额 · '+unit;amount.setAttribute('aria-label','红包总额');amount.placeholder=coin?'1–200000 整数':'0.01–2000'}
+  form.setFunding=provider=>{paymentProvider=provider;coin=provider==='coin52';unit=coin?'D币':'LDC';amountField.firstChild.textContent='总额 · '+unit;amount.setAttribute('aria-label','红包总额');amount.placeholder=coin?'1–2000000 整数':'0.01–2000'}
   form.footer=form.querySelector('.rpk-create-footer');submit.setAttribute('form',form.id)
   return form
  }

@@ -2,25 +2,72 @@ name = "meme-hall"
 main = "src/worker.ts"
 compatibility_date = "2025-09-01"
 compatibility_flags = ["nodejs_compat"]
-workers_dev = false
-preview_urls = false
 
-[assets]
-binding = "ASSETS"
-not_found_handling = "single-page-application"
-run_worker_first = ["/", "/activate", "/music", "/pets", "/valley", "/chat", "/chat/*", "/road", "/novels", "/novels/*", "/api/*", "/auth/*", "/img/*", "/ext", "/m/*", "/s/*", "/admin/ai", "/admin/flags", "/admin/invites", "/me/invites", "/me/account", "/me/account/email", "/me/account/password", "/login", "/register", "/reset", "/i/*", "/i", "/welcome"]
+[[services]]
+binding = "JEV_RELAY"
+service = "meme-hall-jev-relay"
+
+[[services]]
+binding = "GAME_HUB"
+service = "meme-guess"
 
 [triggers]
 crons = ["* * * * *", "0 1 * * *", "*/5 * * * *"]
 
+[[ratelimits]]
+name = "AUTH_RL"
+namespace_id = "1001"
+simple = { limit = 10, period = 60 }
+
+[assets]
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*", "/auth/*", "/img/*", "/ext", "/m/*", "/s/*", "/admin/ai", "/admin/flags", "/admin/invites", "/me/invites", "/me/account", "/me/account/email", "/me/account/password", "/login", "/register", "/reset", "/i/*", "/i", "/welcome", "/", "/activate", "/music", "/farm", "/chat", "/chat/*", "/road", "/novels", "/novels/*", "/slime", "/arcade", "/arcade/*", "/pets", "/manor", "/hb/*"]
+
 [[d1_databases]]
 binding = "DB"
-database_name = "meme-hall-local"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_name = "meme-hall"
+database_id = "00000000-0000-0000-0000-000000000000" # 换成自己的 D1
+
+[[d1_databases]]
+binding = "MINIAPP_SANDBOX_DB"
+database_name = "meme-hall-miniapp-sandbox"
+database_id = "00000000-0000-0000-0000-000000000000" # 换成自己的 D1
+
+[[d1_databases]]
+binding = "MINIAPP_DB"
+database_name = "meme-hall"
+database_id = "00000000-0000-0000-0000-000000000000" # 换成自己的 D1
 
 [[r2_buckets]]
 binding = "BUCKET"
-bucket_name = "meme-hall-local-images"
+bucket_name = "meme-hall-images"
 
 [vars]
-REGISTER_MODE = "closed"
+# 在 https://connect.linux.do 申请应用，回调地址填 <你的域名>/auth/callback
+LINUXDO_CLIENT_ID = "" # https://connect.linux.do 申请
+# 管理员（linux.do 用户名，逗号分隔）
+ADMIN_USERNAMES = ""
+# 2026-10-12 只读核验，站长权限仅按固定 ID；旧用户名继续作为注册保留词。
+ADMIN_USER_IDS = "" # 站长账号 ID，登录后从本地数据库查
+REGISTER_MODE = "open"
+# 发图所需最低信任等级
+MIN_POST_TRUST_LEVEL = "1"
+# 频率限制（发太快提示「慢一点」等），填 "on" 才打开；人少先关着
+# RATE_LIMIT = "on"
+# 允许代理的外链图域名（历史图兜底用，只走边缘缓存，不落存储）
+EXT_HOSTS = "linux.do,ldstatic.com"
+
+# 机密：npx wrangler secret put LINUXDO_CLIENT_SECRET
+
+GUESS_FISH_ENABLED = "1"
+GUESS_FISH_CUSTODIAN_ID = ""
+GUESS_SIMULATED_LDC = "0"
+
+# 小程序（官方渠道 + 沙箱）与图廊小程序
+MINI_APP_ID = ""
+MINI_APP_JWKS = "{\"keys\":[]}"
+MINI_APP_PRODUCTION = "off"
+GALLERY_APP_ID = ""
+# 鱼鱼谷岛钟起点：发布时必须保持不变（2026-11-09 b12 起）
+B12_CLOCK_START = "" # 鱼鱼谷岛钟起点：首次部署填当前 Unix 秒数，之后不要改

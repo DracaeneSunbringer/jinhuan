@@ -1,2 +1,14 @@
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+/pets/dsh/animations/*
+  Cache-Control: public, max-age=604800
+/pets/ark/m/*
+  Cache-Control: public, max-age=604800
+/pets/vpet/sheets/*
+  Cache-Control: public, max-age=604800
+/vendor/*
+  Cache-Control: public, max-age=604800
+/mini-cdn/*
+  Access-Control-Allow-Origin: https://linux.do
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff

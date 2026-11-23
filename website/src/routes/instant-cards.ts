@@ -49,7 +49,7 @@ instantCards.get(`${base}/records`,async c=>{
 instantCards.post(`${base}/pools`,async c=>{
  sameOrigin(c);const u=needUser(c);if(!isOwner(c,u))fail(403,'仅站长能管理奖池')
  const b=await boundedJson(c,1024),title=raffleTitleId(b.title),t=now()
- if(!title||(title==='newcomer'||title==='oldfarmer')||!raffleTitleEnabled(title)||![0,1].includes(Number(b.active))||!Number.isInteger(b.revision)||Number(b.revision)<0)fail(400,'奖池配置无效')
+ if(!title||(title==='newcomer'||(title as string)==='oldfarmer')||!raffleTitleEnabled(title)||![0,1].includes(Number(b.active))||!Number.isInteger(b.revision)||Number(b.revision)<0)fail(400,'奖池配置无效')
  const result=Number(b.revision)===0?await c.env.DB.prepare(`INSERT OR IGNORE INTO instant_card_pools(title,owner_id,active,created_at,updated_at) VALUES(?,?,?,?,?)`).bind(title,u.id,Number(b.active),t,t).run():await c.env.DB.prepare('UPDATE instant_card_pools SET active=?,revision=revision+1,updated_at=? WHERE title=? AND owner_id=? AND revision=?').bind(Number(b.active),t,title,u.id,Number(b.revision)).run()
  if(!result.meta.changes)fail(409,'奖池已被更新或属于其他站长，请刷新')
  return c.json({ok:true})

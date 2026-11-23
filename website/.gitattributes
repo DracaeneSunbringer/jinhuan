@@ -1,0 +1,3 @@
+* text=auto eol=lf
+# Preserve the downloaded CLDR bytes used by the provenance SHA256 records.
+research/emoji-search/source/*.json -text

@@ -15,7 +15,7 @@ import {winrateView} from './winrate'
 import {characterMatches} from './character-matches'
 import {canManageAi} from '../services/auth'
 import {styleRules,styleMatches} from '../games/style-rules'
-import {guessAdmissionSql,rejectPendingGuess} from './submission-guard'
+import {guessAdmissionSql,rejectPendingGuess} from '../legacy/live-app.js'
 
 type Entry={id:number;body:string;user_id:number;name:string;avatar:string|null;created_at:number;updated_at:number;deleted:number;ai_text:string|null;ai_score:number|null;ai_status:string|null}
 type SummaryEntry={id:string;user_id:number;question:string;verdict:string;score:number;created_at:number;avatar:string|null;users_json:string;participant_count:number;review_state:string|null}

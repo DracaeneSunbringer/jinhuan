@@ -5,7 +5,7 @@ import {Shell} from './auth'
 
 type Confirmation={valid:boolean;source:{id:number;username:string};target:{id:number;username:string};providers:string[]}
 type RequestError=Error&{status?:number;code?:string}
-const methods:Record<string,string>={google:'Google',linuxdo:'Linux.DO',email:'邮箱与密码'}
+const methods:Record<string,string>={google:'Google',linuxdo:'Linux.DO',email:'邮箱与密码',github:'GitHub',password:'账号密码'}
 export function MergeConfirm({token}:{token:string}){
  const client=useQueryClient(),flight=useRef(false),[password,setPassword]=useState(''),[finished,setFinished]=useState<'merged'|'cancelled'|null>(null)
  const check=useQuery({queryKey:['merge',token],queryFn:()=>api<Confirmation>('/api/me/merge?token='+encodeURIComponent(token)),retry:false,refetchOnWindowFocus:false,enabled:!finished})

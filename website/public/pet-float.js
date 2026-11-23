@@ -1,5 +1,5 @@
-import { CARE, petLevels, DAILY_XP_CAP, initPetStore, petStore, petState, subscribePet, carePet, petInteract, companionTick, flushPet, floatPrefs, setFloatPrefs, petSrc, currentPet, setActivePet, petCatalog, unlocked, hasPerk, petName, xpToNext } from '/pet-store.js'
-import { createPlayerFor } from '/pet-player.js'
+import { CARE, petLevels, DAILY_XP_CAP, initPetStore, petStore, petState, subscribePet, carePet, petInteract, companionTick, flushPet, floatPrefs, setFloatPrefs, petSrc, currentPet, setActivePet, petCatalog, unlocked, hasPerk, petName, xpToNext } from '/pet-store.js?v=472f7fbf'
+import { createPlayerFor } from '/pet-player.js?v=472f7fbf'
 
 // 全站悬浮站宠：把 dsh-pet 桌宠搬进网页。只悬浮宠物本身（透明视频），透明区域不挡页面，只有身体能点。
 // 左键 = 互动（摸摸），右键 / 手机长按 = 菜单。可以放在屏幕任何地方；没手动放过时每次随机出现。
@@ -71,7 +71,7 @@ export async function mountPetFloat({ user, api, navigate, toast }) {
   const inGroup = (group) => open(actions.filter((item) => item.group === group))
   const clicks = () => open(roleList('click')).length ? open(roleList('click')) : inGroup('click')
   const named = (names) => open(names.map((n) => byName.get(n)))
-  if (!document.getElementById('pet-float-styles')) document.head.append(Object.assign(document.createElement('link'), { id: 'pet-float-styles', rel: 'stylesheet', href: '/pet-float.css' }))
+  if (!document.getElementById('pet-float-styles')) document.head.append(Object.assign(document.createElement('link'), { id: 'pet-float-styles', rel: 'stylesheet', href: '/pet-float.css?v=472f7fbf' }))
 
   const node = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e }
   const root = node('div', 'pf-root')
@@ -508,7 +508,7 @@ export async function mountPetFloat({ user, api, navigate, toast }) {
       item('⚔', '大肥鱼擂台', () => {
         closeMenu()
         // 已经在站宠屋就直接打开；在别的页面先进站宠屋（#battle 会自动打开擂台）。
-        if (location.pathname === '/pets') import('/pet-battle.js').then(({ openBattle }) => openBattle({ api, toast, user })).catch((e) => toast?.(e.message || '擂台加载失败', 'err'))
+        if (location.pathname === '/pets') import('/pet-battle.js?v=472f7fbf').then(({ openBattle }) => openBattle({ api, toast, user })).catch((e) => toast?.(e.message || '擂台加载失败', 'err'))
         else navigate('/pets#battle')
       }),
       item('🏠', '站宠屋', () => { closeMenu(); navigate('/pets') }),

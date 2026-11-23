@@ -1,0 +1,38 @@
+node_modules/
+.wrangler/
+.build/
+dist/
+web/dist/
+.worktrees/
+
+# 本地密钥，不入库
+.dev.vars
+.dev-online-key.txt
+
+# 数据库备份
+backup-*.sql
+
+# 专属装扮设计的群聊原始片段仅用于本地分析
+data/raw/personal-decorations-20261014/
+data/raw/personal-decorations-v2-20261014/
+data/processed/personal-decorations-v2-20261014/
+research/personal-decorations-v2-20261014/design-directions.json
+
+# 大素材不入库：构建前需要在本地 public/ 里准备好（见 docs/consolidation-plan.md）
+public/pets/
+public/novel-data/
+public/mini-cdn/
+public/stickers/**/*.webp
+public/stickers/**/*.png
+public/stickers/**/*.gif
+public/assets/**/*.webp
+public/assets/**/*.png
+public/assets/**/*.gif
+public/assets/**/*.jpg
+public/assets/**/*.mp4
+public/wallpapers/**/*.webp
+public/xs/art/
+
+# 本地构建比对产物
+.build/
+node_modules

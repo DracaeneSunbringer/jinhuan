@@ -1,6 +1,6 @@
 const activePanels=new WeakMap()
 function ui(doc,{floating=false}={}){
- if(!doc.getElementById('random-image-css')){const css=doc.createElement('link');css.id='random-image-css';css.rel='stylesheet';css.href='/random-image.css';doc.head.append(css)}
+ if(!doc.getElementById('random-image-css')){const css=doc.createElement('link');css.id='random-image-css';css.rel='stylesheet';css.href='/random-image.css?v=472f7fbf';doc.head.append(css)}
  const h=(tag,attrs={},...children)=>{const e=doc.createElement(tag);for(const [k,v]of Object.entries(attrs)){if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(k==='class')e.className=v;else if(v!==false&&v!=null)e.setAttribute(k,v===true?'':v)}for(const child of children.flat())if(child!=null)e.append(child);return e}
  const dialog=h('dialog',{class:'random-image-dialog'+(floating?' ri-floating':'')}),body=h('div',{class:'random-image-body'}),close=h('button',{type:'button',class:'ri-close','aria-label':'关闭',onclick:()=>dialog.close()},'×');dialog.append(close,body);doc.body.append(dialog);floating?dialog.show():dialog.showModal();return{h,dialog,body,close}
 }

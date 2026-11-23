@@ -1,7 +1,7 @@
-import {appendBubbleDetail} from '/title-bubble-details.js'
-import {installBubbleBursts} from '/title-bubble-bursts.js'
-import {initializeShiguang} from '/shiguang-host.js'
-import {attachOwner52} from '/owner52.js'
+import {appendBubbleDetail} from '/title-bubble-details.js?v=472f7fbf'
+import {installBubbleBursts} from '/title-bubble-bursts.js?v=472f7fbf'
+import {initializeShiguang} from '/shiguang-host.js?v=472f7fbf'
+import {attachOwner52} from '/owner52.js?v=472f7fbf'
 export function initializeTitleEffects(doc=document){installBubbleBursts(doc);initializeShiguang(doc)}
 // Visual identity is independent of ownership, pool availability and level rules.
 const families={court:['lace','blacksilk','whitedragon'],ocean:['deepseek','deepseekupgrade','maid','whalepunch','whalebuddy'],weapon:['blade','spear','sword','halberd','muscle','railcannon','chickengun'],arcane:['gpt','gemini','electric','moon','star'],meadow:['newcomer','mona','claude','snow','wind','flower','sun','cloud'],prank:['giant','worship','nightdevil','rascal','weirdo','loli']}

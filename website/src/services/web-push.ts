@@ -52,7 +52,7 @@ export async function runWebPush(env:Env,t:number){
     else{
      const details=webpush.generateRequestDetails({endpoint:device.endpoint,keys:{p256dh:device.p256dh,auth:device.auth}},
       JSON.stringify({body:'群聊有新消息',url:'/chat/'+unread.group_id,binding:await sha256(device.session_id+device.id)}),
-      {vapidDetails:{subject:'https://jinhuan.example',publicKey:env.PUSH_VAPID_PUBLIC_KEY!,privateKey:env.PUSH_VAPID_PRIVATE_KEY!},TTL:300,urgency:'normal',contentEncoding:'aes128gcm'})
+      {vapidDetails:{subject:'https://52dmeme.com',publicKey:env.PUSH_VAPID_PUBLIC_KEY!,privateKey:env.PUSH_VAPID_PRIVATE_KEY!},TTL:300,urgency:'normal',contentEncoding:'aes128gcm'})
      const response=await fetch(details.endpoint,{method:details.method,headers:details.headers,body:details.body as BodyInit,redirect:'manual',signal:AbortSignal.timeout(5000)})
      status=response.status
      await response.body?.cancel()

@@ -1,4 +1,4 @@
-const origin=''
+const origin=location.hostname==='cc.52dmeme.com'?'https://52dmeme.com':''
 let entries=[],loading=null,loadedAt=0
 const validId=id=>typeof id==='string'&&/^[a-z0-9][a-z0-9-]{2,47}$/.test(id)
 export function communityClass(id,kind){return validId(id)&&['bubble','title','badge','reply'].includes(kind)?` cskin-${kind} cskin-${kind}-${id}`:''}

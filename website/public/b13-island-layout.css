@@ -1,0 +1,2 @@
+/* Preserve the deployed island palette and art; remove only the extra page extent. */
+.page:has(> .pets-hub.b13-island-layout){padding-bottom:0}

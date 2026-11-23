@@ -6,18 +6,18 @@
 
 export const C = {
   ink: '#1b1424',
-  g0: '#1f4a34', g1: '#2b6640', g2: '#3a854a', g3: '#57a553', g4: '#86c766', g5: '#b9e08a',
+  g0: '#354b32', g1: '#4d6440', g2: '#647c4d', g3: '#849951', g4: '#a9b86b', g5: '#c6ce91',
   d0: '#4f3424', d1: '#6e4a32', d2: '#8d6443', d3: '#ad8259', d4: '#c9a274',
   s0: '#3c261c', s1: '#553425', s2: '#6c4330', s3: '#85563c', s4: '#9e6a4a',
   wt0: '#2a1a14', wt1: '#3b261c',
-  w0: '#163463', w1: '#1f4c86', w2: '#2a6aa9', w3: '#4690cc', w4: '#8acbec', w5: '#e4f6ff',
+  w0: '#254956', w1: '#396e7c', w2: '#4d8fa5', w3: '#70aebb', w4: '#a7ced1', w5: '#e5eeeb',
   a0: '#b38a55', a1: '#cfa86d', a2: '#e3c48b', a3: '#f1dcab', a4: '#fbefd2',
   r0: '#2d2a3a', r1: '#47455a', r2: '#666479', r3: '#8a889c', r4: '#b4b2c3', r5: '#dcdbe6',
   b0: '#3a2216', b1: '#5a361f', b2: '#7b4c2a', b3: '#9d6838', b4: '#c08a51', b5: '#dcae75',
   rf0: '#4e1a26', rf1: '#7c2834', rf2: '#a93a43', rf3: '#d0594f', rf4: '#ec8a6a',
   tl0: '#173f4a', tl1: '#24606b', tl2: '#35868c', tl3: '#55aea8', tl4: '#8fd5c4',
   wl0: '#9a8f80', wl1: '#c3b8a5', wl2: '#e2d9c6', wl3: '#f6f0e2',
-  l0: '#173a26', l1: '#225534', l2: '#337543', l3: '#4f9a4c', l4: '#7cc15e', l5: '#b2e07f',
+  l0: '#354b32', l1: '#4c633c', l2: '#648044', l3: '#879950', l4: '#a7b568', l5: '#c4ce91',
   fy: '#ffd75e', fp: '#ff8fb1', fw: '#fff4ea', fv: '#b48cff', fr: '#ff5d5d',
   gold: '#ffcf4a', gold2: '#e89b23', glow: '#ffe9a8',
 }
@@ -148,7 +148,9 @@ const RIPE = {
   pumpkin: ['................', '.......NL.......', '.......NlL......', '...OOOOOOOOOO...', '..OOyOOOOOOyOO..', '.OOyOOOOOOOOyOO.', '.OOOOOOOOOOOOOO.', '.OOyOOOOOOOOyOO.', '.OOOOOOOOOOOOOO.', '..OOyOOOOOOyOO..', '...OOOOOOOOOO...', '................', '................'],
   cabbage: ['................', '................', '....lllllll.....', '...llLlllLll....', '..lLlllLlllLl...', '..llLlzzzlLll...', '..lLlzlllzlLl...', '..llLzlllzLll...', '...lLlzzzlLl....', '....lllLlll.....', '......LLL.......', '.......d........', '................'],
 }
-export const CROP = Object.fromEntries(Object.entries(RIPE).map(([k, v]) => [k, [spr(SEEDLING), spr(SPROUT), spr(GROW), spr(v)]]))
+// 第 3 阶段：绿苗上长出缩小、半透明的果实（11-07）
+const growing = (base, ripe) => { const c = canvas(base.width, base.height), g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(base, 0, 0); g.globalAlpha = 0.9; const w = Math.round(ripe.width * 0.62), h = Math.round(ripe.height * 0.62); g.drawImage(ripe, Math.round((base.width - w) / 2), base.height - h - 1, w, h); return c }
+export const CROP = Object.fromEntries(Object.entries(RIPE).map(([k, v]) => [k, [spr(SEEDLING), spr(SPROUT), growing(spr(GROW), spr(v)), spr(v)]]))
 export const CROP_WITHER = spr(WITHER)
 // ---------- 动物（两帧） ----------
 const AN = {
@@ -209,45 +211,13 @@ const ITEM = {
 }
 for (const [k, v] of Object.entries(RIPE)) if (!ITEM[k]) ITEM[k] = v.slice(2, 12).map((r) => r.slice(1, 15))
 export const ITEM_ROWS = ITEM
-const packItems = new Map(), packUrls = new Map()
-export const itemSpr = (id) => packItems.get(id) || spr(ITEM[id] || ITEM.seed)
-export function itemIcon(id, scale = 3) {
-  if (!packItems.has(id)) return iconUrl(ITEM[id] || ITEM.seed, scale)
-  const key = id + ':' + scale
-  if (!packUrls.has(key)) {
-    const img = packItems.get(id), c = canvas(img.width * scale, img.height * scale), g = c.getContext('2d')
-    g.imageSmoothingEnabled = false; g.drawImage(img, 0, 0, c.width, c.height); packUrls.set(key, c.toDataURL())
-  }
-  return packUrls.get(key)
-}
-
-let packPromise = null, packTree = null
-// Only load on entering the valley; callers may provide packaged Blob URLs in a mini-app.
-export function loadArt(resolveAsset = (path) => path) {
-  if (packPromise) return packPromise
-  packPromise = Promise.all(['tiny-farm', 'tiny-town'].map(async (name) => {
-    const url = await resolveAsset('/pets/dsh/isle/art/' + name + '.png')
-    return new Promise((resolve, reject) => {
-      const image = new Image(); image.onload = () => resolve(image); image.onerror = () => reject(Error('像素素材加载失败')); image.src = url
-    })
-  })).then(([farm, town]) => {
-    const tile = (image, index, w = 16, h = 16) => {
-      const c = canvas(w + 2, h + 2), g = c.getContext('2d')
-      g.drawImage(image, (index % 12) * 16, Math.floor(index / 12) * 16, w, h, 1, 1, w, h)
-      return c
-    }
-    // Growth stages come from the same pack, so sprouts and ripe crops share the same anchor.
-    for (const [id, stages] of Object.entries({ carrot: [4,5,6,8], turnip: [16,17,18,20], corn: [28,29,30,32], tomato: [40,41,42,44], cabbage: [52,53,54,56], wheat: [64,65,66,68] })) CROP[id] = stages.map((n) => tile(farm, n))
-    for (const [id, index] of Object.entries({ carrot: 6, turnip: 18, corn: 32, tomato: 44, cabbage: 56, wheat: 68, egg: 125, feed: 74, seed: 9, coffee: 123 })) packItems.set(id, tile(farm, index))
-    for (const [id, index] of Object.entries({ chicken: 122, cow: 121 })) {
-      const a = tile(farm, index), b = canvas(18, 18), g = b.getContext('2d'); g.drawImage(a, 0, 1)
-      ANIMAL[id] = [a, b]
-    }
-    packTree = tile(town, 4, 16, 32)
-    return true
-  }).catch((error) => { packPromise = null; console.warn('使用内置像素素材：', error.message); return false })
-  return packPromise
-}
+export const itemSpr = (id) => spr(ITEM[id] || ITEM.seed)
+// 11-07 贴图包：有贴图的物品优先用贴图图标
+let packIcon = null
+export const setPackIcons = (fn) => { packIcon = fn }
+export const canvasIcon = (c) => c.toDataURL()
+const ICON_ALIAS = {"salad":"carrot","flour":"wheat","jam":"strawberry","ketchup":"tomato","popcorn":"corn","wine":"grape","pie":"pumpkin","kimchi":"cabbage","mayo":"duckegg","cheese":"milk","sweater":"wool","ironbar":"iron","ingot":"gold","jewel":"ruby","crown":"diamond","bomb":"coal","guard1":"sardine","guard2":"ruby","guard3":"emerald","cloak":"amethyst","sack":"wool"}
+export const itemIcon = (id, scale = 3) => { const own = packIcon && packIcon(id); if (own) return own; if (Object.hasOwn(ICON_ALIAS, id)) id = ICON_ALIAS[id]; else if (typeof id === 'string' && id.startsWith('sd_')) id = 'seed'; return (packIcon && packIcon(id)) || iconUrl(ITEM[id] || ITEM.seed, scale) }
 
 // ---------- 程序化画笔 ----------
 function painter(ctx, seed = 7) {
@@ -263,27 +233,30 @@ function painter(ctx, seed = 7) {
   return P
 }
 // 一片树冠：几团圆 + 阴影 + 高光点
-function tree(ctx, x, y, seed, kind = 0) {
-  if (packTree && arguments[4] === 0) { ctx.drawImage(packTree, x, y - 4); return }
+function tree(ctx, x, y, seed, kind = 0, season = 0) {
   const P = painter(ctx, seed)
   P.ellipse(x + 8, y + 27, 9, 3, 'rgba(10,20,10,.35)')
   P.rect(x + 6, y + 16, 4, 11, C.b1); P.rect(x + 7, y + 16, 2, 11, C.b2); P.px(x + 6, y + 26, C.b0); P.px(x + 9, y + 26, C.b0)
-  const ramp = kind === 1 ? [C.l0, '#5a3a5e', '#8a4f7a', '#c46f9a', '#f2a3c3'] : kind === 2 ? [C.l0, '#5e4520', '#a0662a', '#d58e33', '#f4be5c'] : [C.l0, C.l1, C.l2, C.l3, C.l4]
+  if(season===3){
+    for(const[dx,dy,len]of[[-1,-1,7],[1,-1,6],[-1,-2,4],[1,-2,4]])for(let k=0;k<len;k++){P.rect(x+7+dx*k,y+18+dy*k,2,2,C.b1);if(k>1)P.px(x+7+dx*k,y+17+dy*k,'#eaf0ef')}
+    P.rect(x+5,y+25,7,2,'#d3e1e6');P.rect(x+6,y+24,5,1,'#f3f5ee');return;
+  }
+  const ramp = season===2?['#604332','#875a35','#a8783f','#c2934d','#dbc17b']:season===1?['#284b38','#355d4a','#4d7850','#699451','#91af67']:kind===1?['#69494b','#9d6d71','#c18c85','#dfb3a1','#f0d1b5']:[C.l0,C.l1,C.l2,C.l3,C.l4]
   const blobs = [[8, 9, 8], [3, 12, 5], [13, 12, 5], [8, 4, 5], [4, 6, 4], [12, 6, 4]]
   for (const [bx, by, r] of blobs) P.disc(x + bx, y + by + 1, r, ramp[0])
   for (const [bx, by, r] of blobs) P.disc(x + bx, y + by, r - 1, ramp[1])
   for (const [bx, by, r] of blobs) P.disc(x + bx - 1, y + by - 1, r - 2, ramp[2])
   for (const [bx, by, r] of blobs) if (r > 3) P.disc(x + bx - 2, y + by - 2, r - 4, ramp[3])
   for (let i = 0; i < 9; i++) P.px(x + 3 + Math.floor(P.R() * 10), y + 2 + Math.floor(P.R() * 10), ramp[4])
-  if (kind === 0 && P.R() < 0.5) for (let i = 0; i < 3; i++) { const ax = x + 3 + Math.floor(P.R() * 10), ay = y + 5 + Math.floor(P.R() * 9); P.px(ax, ay, C.fr); P.px(ax + 1, ay, '#c23a3a') }
+  if (kind === 0 && season!==0 && P.R() < 0.5) for (let i = 0; i < 3; i++) { const ax = x + 3 + Math.floor(P.R() * 10), ay = y + 5 + Math.floor(P.R() * 9); P.px(ax, ay, C.fr); P.px(ax + 1, ay, '#c23a3a') }
 }
-function bush(ctx, x, y, seed) {
-  const P = painter(ctx, seed)
+function bush(ctx, x, y, seed, season=0) {
+  const P = painter(ctx, seed),leaf=season===3?["#667b79","#8ca4a4","#b7cacc","#d9e5e6","#f3f4ec"]:season===2?["#5d4734","#86633c","#a78647","#c3a361","#ded09c"]:[C.l0,C.l1,C.l2,C.l3,C.l4]
   P.ellipse(x + 7, y + 11, 7, 2, 'rgba(10,20,10,.3)')
-  P.disc(x + 4, y + 7, 4, C.l1); P.disc(x + 10, y + 7, 4, C.l1); P.disc(x + 7, y + 5, 4, C.l1)
-  P.disc(x + 4, y + 6, 3, C.l2); P.disc(x + 10, y + 6, 3, C.l2); P.disc(x + 7, y + 4, 3, C.l3)
-  P.px(x + 6, y + 2, C.l4); P.px(x + 3, y + 4, C.l4); P.px(x + 10, y + 4, C.l4)
-  if (P.R() < 0.6) { const c = [C.fp, C.fw, C.fy][Math.floor(P.R() * 3)]; P.px(x + 5, y + 5, c); P.px(x + 9, y + 3, c); P.px(x + 11, y + 7, c) }
+  P.disc(x + 4, y + 7, 4, leaf[1]); P.disc(x + 10, y + 7, 4, leaf[1]); P.disc(x + 7, y + 5, 4, leaf[1])
+  P.disc(x + 4, y + 6, 3, leaf[2]); P.disc(x + 10, y + 6, 3, leaf[2]); P.disc(x + 7, y + 4, 3, leaf[3])
+  P.px(x + 6, y + 2, leaf[4]); P.px(x + 3, y + 4, leaf[4]); P.px(x + 10, y + 4, leaf[4])
+  if (season!==3 && P.R() < 0.6) { const c = [C.fp, C.fw, C.fy][Math.floor(P.R() * 3)]; P.px(x + 5, y + 5, c); P.px(x + 9, y + 3, c); P.px(x + 11, y + 7, c) }
 }
 function rockSmall(ctx, x, y, seed) {
   const P = painter(ctx, seed)
@@ -294,25 +267,71 @@ function rockSmall(ctx, x, y, seed) {
 export const TILE = 16
 const GRASS = [
   [C.g0, C.g1, C.g2, C.g3, C.g4, C.g5], // 春
-  ['#1d4a2c', '#24633a', '#2f7d40', '#4a9c45', '#76bf55', '#a9dc72'], // 夏：更深更绿
+  ['#294a38','#355d4a','#4e7750','#618b53','#88aa6a','#acc68a'], // 夏：更深更绿
   ['#3f4420', '#5c6229', '#7a7a34', '#98923f', '#bcae58', '#ddcd88'], // 秋：橄榄金
   ['#7d8aa3', '#a7b4c8', '#c8d3e2', '#e4ebf3', '#f4f8fc', '#ffffff'], // 冬：积雪
 ]
-export function bakeTerrain(map, W, H, seed = 20261104, season = 0) {
+// Native static terrain baking. Visual edges never change the walkability map.
+function b12TerrainDetail(ctx,map,W,H,seed,season,weather){
+ const P=painter(ctx,seed^0x5268),T=16,winter=season===3;
+ const at=(x,y)=>x<0||y<0||x>=W||y>=H?'~':map[y][x];
+ const sides=[[0,-1],[1,0],[0,1],[-1,0]];
+ const strip=(X,Y,side,k,len,width,color)=>{
+  if(side===0)P.rect(X+k,Y,len,width,color);
+  else if(side===1)P.rect(X+T-width,Y+k,width,len,color);
+  else if(side===2)P.rect(X+k,Y+T-width,len,width,color);
+  else P.rect(X,Y+k,width,len,color);
+ };
+ // Shallows follow the existing shoreline; an inset highlight softens tile steps.
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+  const t=at(x,y),X=x*T,Y=y*T;
+  if(t==='~'){
+   const pond=x>=14&&x<=21&&y>=19&&y<=25;
+   if(pond){P.rect(X,Y,T,T,winter?'#749598':'#477e7c');P.noise(X,Y,T,T,[winter?'#86a7ab':'#538c88'],.012)}
+   for(let i=0;i<4;i++){const[dx,dy]=sides[i],land=at(x+dx,y+dy);if(land==='~')continue;
+    for(let k=0;k<T;k+=4){const d=3+Math.floor(P.R()*3);strip(X,Y,i,k,4,d+3,pond?'#649b92':winter?'#84adb4':'#6aa4ac');strip(X,Y,i,k,4,d,pond?'#83b4a0':winter?'#bfd0cb':'#94c2ba');if(land===','&&k%8===0)strip(X,Y,i,k,3,1,'#e6e8d8')}
+   }
+   if(P.R()<.10){P.rect(X+4,Y+9,5,1,pond?'#81b3a6':'#7db4bd');P.px(X+10,Y+10,pond?'#639e96':'#5b99a8')}
+   if(pond&&winter&&P.R()<.28){P.rect(X+4,Y+7,7,1,'#a7c1c6');P.rect(X+5,Y+8,4,1,'#95b2b9')}
+  }
+  if(t===','){
+   for(let i=0;i<4;i++){const[dx,dy]=sides[i],n=at(x+dx,y+dy);if(n==='~')for(let k=0;k<T;k+=4){strip(X,Y,i,k,4,4+Math.floor(P.R()*3),winter?'#a5b7b8':'#bcae8b');strip(X,Y,i,k,4,2,winter?'#c3ceca':'#d3c9aa')}
+    if(winter&&n==='.')for(let k=0;k<T;k+=4){strip(X,Y,i,k,4,6+Math.floor(P.R()*5),'#d7e0e3');strip(X,Y,i,k,4,3,'#edf0ec')}
+   }
+   if(P.R()<.09){const c=winter?'#8a9b9b':'#a6967c';P.rect(X+7,Y+9,3,2,c);P.rect(X+7,Y+8,2,1,winter?'#d0d7d4':'#e3d5b5')}
+  }
+  if(t==='='){
+   const edge=winter?'#9dada7':'#ac9871',rim=winter?'#dce4df':'#c5b28a';
+   for(let i=0;i<4;i++){const[dx,dy]=sides[i];if(at(x+dx,y+dy)!=='.')continue;for(let k=0;k<T;k+=4){strip(X,Y,i,k,4,2+Math.floor(P.R()*2),edge);if(k%8===0)strip(X,Y,i,k,3,1,rim)}}
+   const horizontal=at(x-1,y)==='='&&at(x+1,y)==='=',vertical=at(x,y-1)==='='&&at(x,y+1)==='=';
+   if(horizontal&&!vertical){P.rect(X+2,Y+6,11,1,weather===1?'#a28b6d':'#c3ac86');P.rect(X+4,Y+11,8,1,'#ab9270')}
+   if(vertical&&!horizontal){P.rect(X+6,Y+2,1,10,weather===1?'#a28b6d':'#c3ac86');P.rect(X+11,Y+4,1,9,'#ab9270')}
+   if(P.R()<.15){P.rect(X+7,Y+8,3,2,'#938d79');P.rect(X+7,Y+8,2,1,'#d1c5a5')}
+  }
+ }
+ // Sparse reeds sit on the pond bank, not on paths or clickable farm cells.
+ for(let y=19;y<=25;y++)for(let x=14;x<=21;x++)if(at(x,y)==='.'&&sides.some(([dx,dy])=>at(x+dx,y+dy)==='~')&&P.R()<.45){
+  const X=x*T+7,Y=y*T+10,col=winter?'#8d927b':season===2?'#9c8a50':'#66855b';
+  P.rect(X,Y-7,1,7,col);P.rect(X+3,Y-5,1,5,col);P.rect(X-2,Y-4,1,4,col);P.rect(X,Y-9,1,3,winter?'#c9d1bd':'#8a6a47');
+  if(winter)P.rect(X-2,Y+1,7,1,'#eef1e7');
+ }
+}
+
+export function bakeTerrain(map, W, H, seed = 20261104, season = 0, weather=0) {
   const c = canvas(W * TILE, H * TILE), ctx = c.getContext('2d'), P = painter(ctx, seed)
   const G = GRASS[season] || GRASS[0], g = { g0: G[0], g1: G[1], g2: G[2], g3: G[3], g4: G[4], g5: G[5] }
   const at = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? '~' : map[y][x])
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const t = at(x, y), X = x * TILE, Y = y * TILE
-    if (t === '~') { P.rect(X, Y, TILE, TILE, C.w1); P.noise(X, Y, TILE, TILE, [C.w0, C.w2], 0.06) }
-    else if (t === ',') { P.rect(X, Y, TILE, TILE, C.a2); P.noise(X, Y, TILE, TILE, [C.a1, C.a3, C.a3, C.a4], 0.18); if (P.R() < 0.06) { P.px(X + 5, Y + 7, C.fw); P.px(X + 6, Y + 7, C.fp) } }
-    else if (t === '=') { P.rect(X, Y, TILE, TILE, C.d2); P.noise(X, Y, TILE, TILE, [C.d1, C.d3, C.d3, C.d4], 0.22); if (P.R() < 0.3) P.px(X + Math.floor(P.R() * 14) + 1, Y + Math.floor(P.R() * 14) + 1, C.r3) }
+    if (t === '~') { P.rect(X, Y, TILE, TILE, C.w1); P.noise(X, Y, TILE, TILE, [C.w0, C.w2], 0.006) }
+    else if (t === ',') { P.rect(X,Y,TILE,TILE,season===3?'#c5c9bb':'#d5c59d'); P.noise(X,Y,TILE,TILE,season===3?['#b8c2bc','#d9ddd0']:['#ccbb93','#e3d3ae'],.018); if (P.R() < 0.06) { P.px(X + 5, Y + 7, C.fw); P.px(X + 6, Y + 7, C.fp) } }
+    else if (t === '=') { P.rect(X,Y,TILE,TILE,season===3?'#adb5a9':weather===1?'#ad9470':'#b9a17c'); P.noise(X, Y, TILE, TILE, [C.d1, C.d3, C.d3, C.d4], 0.12); if(weather===1&&P.R()<.16){P.ellipse(X+8,Y+10,5,2,'#687c76');P.rect(X+5,Y+9,4,1,'#a6bcb2')} if(season===2&&P.R()<.2){P.rect(X+4,Y+4,2,1,'#bc8745');P.px(X+11,Y+12,'#995f38')}  if (P.R() < 0.3) P.px(X + Math.floor(P.R() * 14) + 1, Y + Math.floor(P.R() * 14) + 1, C.r3) }
     else if (t === '#') { P.rect(X, Y, TILE, TILE, C.r1); P.noise(X, Y, TILE, TILE, [C.r0, C.r2, C.r2], 0.25) }
     else { // 草
       P.rect(X, Y, TILE, TILE, g.g3)
-      P.noise(X, Y, TILE, TILE, [g.g2, g.g2, g.g4], 0.16)
-      for (let i = 0; i < 4; i++) { const bx = X + 1 + Math.floor(P.R() * 14), by = Y + 2 + Math.floor(P.R() * 13); P.px(bx, by, g.g2); P.px(bx, by - 1, g.g4) }
-      if (P.R() < 0.09) { const fc = [C.fy, C.fw, C.fp, C.fv][Math.floor(P.R() * 4)], fx = X + 3 + Math.floor(P.R() * 10), fy = Y + 3 + Math.floor(P.R() * 10); P.px(fx, fy, fc); P.px(fx + 1, fy + 1, g.g1) }
+      P.noise(X, Y, TILE, TILE, [g.g2, g.g2, g.g4], 0.014)
+      for (let i = 0; i < (P.R()<.22?2:0); i++) { const bx = X + 1 + Math.floor(P.R() * 14), by = Y + 2 + Math.floor(P.R() * 13); P.px(bx, by, g.g2); P.px(bx, by - 1, g.g4) }
+      if (season!==3 && P.R() < (season===0?.07:.025)) { const fc = [C.fy, C.fw, C.fp, C.fv][Math.floor(P.R() * 4)], fx = X + 3 + Math.floor(P.R() * 10), fy = Y + 3 + Math.floor(P.R() * 10); P.px(fx, fy, fc); P.px(fx + 1, fy + 1, g.g1) }
     }
   }
   // 过渡：草地压在沙/路/海上的边缘（不规则锯齿）+ 沙滩接海的湿沙与浪花底
@@ -343,6 +362,7 @@ export function bakeTerrain(map, W, H, seed = 20261104, season = 0) {
       P.rect(X, Y + 15, TILE, 1, C.r0)
     }
   }
+  b12TerrainDetail(ctx,map,W,H,seed,season,weather);
   return c
 }
 // ---------- 建筑（静态）：每个返回一张带透明的画布 ----------
@@ -504,8 +524,8 @@ function flowers(ctx, x, y, seed) {
   const P = painter(ctx, seed), c = [C.fp, C.fy, C.fw, C.fv, C.fr][seed % 5]
   for (let k = 0; k < 9; k++) { const fx = x + Math.floor(P.R() * 18), fy = y + Math.floor(P.R() * 10); P.px(fx, fy + 1, C.g1); P.px(fx, fy + 2, C.g2); P.px(fx, fy, c); if (P.R() < 0.4) { P.px(fx - 1, fy, c); P.px(fx + 1, fy, c) } }
 }
-export function bakeDecor(ctx, items) {
-  for (const [kind, x, y, seed, v] of items) { if (kind === 'tree') tree(ctx, x, y, seed, v || 0); else if (kind === 'bush') bush(ctx, x, y, seed); else if (kind === 'rock') rockSmall(ctx, x, y, seed); else if (kind === 'flowers') flowers(ctx, x, y, seed); else if (kind === 'palm') palm(ctx, x, y, seed); else if (kind === 'shell') shell(ctx, x, y, seed); else if (kind === 'trough') trough(ctx, x, y); else if (kind === 'bench') bench(ctx, x, y); else if (kind === 'lily') lily(ctx, x, y, seed) }
+export function bakeDecor(ctx, items, season=0) {
+  for (const [kind, x, y, seed, v] of items) { if (kind === 'tree') tree(ctx, x, y, seed, v || 0, season); else if (kind === 'bush') bush(ctx, x, y, seed, season); else if (kind === 'rock') rockSmall(ctx, x, y, seed); else if (kind === 'flowers') flowers(ctx, x, y, seed); else if (kind === 'palm') palm(ctx, x, y, seed); else if (kind === 'shell') shell(ctx, x, y, seed); else if (kind === 'trough') trough(ctx, x, y); else if (kind === 'bench') bench(ctx, x, y); else if (kind === 'lily') lily(ctx, x, y, seed) }
 }
 // 一块耕地（干 / 湿）
 const soilCache = new Map()

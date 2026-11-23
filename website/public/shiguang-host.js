@@ -1,4 +1,4 @@
-import {createShiguangSkin} from '/shiguang-runtime.js'
+import {createShiguangSkin} from '/shiguang-runtime.js?v=472f7fbf'
 
 // Original skin geometry/art; this adapter only handles host DOM and lifetime.
 const documents=new WeakMap(), bubbles=new WeakMap()
@@ -7,7 +7,7 @@ function markup(doc,html){const t=doc.createElement('template');t.innerHTML=html
 function install(doc){
  if(documents.has(doc))return documents.get(doc)
  const win=doc.defaultView,K=createShiguangSkin(win).init({particles:false,assets:{sticker:assets+'shiguang-sticker.webp',figure:assets+'shiguang-figure.webp',sun:assets+'sg-sunburst.svg',wax:assets+'sg-wax-seal.svg',reply:assets+'reply.webp'}})
- for(const href of ['/shiguang/css/shiguang-skin.css','/shiguang-host.css'])if(!doc.querySelector(`link[href="${href}"]`)){const link=doc.createElement('link');link.rel='stylesheet';link.href=href;doc.head.append(link)}
+ for(const href of ['/shiguang/css/shiguang-skin.css','/shiguang-host.css?v=472f7fbf'])if(!doc.querySelector(`link[href="${href}"]`)){const link=doc.createElement('link');link.rel='stylesheet';link.href=href;doc.head.append(link)}
  const live=new Map(),life=new win.AbortController()
  const update=(el,inside)=>{
   if(!el.isConnected||el.ownerDocument!==doc)return

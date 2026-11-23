@@ -1,6 +1,6 @@
 // Owner-only caller. No credentials, user data or D1 requests are sent to GitHub.
-const endpoint='https://api.github.com/repos/example-owner/skins/issues?state=open&per_page=100&sort=updated&direction=desc'
-const destination='https://github.com/example-owner/skins/'
+const endpoint='https://api.github.com/repos/kourou25/meme-hall-skins/issues?state=open&per_page=100&sort=updated&direction=desc'
+const destination='https://github.com/kourou25/meme-hall-skins/'
 export function createSkinStatusAlerts({fetcher=(...args)=>fetch(...args),storage,now=()=>Date.now(),cacheMs=300000,timeoutMs=3000}={}){
  if(storage===undefined)try{storage=globalThis.localStorage}catch{storage=null}
  let cached=null,last=0,pending=null

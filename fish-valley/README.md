@@ -1,5 +1,7 @@
 # 鱼鱼谷
 
+> 2026-11-23：主站源码已换成线上完整版本，原先依赖的 `website/src/shared/pet-world.ts` 规则现在位于 `website/src/legacy/live-app.js`。鱼鱼谷正在整体重做，本目录的小程序构建暂时不可用，重做完成后更新。
+
 网页版随尽欢主站运行。按照 [主站说明](../website/README.md) 初始化本地实例后，登录并打开 `/valley`。当前代码包含种植、牧场、钓鱼和矿洞的基础玩法。网页版和小程序复用 `website/public/pet-isle*.js` 的场景与 `website/src/shared/pet-world.ts` 的规则。
 
 ## 小程序构建

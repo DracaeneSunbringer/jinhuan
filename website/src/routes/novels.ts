@@ -10,7 +10,7 @@ import catalog from '../novels/catalog.json'
 
 export const novels=new Hono<Ctx>()
 novels.use('*',async(c,next)=>{c.header('cache-control','no-store');await next()})
-const books:Record<string,number>=Object.fromEntries((catalog.books as {id:string;chapters:number}[]).map(b=>[b.id,b.chapters]))
+const books:Record<string,number>=Object.fromEntries(catalog.books.map(b=>[b.id,b.chapters]))
 function bookId(c:C){const id=c.req.param('book')||'';if(!Object.hasOwn(books,id))fail(404,'书籍不存在');return id}
 function integer(v:unknown,min:number,max:number){if(typeof v!=='number'||!Number.isInteger(v)||v<min||v>max)fail(400,'编号或位置无效');return v as number}
 function text(v:unknown,max:number){if(typeof v!=='string'||v.length>max)fail(400,`文字不能超过 ${max} 字`);return v as string}

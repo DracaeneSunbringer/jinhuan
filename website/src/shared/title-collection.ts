@@ -18,7 +18,6 @@ export function chickengunSize(level:number,requested:unknown,random=false,seed:
 }
 export const titleChance=(finger:number)=>10+Math.max(0,Math.min(5,Math.trunc(finger)))*2
 const rows=[
- ['oldfarmer','老农民','一畦土地，一段相聚；田园暂别，收获长存','sprout','#9b7334','#b8cf91','SSR'],
  ['newcomer','初见欢欢','带着好奇，开启新的故事','sprout','#659d83','#f1ce86','normal'],
  ['mona','莫奈之王','睡莲与湖光，画中漫游','lotus','#5e9b92','#d8a4ca','normal'],
  ['lace','夜绒蕾丝','紫夜天鹅与细绒花纹','swan','#655790','#dba6c1','SSR'],
@@ -54,7 +53,7 @@ const rows=[
  ['star','星·许愿','把星星揣进口袋，陪你闪光','star','#7c7eb9','#ecd39a','SSR'],
  ['cloud','云·软绵','云朵羊的慢悠悠天空旅行','cloud','#7dabb4','#d9c9e8','normal'],
 ] as const
-export const TITLE_COLLECTION=rows.map(([id,name,mood,motif,color,accent,rarity])=>({id,name,mood,motif,color,accent,rarity,enabled:true,newcomer:id==='newcomer',commemorative:id==='oldfarmer',limited:['blacksilk','sword','halberd','moon','star','nightdevil','railcannon','chickengun'].includes(id)}))
+export const TITLE_COLLECTION=rows.map(([id,name,mood,motif,color,accent,rarity])=>({id,name,mood,motif,color,accent,rarity,enabled:true,newcomer:id==='newcomer',commemorative:undefined as boolean|undefined,limited:['blacksilk','sword','halberd','moon','star','nightdevil','railcannon','chickengun'].includes(id)}))
 export type CollectionTitleId=typeof rows[number][0]
 export const collectionTitle=(id:unknown)=>TITLE_COLLECTION.find(t=>t.id===id)
 // UTC+8 two-week exhibits. All limited exhibits retain one shared pity counter.

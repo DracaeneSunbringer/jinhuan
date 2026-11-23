@@ -1,4 +1,4 @@
-import {onRemoval} from '/resource-memory.js'
+import {onRemoval} from '/resource-memory.js?v=472f7fbf'
 export const OWNER52_ID='owner-52di'
 export const OWNER52_TITLE={name:'52帝',mood:'站长专属',rarity:'SSR',ownerOnly:true}
 export const OWNER52B_ID='owner-52b'
@@ -16,7 +16,7 @@ function controller(doc){
  const draw=(items,seconds)=>{if(!rig||!items.length)return;const ids=new Set(items.flatMap(s=>[s.id,s.pixelId]));rig.render(seconds,ids);for(const s of items){rig.paint(s.full,s.id,false);rig.paint(s.pixel,s.pixelId,true);s.el.dataset.di52Ready='true'}}
  const tick=now=>{raf=0;if(closed||!allowed()){last=0;return}const items=[...states].filter(s=>s.full&&live(s));if(!items.length){last=0;return}if(!last||now-last>=1000/30){clock+=last?Math.min((now-last)/1000,.08):0;last=now;draw(items,clock)}if(rig?.animated)raf=win.requestAnimationFrame(tick)}
  const refresh=()=>{if(closed)return;setLive();const hasVisible=[...states].some(s=>s.full&&live(s));if(hasVisible)ensureRig();if(!allowed()||!hasVisible){win.cancelAnimationFrame(raf);raf=0;last=0;return}if(rig&&!raf)raf=win.requestAnimationFrame(tick)}
- const ensureRig=()=>{if(loading)return;const epoch=loadEpoch;loading=import('/owner52-rig.js').then(m=>m.createCharacterRig(doc,{signal:life.signal})).then(value=>{if(closed||epoch!==loadEpoch){value.destroy();return}rig=value;draw([...states].filter(s=>s.full),clock);refresh()}).catch(error=>{if(error.name!=='AbortError'&&!closed&&epoch===loadEpoch)for(const s of states)s.el.dataset.di52Ready='unavailable'})}
+ const ensureRig=()=>{if(loading)return;const epoch=loadEpoch;loading=import('/owner52-rig.js?v=472f7fbf').then(m=>m.createCharacterRig(doc,{signal:life.signal})).then(value=>{if(closed||epoch!==loadEpoch){value.destroy();return}rig=value;draw([...states].filter(s=>s.full),clock);refresh()}).catch(error=>{if(error.name!=='AbortError'&&!closed&&epoch===loadEpoch)for(const s of states)s.el.dataset.di52Ready='unavailable'})}
  const io=new win.IntersectionObserver(entries=>{for(const e of entries)e.isIntersecting?visible.add(e.target):visible.delete(e.target);refresh()},{threshold:0})
  const ro=new win.ResizeObserver(entries=>{for(const {target:e} of entries){const w=e.clientWidth,h=e.clientHeight,r=Math.max(0,Math.min(11,h/2-1)),svg=e.querySelector(':scope>.di52-track');if(!svg)continue;e.style.setProperty('--di52-diameter',Math.ceil(Math.hypot(w,h)*1.12)+'px');svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.firstChild.setAttribute('d',`M${r+1} 1H${w-r-1}Q${w-1} 1 ${w-1} ${r+1}V${h-r-1}Q${w-1} ${h-1} ${w-r-1} ${h-1}H${r+1}Q1 ${h-1} 1 ${h-r-1}V${r+1}Q1 1 ${r+1} 1Z`)}})
  const prefs=new win.MutationObserver(refresh);prefs.observe(doc.documentElement,{attributes:true,attributeFilter:['data-bubble-motion','data-page-hidden']})

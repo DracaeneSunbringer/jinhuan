@@ -1,4 +1,4 @@
-import {serializeNovelExcerpt,novelExcerptCard} from '/novel-excerpt.js'
+import {serializeNovelExcerpt,novelExcerptCard} from '/novel-excerpt.js?v=472f7fbf'
 // 小说正文分章读取；个人进度节流同步，创作只在明确操作时调用个人模型。
 const defaults={theme:'paper',font:'serif',size:21,width:760,line:20}
 const node=(tag,attrs={},...children)=>{const el=document.createElement(tag);for(const [k,v] of Object.entries(attrs)){if(k.startsWith('on'))el.addEventListener(k.slice(2),v);else if(k==='class')el.className=v;else if(k==='value')el.value=v;else if(k==='checked')el.checked=v;else if(v!==false&&v!=null)el.setAttribute(k,v===true?'':v)}for(const c of children.flat(Infinity)){if(c!=null&&c!==false)el.append(c instanceof Node?c:document.createTextNode(String(c)))}return el}
@@ -18,7 +18,7 @@ export async function mountNovels(host,{user,api,onLeave,navigate,openChat}){
  const notify=statusNode();host.replaceChildren(notify);notify.textContent='正在打开书房…'
  try{
   if(path[1]==='studio'){await studio(path[2]);return}
-  const catalog=await json('/novel-data/catalog.json');if(disposed)return
+  const catalog=await json('/novel-data/catalog.json?v=cf8564dab6b8');if(disposed)return
   const book=catalog.books.find(b=>b.id===path[1]);if(book){if(book.adultNotice&&!(await confirmAdult(book)))return;if(!disposed)await reader(book);return}
   let progress=[]
   if(user)try{progress=(await api('/novels/progress')).items}catch{notify.textContent='云端书签暂时无法读取，仍可打开书籍。'}
@@ -91,7 +91,7 @@ export async function mountNovels(host,{user,api,onLeave,navigate,openChat}){
  async function studio(id){
   if(!user){host.replaceChildren(node('h1',{},'我的创作'),node('p',{},'登录后保存私人作品、人物卡和创作进度。'),link('登录','/login?next=%2Fnovels%2Fstudio'));return}
   const state=await api('/novel-studio');if(disposed)return
-  const header=node('header',{class:'nv-library-head'},node('div',{},link('‹ 书房','/novels'),node('h1',{},'我的创作')),link('配置个人 AI','https://play.jinhuan.example/me/ai',true)),notice=statusNode()
+  const header=node('header',{class:'nv-library-head'},node('div',{},link('‹ 书房','/novels'),node('h1',{},'我的创作')),link('配置个人 AI','https://cc.52dmeme.com/me/ai',true)),notice=statusNode()
   if(!id){const name=node('input',{maxlength:80,placeholder:'给故事起个名字','aria-label':'作品名称'}),create=button('新建作品',async()=>{create.disabled=true;try{const d=await api('/novel-studio',{method:'POST',body:{title:name.value}});navigate('/novels/studio/'+d.id)}catch(e){notice.textContent=e.message}finally{create.disabled=false}});host.replaceChildren(header,node('p',{class:'nv-meta'},'作品默认仅自己可见。可手写，也可使用个人模型辅助续写或进行互动剧情。'),node('div',{class:'nv-actions'},name,create),node('div',{class:'nv-work-list'},state.works.map(w=>node('article',{},link(w.title,'/novels/studio/'+w.id),node('small',{},w.mode==='roleplay'?'互动剧情':'小说写作')))),notice);return}
   const data=await api('/novel-studio/'+encodeURIComponent(id));if(disposed)return
   const work=data.work;let chapters=data.chapters,current=chapters[0]?.id||1,chapterRevision=0,dirty=false,pending=false

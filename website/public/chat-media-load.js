@@ -1,15 +1,15 @@
-import {onRemoval} from '/resource-memory.js'
+import {onRemoval} from '/resource-memory.js?v=472f7fbf'
 
 // Public media has its own origin; private attachments and development keep their URL.
 export function mediaUrl(value, base = location.href) {
   if (typeof value !== 'string' || !value) return value
   try {
     const page = new URL(base), url = new URL(value, page)
-    if (!['jinhuan.example', 'play.jinhuan.example'].includes(page.hostname) ||
-        !['jinhuan.example', 'play.jinhuan.example'].includes(url.hostname) || !url.pathname.startsWith('/img/')) return value
+    if (!['52dmeme.com', 'cc.52dmeme.com'].includes(page.hostname) ||
+        !['52dmeme.com', 'cc.52dmeme.com'].includes(url.hostname) || !url.pathname.startsWith('/img/')) return value
     const key = decodeURIComponent(url.pathname.slice(5))
     if (!key || key.startsWith('d/') || key.includes('\\') || key.split('/').some(p => p === '..' || p === '.')) return value
-    url.protocol = 'https:'; url.host = 'img.jinhuan.example'; url.port = ''
+    url.protocol = 'https:'; url.host = 'img.52dmeme.com'; url.port = ''
     return url.href
   } catch { return value }
 }

@@ -6,7 +6,7 @@ import {api} from './api'
 import {HandleEditor} from './account-handle'
 import {safeNext} from '../../src/shared/navigation'
 import {passwordInput} from '../../src/shared/schemas'
-type AuthConfig={open:boolean;email:boolean;google:boolean;register_mode:'open'|'invite';turnstile_site_key:string|null}
+type AuthConfig={open:boolean;email:boolean;google:boolean;github?:boolean;password_login?:boolean;register_mode:'open'|'invite';turnstile_site_key:string|null}
 type TurnstileAPI={render:(element:HTMLElement,options:Record<string,unknown>)=>string;remove:(id:string)=>void}
 declare global{interface Window{turnstile?:TurnstileAPI}}
 let script:Promise<void>|undefined
@@ -41,6 +41,8 @@ export function AuthForm(){
  return <Shell title={title}>
   {mode!=='reset'&&<a className="oauth-button" href={'/auth/login?next='+encodeURIComponent(next)+(invite?'&invite='+encodeURIComponent(invite):'')}>使用 Linux.DO 登录</a>}
   {mode!=='reset'&&config.data!.google&&<a className="oauth-button" href={'/auth/google/start?next='+encodeURIComponent(next)+(invite?'&invite='+encodeURIComponent(invite):'')}>使用 Google 登录</a>}
+  {mode!=='reset'&&config.data!.github&&<a className="oauth-button" href={'/auth/github/start?next='+encodeURIComponent(next)+(invite?'&invite='+encodeURIComponent(invite):'')}>使用 GitHub 登录</a>}
+  {mode==='login'&&config.data!.password_login&&<a className="oauth-button" href={'/account-password.html?next='+encodeURIComponent(next)}>使用账号密码登录</a>}
   {!available?<p className="hint">{config.data!.open?'邮箱登录暂未开放。':'新登录方式即将开放。'}{mode!=='login'&&<a href="/login"> 前往登录</a>}</p>:submit.isSuccess&&mode!=='login'?<div role="status"><h2>请查看邮箱</h2><p>{mode==='register'?'请点击验证邮件中的链接，再确认完成注册。':'如果这个邮箱已有账号，会收到重设密码的链接。'}</p><button onClick={()=>{submit.reset();setAttempt(x=>x+1)}}>重新发送</button></div>:<form onSubmit={event=>{event.preventDefault();setValidation('');if(mode==='register'){try{passwordInput(password,email.trim().normalize('NFKC').toLowerCase(),handle.trim())}catch(error){setValidation((error as Error).message);return}}submit.mutate()}}>
    <label htmlFor="email">邮箱</label><input id="email" type="email" autoComplete="email" maxLength={254} required value={email} onChange={e=>setEmail(e.target.value)} disabled={submit.isPending}/>
    {mode==='register'&&<><label htmlFor="handle">用户名</label><input id="handle" autoComplete="username" minLength={3} maxLength={20} pattern="[A-Za-z0-9_][A-Za-z0-9_.\-]{1,18}[A-Za-z0-9_]" required value={handle} onChange={e=>setHandle(e.target.value)} disabled={submit.isPending} aria-describedby="handle-hint"/><p id="handle-hint" className="hint">用于 @ 提及，3～20 位字母、数字或 _ . -</p><label htmlFor="nick">昵称（选填）</label><input id="nick" maxLength={40} value={nick} onChange={e=>setNick(e.target.value)} disabled={submit.isPending}/></>}

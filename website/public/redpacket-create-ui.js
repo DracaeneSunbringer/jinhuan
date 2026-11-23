@@ -1,4 +1,4 @@
-import {normalizePlatformCreate} from '/redpacket-create-core.js?v=20261015a'
+import {normalizePlatformCreate} from '/redpacket-create-core.js?v=472f7fbf'
 
 // 仅打开HB/Fish创建表单时加载；无定时器和后台监听。
 export function platformCreateForm({provider,userId,groupId,h,bridge,win,onState}){

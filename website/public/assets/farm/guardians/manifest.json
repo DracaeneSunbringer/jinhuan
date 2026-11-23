@@ -1,0 +1,49 @@
+{
+  "version": "2026-10-23",
+  "items": [
+    {
+      "id": "deepseek",
+      "source": "assets/generated/prototypes/farm-voxel-20261020/characters/deepseek.png",
+      "target": "public/assets/farm/guardians/deepseek.webp",
+      "sourceBytes": 1201305,
+      "bytes": 72486,
+      "original": [
+        1060,
+        1484
+      ]
+    },
+    {
+      "id": "gpt",
+      "source": "assets/generated/prototypes/farm-voxel-20261020/characters/gpt.png",
+      "target": "public/assets/farm/guardians/gpt.webp",
+      "sourceBytes": 1615925,
+      "bytes": 83750,
+      "original": [
+        1060,
+        1484
+      ]
+    },
+    {
+      "id": "claude",
+      "source": "assets/generated/prototypes/farm-voxel-20261020/characters/claude.png",
+      "target": "public/assets/farm/guardians/claude.webp",
+      "sourceBytes": 1500151,
+      "bytes": 86710,
+      "original": [
+        1060,
+        1484
+      ]
+    },
+    {
+      "id": "gemini",
+      "source": "assets/generated/prototypes/farm-voxel-20261020/characters/gemini.png",
+      "target": "public/assets/farm/guardians/gemini.webp",
+      "sourceBytes": 1487774,
+      "bytes": 91010,
+      "original": [
+        1060,
+        1484
+      ]
+    }
+  ]
+}

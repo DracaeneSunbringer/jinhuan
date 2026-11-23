@@ -99,10 +99,6 @@ img { display: block; max-width: 100%; }
 .logo-text { --m: url(/wordmark.svg?v=3); width: 52px; height: 25px; }
 @media (hover: hover) { .logo:hover .logo-mark { transform: rotate(-8deg) scale(1.04); } }
 .mainnav { display: flex; gap: 2px; flex: none; }
-@media (min-width:641px) and (max-width:1080px) {
-  .topbar .mainnav { flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:thin; }
-  .topbar .mainnav a { flex:none;white-space:nowrap; }
-}
 .mainnav a, .me-link {
   position: relative; display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 12px;
   border-radius: 999px; color: var(--text-2); font-size: 15px; font-weight: 500;
@@ -2069,3 +2065,41 @@ html[data-skin] .site-notice { display: none; }
   .mobile-nav a > span .i { width: 20px; height: 20px; }
   .mobile-nav a.on::after { content: ''; position: absolute; bottom: 3px; width: 12px; height: 2px; border-radius: 2px; background: currentColor; }
 }
+
+@media(min-width:641px) and (max-width:1080px){.topbar .mainnav{flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:thin}.topbar .mainnav a{flex:none;white-space:nowrap}}
+/* 2026-11-05 个人中心 / 管理工具：布局优化（只加样式，不改结构；颜色都用皮肤变量，换皮肤也跟着变） */
+.me-wallet{padding:16px 20px;margin-bottom:18px;border-left-width:1px;border-radius:16px}
+.me-wallet-figures>strong{font-size:clamp(22px,3.2vw,30px)}
+.me-service-list{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--surface)}
+.me-service{padding:14px 16px!important}
+.me-service:last-child{border-bottom:0}
+.settings-category-panel>h3{margin:0 0 10px}
+.me-session{padding-top:6px}
+@media (min-width:900px){.settings-category-nav{position:sticky;top:76px;align-self:start}}
+@media (max-width:640px){
+  .me-head{padding-bottom:12px}
+  .me-wallet{padding:12px 14px}
+  .me-wallet-summary{gap:10px}
+  .me-wallet-actions{width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .me-wallet-actions button{min-height:36px;padding:6px 8px}
+  .settings-search{height:38px}
+  .settings-category-nav{position:sticky;top:54px;z-index:5;background:var(--bg,var(--surface));padding:4px 0}
+  /* 收藏 / 喜欢 / 回应…：一行横向滑动的小胶囊，不再挤成两行 */
+  .me-tabs{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;gap:6px;padding:2px 0 10px;scrollbar-width:none;border-bottom:0!important}
+  .me-tabs .me-tab{flex:none!important;padding:6px 14px!important;border-radius:16px;border:1px solid var(--line);background:var(--surface)}
+  .me-tabs .me-tab.on{background:var(--primary);border-color:var(--primary);color:#fff}
+  .me-tabs .me-tab.on .n{color:inherit;opacity:.85}
+  .me-tabs .me-tab:after{display:none!important}
+  .me-tools{flex-wrap:wrap;gap:8px}
+}
+
+/* 11-07 入群申请分组页签 */
+.gp-out-tabs{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0 10px;border-bottom:1px solid var(--line)}
+.gp-out-tabs button{appearance:none;border:0;background:none;color:var(--text-2);font:inherit;font-size:13px;padding:7px 10px;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.gp-out-tabs button.on{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.gp-out-n{font-size:11px;line-height:16px;min-width:16px;padding:0 5px;border-radius:8px;background:var(--surface-2);color:var(--text-2);text-align:center}
+.gp-out-n.hot{background:var(--like);color:#fff}
+
+.b9-monitor{width:min(1000px,calc(100vw - 24px));max-height:calc(100dvh - 24px);border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--text);padding:20px}.b9-monitor::backdrop{background:#0008}.b9-monitor header{display:flex;justify-content:space-between;align-items:center;gap:12px}.b9-monitor h2{font-size:21px;margin:0}.b9-monitor-controls{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}.b9-monitor-controls select{width:auto;max-width:100%}.b9-monitor-body{overflow:auto}.b9-monitor-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}.b9-monitor-summary section{padding:12px;background:var(--surface-2);border-radius:8px}.b9-monitor-summary h3{font-size:14px;margin:0 0 8px}.b9-monitor-summary strong{font-size:25px;display:block}.b9-monitor-summary small{color:var(--text-2)}.b9-monitor-chart{display:grid;gap:5px;margin-bottom:20px;max-height:240px;overflow:auto}.b9-monitor-chart>div{display:grid;grid-template-columns:50px 1fr 48px;gap:10px;align-items:center;font-size:12px}.b9-monitor-track{height:9px;background:var(--surface-2);border-radius:4px;overflow:hidden}.b9-monitor-track i{height:100%;display:block;background:var(--primary,#2f8668)}.b9-monitor-table{width:100%;border-collapse:collapse;font-size:13px}.b9-monitor-table td,.b9-monitor-table th{text-align:left;padding:8px;border-bottom:1px solid var(--line)}.b9-monitor-table th{white-space:nowrap}.b9-monitor-table td:nth-child(n+3){text-align:right}@media(max-width:600px){.b9-monitor{padding:12px}.b9-monitor-table{font-size:11px}.b9-monitor-table td,.b9-monitor-table th{padding:6px 3px}.b9-monitor-summary{grid-template-columns:1fr}.b9-monitor-controls{gap:7px}}
+
+.manor-farewell{max-width:760px;margin:24px auto;padding:24px}.manor-farewell h1{font-size:24px}.manor-farewell-result{margin:24px 0}.manor-farewell-amount{display:block;font-size:28px;margin:16px 0}.manor-farewell details{margin:20px 0}.manor-farewell ul{list-style:none;padding:0}.manor-farewell li{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid var(--line)}.manor-farewell li strong{white-space:nowrap}@media(max-width:600px){.manor-farewell{padding:16px;margin:12px auto}.manor-farewell h1{font-size:21px}}

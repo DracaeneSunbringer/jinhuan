@@ -1,4 +1,4 @@
-import {animateShiguangMessage} from '/shiguang-host.js';
+import {animateShiguangMessage} from '/shiguang-host.js?v=dd731544';
 import {renderWinnerChat} from './winner-chat.js';
 // Both hosts use guess_sidebar_messages. Never use main-group message IDs here.
 export function createGameChat({h,api,base='/guess-sidebar/messages',renderMessage,renderBody,emojiPicker,onSignal=()=>{},onDestroy=()=>{},openGuess=()=>{},group={id:1},panes,destination='VIP'}){

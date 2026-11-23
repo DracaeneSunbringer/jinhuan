@@ -1,3 +1,40 @@
+;(() => {
+if (window.siteConfirm) return
+const css = '.site-ask{max-width:min(380px,calc(100vw - 32px));width:380px;border:1px solid var(--line,#d9dfd5);border-radius:16px;padding:20px 18px 16px;background:var(--surface,#fff);color:var(--text,#172d25);box-shadow:0 24px 64px rgba(0,0,0,.22);font:inherit;font-family:var(--font,system-ui,sans-serif)}'
+  + '.site-ask::backdrop{background:rgba(10,20,16,.42)}.site-ask p{margin:0 0 14px;font-size:14px;line-height:1.65;white-space:pre-line;word-break:break-word}'
+  + '.site-ask input{display:block;width:100%;box-sizing:border-box;margin:0 0 14px;padding:9px 11px;border:1px solid var(--line,#d9dfd5);border-radius:10px;background:var(--surface-2,#f3f4f0);color:inherit;font:inherit;font-size:14px}'
+  + '.site-ask .site-ask-acts{display:flex;justify-content:flex-end;gap:8px}.site-ask button{min-width:72px;padding:8px 14px;border-radius:10px;border:1px solid var(--line,#d9dfd5);background:transparent;color:inherit;font:inherit;font-size:13px;font-weight:600;cursor:pointer}'
+  + '.site-ask button.site-ask-ok{border-color:transparent;background:var(--primary,#1f6b4f);color:var(--primary-ink,#fff)}.site-ask button:focus-visible{outline:2px solid var(--primary,#1f6b4f);outline-offset:2px}'
+let styled = false
+function ask(text, mode, value) {
+  return new Promise((resolve) => {
+    if (!styled) { styled = true; const s = document.createElement('style'); s.textContent = css; document.head.append(s) }
+    const d = document.createElement('dialog'); d.className = 'site-ask'; d.setAttribute('aria-label', '确认')
+    const p = document.createElement('p'); p.textContent = String(text ?? '')
+    const input = mode === 'prompt' ? Object.assign(document.createElement('input'), { type: 'text', value: value == null ? '' : String(value) }) : null
+    const acts = document.createElement('div'); acts.className = 'site-ask-acts'
+    const ok = Object.assign(document.createElement('button'), { type: 'button', className: 'site-ask-ok', textContent: mode === 'alert' ? '知道了' : '确定' })
+    const no = mode === 'alert' ? null : Object.assign(document.createElement('button'), { type: 'button', textContent: '取消' })
+    let done = false
+    const prev = document.activeElement
+    const end = (v) => { if (done) return; done = true; try { d.close() } catch {} d.remove(); try { prev && prev.focus && prev.focus() } catch {} resolve(v) }
+    const cancel = () => end(mode === 'confirm' ? false : mode === 'prompt' ? null : undefined)
+    ok.onclick = () => end(mode === 'confirm' ? true : mode === 'prompt' ? input.value : undefined)
+    if (no) no.onclick = cancel
+    d.addEventListener('cancel', (e) => { e.preventDefault(); cancel() })
+    d.addEventListener('click', (e) => { if (e.target !== d) return; const r = d.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) cancel() })
+    if (input) input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); ok.click() } })
+    if (no) acts.append(no); acts.append(ok)
+    d.append(p); if (input) d.append(input); d.append(acts)
+    document.body.append(d)
+    try { d.showModal() } catch { d.setAttribute('open', '') }
+    ;(input || ok).focus(); if (input) input.select()
+  })
+}
+window.siteConfirm = (text) => ask(text, 'confirm')
+window.sitePrompt = (text, value) => ask(text, 'prompt', value)
+window.siteAlert = (text) => { void ask(text, 'alert') }
+})();
 const labels={project:'开源项目',film:'番号影片',link:'链接分享'}
 const signs={project:'⌘',film:'▶',link:'↗'}
 export async function mountResources(host,{user,api,h,onLeave,navigate,mediaTray,toast,icon}){
@@ -58,7 +95,7 @@ export async function mountResources(host,{user,api,h,onLeave,navigate,mediaTray
   const emojis=['👍','❤️','😂','🤔','🔥'];let reacting=false
   for(const emoji of emojis)react.append(btn(emoji+' '+(reactions.find(x=>x.reaction===emoji)?.n||0),async()=>{if(!login()||reacting)return;reacting=true;for(const el of react.children)el.disabled=true;const previous=p.reaction,value=previous===emoji?'':emoji;try{await api('/resources/'+id+'/mark',{method:'PUT',body:{key:'reaction',value}});p.reaction=value;for(const symbol of [previous,value]){if(!symbol)continue;let entry=reactions.find(x=>x.reaction===symbol);if(!entry){entry={reaction:symbol,n:0};reactions.push(entry)}entry.n=Math.max(0,entry.n+(symbol===value?1:-1))}for(const [i,el]of [...react.children].entries()){el.textContent=emojis[i]+' '+(reactions.find(x=>x.reaction===emojis[i])?.n||0);el.setAttribute('aria-pressed',String(value===emojis[i]))}}catch(error){toast(error.message,'err')}finally{reacting=false;for(const el of react.children)el.disabled=false}},{'aria-label':emoji+' 回应','aria-pressed':p.reaction===emoji}))
   body.append(react)
-  if(user&&(user.id===p.user_id||user.is_admin))body.append(h('div',{class:'rs-owner-actions'},btn('编辑',()=>editor(p)),btn('删除帖子',async()=>{if(!confirm('确定删除这篇分享？'))return;try{await api('/resources/'+id,{method:'DELETE'});navigate('/nsfw')}catch(e){toast(e.message,'err')}})))
+  if(user&&(user.id===p.user_id||user.is_admin))body.append(h('div',{class:'rs-owner-actions'},btn('编辑',()=>editor(p)),btn('删除帖子',async()=>{if(!await window.siteConfirm('确定删除这篇分享？'))return;try{await api('/resources/'+id,{method:'DELETE'});navigate('/nsfw')}catch(e){toast(e.message,'err')}})))
   const comments=h('section',{id:'comments',class:'rs-comments'},h('h2',null,'评论 '+p.comments)),rows=h('div'),more=btn('更多评论',()=>loadComments()),textarea=h('textarea',{rows:3,maxlength:2000,placeholder:'分享你的使用体验或补充信息','aria-label':'评论内容'}),send=btn('发表评论',async()=>{
    if(!login()||!textarea.value.trim())return;send.disabled=true;try{await api('/resources/'+id+'/comments',{method:'POST',body:{request_id:commentId,body:textarea.value}});commentId=crypto.randomUUID();textarea.value='';rows.replaceChildren();after=0;await loadComments();toast('评论已发布')}catch(e){toast(e.message,'err')}finally{send.disabled=false}
   },{class:'btn btn-primary'});let after=0,commentId=crypto.randomUUID()

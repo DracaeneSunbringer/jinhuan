@@ -1,4 +1,4 @@
-import {RECENT_UPDATES} from './recent-updates-data.js'
+import {RECENT_UPDATES} from './recent-updates-data.js?v=472f7fbf'
 
 export function openRecentUpdates(anchor){
  const doc=anchor.ownerDocument,existing=doc.querySelector('.recent-updates-dialog')

@@ -29,7 +29,7 @@ titleRaffle.get('/api/me/personal-titles', async c => {
   const limitedOwn=new Set<string>()
   const limited=await c.env.DB.prepare("SELECT item FROM user_unlocks WHERE user_id=? AND item IN ('bubble:community:owner-52di','bubble:community:owner-52b')").bind(u!.id).all<{item:string}>()
   for(const row of limited.results)limitedOwn.add(row.item.endsWith('owner-52b')?'owner-52b':'owner-52di')
-  return c.json({titles:Object.entries(PERSONAL_TITLES).filter(([id,t])=>(!t.ownerOnly&&own.has(id))||((id==='owner-52di'||id==='owner-52b')&&limitedOwn.has(id))).map(([id,t])=>({id,...t,kind:'personal',rarity:t.rarity||'normal',enabled:true,access:t.ownerOnly?'limited':'owned'}))})
+  return c.json({titles:Object.entries(PERSONAL_TITLES).filter(([id,t])=>(!t.ownerOnly&&own.has(id))||((id==='owner-52di'||id==='owner-52b')&&limitedOwn.has(id))).map(([id,t])=>({id,...t,kind:'personal',rarity:t.rarity||'normal',enabled:true}))})
 })
 
 titleRaffle.get('/api/me/raffle-titles', async c => {

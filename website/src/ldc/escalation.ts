@@ -12,7 +12,7 @@ export async function authorPolicy(env:Env,uid:number){
 export async function escalationOptions(c:C,b:Record<string,unknown>,uid:number,total:number){
  const every=b.escalation_every??0
  if(typeof every!=='number'||!Number.isInteger(every)||every<0||every>300)fail(400,'追加奖励间隔需为1–300次，0为关闭')
- const coin=b.payment_provider==='coin52',limit=coin?20000000:200000,unit=coin?'D币':'LDC'
+ const coin=b.payment_provider==='coin52',limit=coin?200000000:200000,unit=coin?'D币':'LDC'
  let step=0,cap=0
  if(every){
   if(b.provider==='free_guess'||!['guess','clues'].includes(String(b.mode)))fail(400,'追加奖励仅用于有奖励的猜词')

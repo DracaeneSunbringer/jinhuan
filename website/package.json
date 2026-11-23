@@ -3,10 +3,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite dev --host 127.0.0.1",
-    "db:init:local": "wrangler d1 execute meme-hall-local --local --file=schema.sql",
+    "dev": "vite dev",
+    "deploy": "node scripts/deploy.mjs",
+    "db:init:local": "wrangler d1 execute meme-hall --local --file=schema.sql",
+    "db:seed:local": "wrangler d1 execute meme-hall --local --file=seed.sql",
+    "db:seed": "wrangler d1 execute meme-hall --remote --file=seed.sql",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.web.json",
-    "build": "vite build"
+    "dev:wt": "vite dev --port 8788",
+    "build": "vite build && node scripts/check-bundle.mjs",
+    "schema:check": "node scripts/schema-snapshot.mjs --check",
+    "deploy:go": "node scripts/deploy.mjs --yes"
   },
   "dependencies": {
     "@hono/valibot-validator": "0.6.1",
@@ -18,8 +24,7 @@
     "react-router": "8.4.0",
     "three": "0.186.1",
     "valibot": "1.5.0",
-    "web-push": "3.6.7",
-    "postcss": "8.5.32"
+    "web-push": "3.6.7"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.63.1",

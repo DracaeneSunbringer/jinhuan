@@ -1,6 +1,5 @@
 export interface Env {
   DB: D1Database
-  RANDOM_IMAGE_ENDPOINT?: string
   MUSIC_ORIGIN?: string
   MUSIC_TOKEN?: string
   PUSH_VAPID_PUBLIC_KEY?: string

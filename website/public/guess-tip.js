@@ -1,4 +1,4 @@
-import {dcoinIcon} from '/dcoin.js'
+import {dcoinIcon} from '/dcoin.js?v=472f7fbf'
 export function createGuessTip({h,api,userId}){
  let mid=0,busy=false,attempt=null,generation=0
  const note=h('p',{role:'status'}),balance=h('small'),history=h('p',{class:'muted'})

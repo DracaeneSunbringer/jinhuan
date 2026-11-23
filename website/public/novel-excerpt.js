@@ -12,7 +12,7 @@ export function serializeNovelExcerpt(item){
  return result
 }
 export function novelExcerptCard(item,h){
- if(!document.getElementById('novel-excerpt-styles')){const link=document.createElement('link');link.id='novel-excerpt-styles';link.rel='stylesheet';link.href='/novel-excerpt.css';document.head.append(link)}
+ if(!document.getElementById('novel-excerpt-styles')){const link=document.createElement('link');link.id='novel-excerpt-styles';link.rel='stylesheet';link.href='/novel-excerpt.css?v=472f7fbf';document.head.append(link)}
  const href=`/novels/${item.bookId}?chapter=${item.chapter}`
  return h('article',{class:'novel-excerpt','data-theme':item.theme,'aria-label':'小说摘录'},
   h('div',{class:'novel-excerpt-head'},h('span',null,'小说摘录'),h('a',{href,'data-link':'','aria-label':'阅读《'+item.title+'》原文'},'阅读原文 ↗')),

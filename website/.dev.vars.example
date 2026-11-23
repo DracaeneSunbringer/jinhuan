@@ -1,5 +1,5 @@
 # Local use only. Set only the credentials required by your own instance.
-# DEV_LOGIN_KEY=
+# DEV_LOGIN_KEY=  （至少 16 位，仅本地测试登录）
 # LINUXDO_CLIENT_ID=
 # LINUXDO_CLIENT_SECRET=
 # PASSWORD_PEPPER=

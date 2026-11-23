@@ -1,4 +1,3 @@
-import {fishSetupNotice,needsFishSetup} from './fish-recipient.js';
 // 只比较已取得的专区快照；不发请求、不补播历史追加。
 export function createRewardTracker(){
  let id=null,high=0
@@ -11,7 +10,7 @@ export function createRewardTracker(){
  }}
 }
 export function createRewardFeedback(doc,visible){
- const win=doc.defaultView,tracker=createRewardTracker(),node=doc.createElement('span'),setup=fishSetupNotice(doc)
+ const win=doc.defaultView,tracker=createRewardTracker(),node=doc.createElement('span')
  node.className='gr-reward-gain';node.setAttribute('role','status');node.setAttribute('aria-live','polite')
  if(!doc.getElementById('gr-reward-feedback-style')){
   const style=doc.createElement('style');style.id='gr-reward-feedback-style';style.textContent=`
@@ -25,13 +24,11 @@ export function createRewardFeedback(doc,visible){
  }
  let timer=0,pending=0
  function clear(){win.clearTimeout(timer);timer=0;pending=0;node.remove()}
- function reset(){clear();setup.remove();tracker.reset()}
+ function reset(){clear();tracker.reset()}
  function visibility(){if(doc.hidden)reset()}
  doc.addEventListener('visibilitychange',visibility)
  return {update(round,meta){
   if(!visible()||doc.hidden){reset();return}
-  const context=meta.closest('.gr-context')||meta;
-  if(needsFishSetup(round?.payment_provider,round?.mine)){if(setup.previousElementSibling!==context)context.after(setup)}else setup.remove()
   const delta=tracker.update(round),target=meta.querySelector('.gr-round')
   if(delta){pending+=delta;node.textContent=`${(pending/100).toFixed(2)} LDC`;node.setAttribute('aria-label',`奖励增加 ${(pending/100).toFixed(2)} LDC`);win.clearTimeout(timer);timer=win.setTimeout(clear,1800)}
   if(pending&&target){target.append(node);if(delta)for(const animation of node.getAnimations())animation.currentTime=0}

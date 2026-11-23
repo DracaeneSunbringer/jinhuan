@@ -48,41 +48,6 @@
 }
 [data-bg="photo"] .slogan p, [data-bg="photo"] .page-head { text-shadow: 0 1px 8px color-mix(in srgb, var(--bg) 80%, transparent); }
 
-/* 图片壁纸的界面透明度只作用于底色，避免父子容器重复铺色。 */
-[data-bg="photo"][data-ui-glass] {
-  --wallpaper-surface: color-mix(in srgb, var(--surface) var(--bg-ui-opacity, 60%), transparent);
-  --wallpaper-surface-2: color-mix(in srgb, var(--surface-2) var(--bg-ui-opacity, 60%), transparent);
-  --wallpaper-bg: color-mix(in srgb, var(--bg) var(--bg-ui-opacity, 60%), transparent);
-}
-[data-bg="photo"][data-ui-glass] body.chat-mode.chat-open,
-[data-bg="photo"][data-ui-glass] :is(.chat-body, .cm-pane, .cm-chat-column, .dm-pane, .dm-layout, .gr-panel,
-  .chat-side, .chat-head, .cd-head, .cm-scroll, .cm-compose, .cm-guess-bar, .dm-side, .dm-top, .dm-pane-head, .dm-feed, .dm-compose) { background: transparent; }
-[data-bg="photo"][data-ui-glass] :is(.card, .series-card, .pcard, .tool-panel, .me-list, .pop, .modal-panel, .login-card,
-  .chat-page, .cd-panel, .dm-page, .fmt-wrap,
-  .gr-head, .gr-overview, .gr-hints, .gr-hint-details, .gr-result, .gr-block, .gr-rank, .gr-facts, .gr-compose, .gr-tools-menu) {
-  background: var(--wallpaper-surface);
-}
-[data-bg="photo"][data-ui-glass] :is(.topbar, .toolbar, .day-head, .me-tabs, .mobile-nav) {
-  background: var(--wallpaper-bg); backdrop-filter: none; -webkit-backdrop-filter: none;
-}
-[data-bg="photo"][data-ui-glass] :is(.input, .search, .me-search, .dm-search, .dm-input, .gr-input, .gr-overview-tools, .gr-divider, .lk-disguise) { background: var(--wallpaper-surface-2); }
-[data-bg="photo"][data-ui-glass] :is(.card .media, .card .covers, .card .cv, .card .car-cell, .series-card .covers, .series-card .cv,
-  .card .rp-form, .fmt-wrap > .input, .chat-side-content > .dm-side, .cm-compose textarea,
-  .dm-compose .dm-input, .gr-compose .gr-input, .gr-overview .gr-overview-tools, .gr-hint-details .gr-hints, .gr-block h3) { background: transparent; }
-[data-bg="photo"][data-ui-glass] .cm-welcome:not(.gone) { background: var(--wallpaper-surface); color: var(--text); }
-
-/* 聊天滚动轨道透出容器的连续底色，避免原生白条；保留可拖动的滚动滑块。 */
-[data-bg="photo"][data-ui-glass] :is(.cm-scroll, .cm-hist-list, .rich-input, .chat-groups, .dm-side, .dm-feed) {
-  scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--text-3) 65%, transparent) transparent;
-}
-[data-bg="photo"][data-ui-glass] :is(.cm-scroll, .cm-hist-list, .rich-input, .chat-groups, .dm-side, .dm-feed)::-webkit-scrollbar { width: 8px; height: 8px; background: transparent; }
-[data-bg="photo"][data-ui-glass] :is(.cm-scroll, .cm-hist-list, .rich-input, .chat-groups, .dm-side, .dm-feed)::-webkit-scrollbar-track { background: transparent; }
-[data-bg="photo"][data-ui-glass] :is(.cm-scroll, .cm-hist-list, .rich-input, .chat-groups, .dm-side, .dm-feed)::-webkit-scrollbar-thumb {
-  border: 2px solid transparent; border-radius: 8px; background: color-mix(in srgb, var(--text-3) 65%, transparent); background-clip: padding-box;
-}
-[data-bg="photo"][data-ui-glass] :is(.cm-scroll, .cm-hist-list, .rich-input, .chat-groups, .dm-side, .dm-feed)::-webkit-scrollbar-thumb:hover { background-color: var(--text-3); }
-[data-bg="photo"][data-ui-glass] :is(.cm-scroll, .cm-hist-list, .rich-input, .chat-groups, .dm-side, .dm-feed)::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
-
 /* ---------- 外观面板 ---------- */
 .pop-looks { width: 340px; max-height: min(640px, calc(100vh - 80px)); overflow-y: auto; overscroll-behavior: contain; }
 .looks { display: flex; flex-direction: column; }
@@ -359,3 +324,47 @@
 }
 .lk-note .dl-link { display: inline-flex; align-items: center; gap: 2px; color: var(--primary); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 .lk-note .dl-link:hover { opacity: .8; }
+
+
+
+
+/* 图片壁纸的界面透明度只作用于底色，避免父子容器重复铺色。 */
+[data-bg="photo"][data-ui-glass] {
+  --wallpaper-surface: color-mix(in srgb, var(--surface) var(--bg-ui-opacity, 60%), transparent);
+  --wallpaper-surface-2: color-mix(in srgb, var(--surface-2) var(--bg-ui-opacity, 60%), transparent);
+  --wallpaper-bg: color-mix(in srgb, var(--bg) var(--bg-ui-opacity, 60%), transparent);
+}
+[data-bg="photo"][data-ui-glass] body.chat-mode.chat-open,
+[data-bg="photo"][data-ui-glass] :is(.chat-body, .cm-pane, .cm-chat-column, .dm-pane, .dm-layout, .gr-panel,
+  .chat-side, .chat-head, .cd-head, .cm-scroll, .cm-compose, .cm-guess-bar, .dm-side, .dm-top, .dm-pane-head, .dm-feed, .dm-compose) { background: transparent; }
+[data-bg="photo"][data-ui-glass] :is(.card, .series-card, .pcard, .tool-panel, .me-list, .pop, .modal-panel, .login-card,
+  .chat-page, .cd-panel, .dm-page, .fmt-wrap,
+  .gr-head, .gr-overview, .gr-hints, .gr-hint-details, .gr-result, .gr-block, .gr-rank, .gr-facts, .gr-compose, .gr-tools-menu) {
+  background: var(--wallpaper-surface);
+}
+[data-bg="photo"][data-ui-glass] :is(.topbar, .toolbar, .day-head, .me-tabs, .mobile-nav) {
+  background: var(--wallpaper-bg); backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+[data-bg="photo"][data-ui-glass] :is(.input, .search, .me-search, .dm-search, .dm-input, .gr-input, .gr-overview-tools, .gr-divider, .lk-disguise) { background: var(--wallpaper-surface-2); }
+[data-bg="photo"][data-ui-glass] :is(.card .media, .card .covers, .card .cv, .card .car-cell, .series-card .covers, .series-card .cv,
+  .card .rp-form, .fmt-wrap > .input, .chat-side-content > .dm-side, .cm-compose textarea,
+  .dm-compose .dm-input, .gr-compose .gr-input, .gr-overview .gr-overview-tools, .gr-hint-details .gr-hints, .gr-block h3) { background: transparent; }
+[data-bg="photo"][data-ui-glass] .cm-welcome:not(.gone) { background: var(--wallpaper-surface); color: var(--text); }
+
+/* 聊天滚动轨道透出容器的连续底色，避免原生白条；保留可拖动的滚动滑块。 */
+[data-bg="photo"][data-ui-glass] :is(.cm-scroll, .cm-hist-list, .rich-input, .chat-groups, .dm-side, .dm-feed) {
+  scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--text-3) 65%, transparent) transparent;
+}
+[data-bg="photo"][data-ui-glass] :is(.cm-scroll, .cm-hist-list, .rich-input, .chat-groups, .dm-side, .dm-feed)::-webkit-scrollbar { width: 8px; height: 8px; background: transparent; }
+[data-bg="photo"][data-ui-glass] :is(.cm-scroll, .cm-hist-list, .rich-input, .chat-groups, .dm-side, .dm-feed)::-webkit-scrollbar-track { background: transparent; }
+[data-bg="photo"][data-ui-glass] :is(.cm-scroll, .cm-hist-list, .rich-input, .chat-groups, .dm-side, .dm-feed)::-webkit-scrollbar-thumb {
+  border: 2px solid transparent; border-radius: 8px; background: color-mix(in srgb, var(--text-3) 65%, transparent); background-clip: padding-box;
+}
+[data-bg="photo"][data-ui-glass] :is(.cm-scroll, .cm-hist-list, .rich-input, .chat-groups, .dm-side, .dm-feed)::-webkit-scrollbar-thumb:hover { background-color: var(--text-3); }
+[data-bg="photo"][data-ui-glass] :is(.cm-scroll, .cm-hist-list, .rich-input, .chat-groups, .dm-side, .dm-feed)::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+
+
+/* 飞书伪装里的单聊：dm.js 嵌在右侧聊天区，用飞书自己的标题栏 */
+.im-dm { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.im-dm .dm-pane-head { display: none; }
+.im-dm .dm-page { background: transparent; }

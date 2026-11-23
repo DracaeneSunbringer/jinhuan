@@ -14,7 +14,7 @@ import {sidebarDay} from '../games/sidebar-retention';
 import {guessMemeRoutes} from '../routes/guess-meme';
 import {personalAiRoutes} from '../routes/personal-ai';
 
-const MAIN='https://jinhuan.example',CC='https://play.jinhuan.example';
+const MAIN='https://52dmeme.com',CC='https://cc.52dmeme.com';
 const gameNext=(value:string)=>/^\/(?:chat\/1|me\/ai|games\/(?:arena|drawing|review))(?:\?room=[-a-f0-9]{36})?$/i.test(value)||(/^\/chat\/1\?message_id=[1-9]\d{0,15}$/.test(value)&&Number.isSafeInteger(Number(value.split('=')[1])))?value:'/chat/1';
 export const sharedRoutes=new Hono<Ctx>();
 sharedRoutes.route('/',personalAiRoutes);sharedRoutes.route('/',guessMemeRoutes);

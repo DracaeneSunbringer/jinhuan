@@ -9,7 +9,7 @@ export const COMMUNITY_GROWTH=[
  {series:'scratch_jackpot',name:'赌神',unit:'次十倍彩',levels:[1,3,10,30,100],color:'#9a7739',accent:'#dcd88b',motif:'star',desc:'刮刮乐单张获得10倍及以上奖励，不代表未来胜率'},
  {series:'scratch_dry',name:'再起不能',unit:'连张未中',levels:[3,6,10,15,25],color:'#8b7e9b',accent:'#becbda',motif:'cloud',desc:'刮刮乐历史最长连续未中奖张数；用于记录趣味经历'},
  {series:'lotto_wins',name:'七星来客',unit:'注中奖',levels:[1,5,20,100,500],color:'#527da0',accent:'#c9d9a4',motif:'star',desc:'大乐透已完成发奖的中奖注数'},
- {series:'coins_peak',name:'金库主人',unit:'枚最高余额',levels:[1000,10000,100000,1000000,10000000],color:'#ad8a40',accent:'#e6cda0',motif:'sun',desc:'账户曾达到的最高D币余额；消费不撤回已获荣誉'},
+ {series:'coins_peak',name:'金库主人',unit:'枚最高余额',levels:[1000,10000,100000,1000000,10000000,100000000,1000000000],color:'#ad8a40',accent:'#e6cda0',motif:'sun',desc:'账户曾达到的最高D币余额；消费不撤回已获荣誉'},
  {series:'market_trades',name:'集市行家',unit:'笔交易',levels:[1,20,100,500,2000],color:'#688f7d',accent:'#e2c79c',motif:'sprout',desc:'动态集市成功买入或售出交易笔数'},
  {series:'market_sold',name:'丰收掌柜',unit:'枚销售收入',levels:[100,1000,10000,100000,1000000],color:'#ae8055',accent:'#d8d79e',motif:'lotus',desc:'动态集市累计售出收入，收入不等于利润'},
  {series:'raid_wins',name:'掠影游侠',unit:'次行动成功',levels:[1,5,20,100,500],color:'#916e76',accent:'#d7bfa0',motif:'blade',desc:'对抗货仓行动判定成功次数；仅限双方加入的对抗玩法'},

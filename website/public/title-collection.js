@@ -20,7 +20,6 @@ function chickengunSize(level, requested, random = false, seed = "preview") {
 }
 var titleChance = (finger) => 10 + Math.max(0, Math.min(5, Math.trunc(finger))) * 2;
 var rows = [
-  ["oldfarmer", "\u8001\u519C\u6C11", "\u4E00\u7566\u571F\u5730\uFF0C\u4E00\u6BB5\u76F8\u805A\uFF1B\u7530\u56ED\u6682\u522B\uFF0C\u6536\u83B7\u957F\u5B58", "sprout", "#9b7334", "#b8cf91", "SSR"],
   ["newcomer", "\u521D\u89C1\u6B22\u6B22", "\u5E26\u7740\u597D\u5947\uFF0C\u5F00\u542F\u65B0\u7684\u6545\u4E8B", "sprout", "#659d83", "#f1ce86", "normal"],
   ["mona", "\u83AB\u5948\u4E4B\u738B", "\u7761\u83B2\u4E0E\u6E56\u5149\uFF0C\u753B\u4E2D\u6F2B\u6E38", "lotus", "#5e9b92", "#d8a4ca", "normal"],
   ["lace", "\u591C\u7ED2\u857E\u4E1D", "\u7D2B\u591C\u5929\u9E45\u4E0E\u7EC6\u7ED2\u82B1\u7EB9", "swan", "#655790", "#dba6c1", "SSR"],
@@ -56,7 +55,7 @@ var rows = [
   ["star", "\u661F\xB7\u8BB8\u613F", "\u628A\u661F\u661F\u63E3\u8FDB\u53E3\u888B\uFF0C\u966A\u4F60\u95EA\u5149", "star", "#7c7eb9", "#ecd39a", "SSR"],
   ["cloud", "\u4E91\xB7\u8F6F\u7EF5", "\u4E91\u6735\u7F8A\u7684\u6162\u60A0\u60A0\u5929\u7A7A\u65C5\u884C", "cloud", "#7dabb4", "#d9c9e8", "normal"]
 ];
-var TITLE_COLLECTION = rows.map(([id, name, mood, motif, color, accent, rarity]) => ({ id, name, mood, motif, color, accent, rarity, enabled: true, newcomer: id === "newcomer", commemorative: id === "oldfarmer", limited: ["blacksilk", "sword", "halberd", "moon", "star", "nightdevil", "railcannon", "chickengun"].includes(id) }));
+var TITLE_COLLECTION = rows.map(([id, name, mood, motif, color, accent, rarity]) => ({ id, name, mood, motif, color, accent, rarity, enabled: true, newcomer: id === "newcomer", limited: ["blacksilk", "sword", "halberd", "moon", "star", "nightdevil", "railcannon", "chickengun"].includes(id) }));
 var collectionTitle = (id) => TITLE_COLLECTION.find((t) => t.id === id);
 function titleExhibit(t) {
   const period = Math.floor((t + 28800) / (14 * 86400)), launch = Math.floor((Date.parse("2026-10-24T00:00:00+08:00") / 1e3 + 28800) / (14 * 86400)), launchTitles = ["railcannon", "chickengun"], limited = TITLE_COLLECTION.filter((x) => x.limited && (period !== launch || !launchTitles.includes(x.id))), start = period * 14 * 86400 - 28800;

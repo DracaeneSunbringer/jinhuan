@@ -8,14 +8,14 @@ export function cents(v:unknown){if(typeof v!=='string'||!/^\d{1,4}(?:\.\d{1,2})
 // D币 uses the same cent storage, with a separate integer-denominated limit.
 export function rewardCents(v:unknown,provider:unknown){
  if(provider!=='coin52')return cents(v)
- if(typeof v!=='string'||!/^\d{1,6}(?:\.0{1,2})?$/.test(v)||Number(v)<1||Number(v)>200000)throw Error('D币总额需为1–200000的整数')
+ if(typeof v!=='string'||!/^\d{1,7}(?:\.0{1,2})?$/.test(v)||Number(v)<1||Number(v)>2000000)throw Error('D币总额需为1–2000000的整数')
  return Number(v)*100
 }
 export const money=(n:number)=>(n/100).toFixed(2)
 export function hintInterval(b:Record<string,unknown>){const n=b.auto_hint_every===undefined?0:b.auto_hint_every;if(typeof n!=='number'||!Number.isInteger(n)||n<0||n>1000)throw Error('自动线索间隔需为0–1000的整数，0为关闭');return n}
 export const extraHints=(json:string|undefined)=>JSON.parse(json||'[]') as {id:string;text:string;source:'owner'|'ai';at:number}[]
 function randomInt(max:number){const cap=Math.floor(4294967296/max)*max;let n:number;do{n=crypto.getRandomValues(new Uint32Array(1))[0]}while(n>=cap);return n%max}
-export function splitAmount(total:number,count:number,mode:string){if(!Number.isInteger(total)||!Number.isInteger(count)||count<1||count>100||total<count||total>200000)throw Error('份数需为1–100，每份至少0.01 LDC');let left=total;return Array.from({length:count},(_,i)=>{const remaining=count-i,n=remaining===1?left:mode==='random'?1+randomInt(Math.min(left-remaining+1,Math.floor(left/remaining*2))):Math.ceil(left/remaining);left-=n;return n})}
+export function splitAmount(total:number,count:number,mode:string,max=200000){if(!Number.isInteger(total)||!Number.isInteger(count)||count<1||count>100||total<count||total>max)throw Error('份数需为1–100，每份至少0.01 LDC');let left=total;return Array.from({length:count},(_,i)=>{const remaining=count-i,n=remaining===1?left:mode==='random'?1+randomInt(Math.min(left-remaining+1,Math.floor(left/remaining*2))):Math.ceil(left/remaining);left-=n;return n})}
 export const normalizeAnswer=(s:unknown)=>String(s??'').normalize('NFKC').toLocaleLowerCase('en').replace(/[\s\p{P}\p{Z}]/gu,'')
 export function cleanGame(b:Record<string,unknown>){const mode=String(b.mode),game=['guess','clues'].includes(mode);if(!['fixed','random','guess','clues'].includes(mode))throw Error('请选择红包玩法');const answers=game?[...new Set(String(b.answers??'').split(/\r?\n/).map(normalizeAnswer).filter(Boolean))]:[];if(game&&(!answers.length||answers.length>6||answers.some(a=>[...a].length>40||/[\p{Cc}\p{Cf}]/u.test(a))))throw Error('请填写1–6个答案，每个最多40字');const hints=String(b.hints??'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean);if(hints.length>6||hints.some(h=>h.length>160)||mode==='clues'&&!hints.length)throw Error('最多6条线索，每条160字；逐步线索至少填一条');return {mode,answers,hints}}
 export function parseVerdict(text:string):'yes'|'no'|'unknown'|'not_question'{try{const d=gameJson(text) as {answer:string}|null;return d&&Object.keys(d).length===1&&['yes','no','unknown','not_question'].includes(d.answer)?d.answer as 'yes'|'no'|'unknown'|'not_question':'unknown'}catch{return 'unknown'}}

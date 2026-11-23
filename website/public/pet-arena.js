@@ -1,7 +1,7 @@
 // 大肥鱼擂台回放：多场景背景 + 冲刺 / 打击停顿 / 震屏 / 连击 / 状态 / 终结慢动作。
 // 角色用大肥鱼动作视频；背景与特效为本站原创的 Canvas 实时绘制。所有动作按顺序结算，同一时间只有一个招式的特效。
-import { createPlayerFor } from '/pet-player.js'
-import { petSrc } from '/pet-store.js'
+import { createPlayerFor } from '/pet-player.js?v=472f7fbf'
+import { petSrc } from '/pet-store.js?v=472f7fbf'
 
 const ANIMS = { idle: '待机呼吸休闲', hurt: '被吓一跳', dodge: '原地重力下蹲压缩', stunned: '打瞌睡被惊醒', win: '工作状态-雀跃庆祝', lose: '工作状态-垂头叹气冒汗', counter: '点击回应-傲娇生气', revive: '超大伸懒腰' }
 const MELEE = new Set(['slash', 'impact', 'crit', 'whip', 'spin', 'balls', 'disc'])
@@ -30,7 +30,7 @@ const SCENES = [
 let dshDef = null
 const loadDsh = async () => dshDef ??= { id: 'dsh-blue-whale', kind: 'video', actions: (await (await fetch('/pets/dsh/manifest.json', { cache: 'force-cache' })).json()).actions }
 
-export async function createArena(host, { battle, skills }, viewer, back) {
+export async function createArena(host, { battle, skills }, viewer, back, opts = {}) {
   const def = await loadDsh()
   const byName = new Map(def.actions.map((a) => [a.name, a]))
   const skillOf = (id) => skills.find((s) => s.id === id)
@@ -344,7 +344,7 @@ export async function createArena(host, { battle, skills }, viewer, back) {
       battle.attacker_id === viewer && battle.xp ? el('span', { class: 'pa-res-xp', text: `经验 +${battle.xp}` }) : null,
       battle.duel ? el('span', { class: 'pa-duel', text: battle.duel.winner_id == null ? `约战平局，押注 ${battle.duel.stake} D币 已退回` : battle.duel.winner_id === viewer ? `约战获胜 +${battle.duel.payout} D币（押注 ${battle.duel.stake}，抽成 ${battle.duel.rake}）` : `约战失利 -${battle.duel.stake} D币` }) : null,
       drop ? el('div', { class: 'pa-drop' }, el('img', { src: `/pets/dsh/thumbs/${drop.item}.webp`, alt: '' }), el('span', { text: drop.upgraded ? '获得重复装备，自动强化 +1' : '获得新装备！' })) : null,
-      el('div', { class: 'pa-res-actions' }, el('button', { class: 'pa-btn primary', type: 'button', onclick: () => back() }, '返回擂台')))
+      el('div', { class: 'pa-res-actions' }, el('button', { class: 'pa-btn primary', type: 'button', onclick: () => back() }, opts.backLabel || '返回擂台')))
     await wait(700); result.hidden = false; hideBanner()
     skipBtn.hidden = true; speedBtn.hidden = true
   })()

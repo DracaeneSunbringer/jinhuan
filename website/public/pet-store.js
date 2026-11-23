@@ -1,4 +1,4 @@
-import { DEFAULT_PET_STATE, clonePetState, validPetState } from '/pet-state.js'
+import { DEFAULT_PET_STATE, clonePetState, validPetState } from '/pet-state.js?v=472f7fbf'
 
 // 站宠共享状态：站宠屋页面和全站悬浮宠物用同一份状态与云档，避免两边各存各的互相冲突。
 // 服务端仍是权威；本机副本只用于断网恢复，多个标签页之间用 BroadcastChannel 同步。

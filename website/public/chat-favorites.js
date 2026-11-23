@@ -1,7 +1,7 @@
 // 单页20条摘要；只在用户展开某条时加载媒体，不自动播放视频或动图。
 export function openChatFavorites(anchor,{h,icon,api,openPop,closePop,send,toast,view,onRemoval,blurAll=()=>false}){
  const doc=anchor.ownerDocument
- if(!doc.getElementById('chat-favorites-media-css')){const css=doc.createElement('link');css.id='chat-favorites-media-css';css.rel='stylesheet';css.href='/chat-favorites-media.css';doc.head.append(css)}
+ if(!doc.getElementById('chat-favorites-media-css')){const css=doc.createElement('link');css.id='chat-favorites-media-css';css.rel='stylesheet';css.href='/chat-favorites-media.css?v=472f7fbf';doc.head.append(css)}
  const list=h('div',{class:'cm-favorites-list'}),status=h('p',{class:'muted',role:'status'}),prev=h('button',{class:'btn',type:'button'},'上一页'),next=h('button',{class:'btn',type:'button'},'下一页')
  const root=h('section',{class:'cm-favorites','aria-label':'消息收藏'},h('header',null,h('strong',null,'消息收藏'),h('button',{type:'button',class:'cm-ibtn','aria-label':'关闭消息收藏',onclick:closePop},icon('close'))),list,status,h('footer',null,prev,next))
  openPop(anchor,root,{key:'chat-favorites',up:true})

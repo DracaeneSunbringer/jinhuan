@@ -16,7 +16,7 @@ export function guessVisibleUserSql(user:string,group:string){
 }
 
 export async function independentGuessRequest(c:C,gid:number){
- if(gid!==1||new URL(c.req.url).origin!=='https://play.jinhuan.example'||!c.env.GAME_SERVICE_SECRET||c.req.header('x-game-service')!==c.env.GAME_SERVICE_SECRET)return false
+ if(gid!==1||new URL(c.req.url).origin!=='https://cc.52dmeme.com'||!c.env.GAME_SERVICE_SECRET||c.req.header('x-game-service')!==c.env.GAME_SERVICE_SECRET)return false
  const path=new URL(c.req.url).pathname
  if(path==='/api/game-runtime/auth'||path==='/api/game-runtime/consent')return true
  if(/^\/api\/guess-sidebar\/(?:groups|messages(?:\/\d+)?)$/.test(path))return true

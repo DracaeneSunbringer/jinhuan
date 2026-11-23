@@ -9,10 +9,9 @@ import {emptyLeasePlot,LEASE_IDLE,LEASE_DEFAULT,settleFarmLeases,workLease,type 
 import type {FarmState} from '../farm/rules'
 import {farmActionLimit} from '../farm/action-limit'
 import {rentLeaseBatch} from '../farm/lease-batch'
-import {buybackLease,leaseBuybackQuote} from '../farm/lease-buyback'
 
 export const farmLeases=new Hono<Ctx>()
-const validId=(v:unknown)=>typeof v==='string'&&/^[a-zA-Z0-9-]{16,64}$/.test(v)
+export const validId=(v:unknown)=>typeof v==='string'&&/^[a-zA-Z0-9-]{16,64}$/.test(v)
 const activePair=`(SELECT COUNT(*) FROM users WHERE id IN(?2,?3) AND disabled=0 AND kind='user')=2 AND NOT EXISTS(SELECT 1 FROM account_retirements WHERE source_id IN(?2,?3))`
 farmLeases.get('/api/farm/leases',async c=>{
  const u=needUser(c),db=c.env.DB,t=now();await settleFarmLeases(db,t,u.id)
@@ -91,16 +90,4 @@ farmLeases.post('/api/farm/leases/:id/work',async c=>{
  if(!validId(b.id)||!['plant','harvest','pest'].includes(String(b.type))||(b.autoBuy!==undefined&&typeof b.autoBuy!=='boolean'))return fail(400,'租地操作格式无效')
  const lease=await db.prepare('SELECT * FROM farm_leases WHERE id=? AND tenant_id=?').bind(c.req.param('id'),u.id).first<Lease>();if(!lease)return fail(404,'租约不存在')
  try{return c.json(await workLease(db,lease!,u.id,String(b.id),b.type as 'plant'|'harvest'|'pest',b.crop,b.autoBuy===true,t,isOwner(c,u)))}catch(e){if(e instanceof Error&&'status' in e)throw e;return fail(400,e instanceof Error?e.message:'租地操作失败')}
-})
-farmLeases.get('/api/farm/leases/:id/buyback',async c=>{
- const u=needUser(c),lease=await c.env.DB.prepare('SELECT * FROM farm_leases WHERE id=? AND owner_id=?').bind(c.req.param('id'),u.id).first<Lease>()
- if(!lease)return fail(404,'租约不存在')
- return c.json(await leaseBuybackQuote(c.env.DB,lease,u.id,now()))
-})
-farmLeases.post('/api/farm/leases/:id/buyback',async c=>{
- sameOrigin(c);const u=needUser(c),b=await boundedJson(c,2048)
- if(!validId(b.id)||!Number.isSafeInteger(b.revision)||!Number.isSafeInteger(b.penalty)||!Number.isSafeInteger(b.reward)||b.confirm!==true)return fail(400,'请查看买回报价后确认')
- const lease=await c.env.DB.prepare('SELECT * FROM farm_leases WHERE id=? AND owner_id=?').bind(c.req.param('id'),u.id).first<Lease>()
- if(!lease)return fail(404,'租约不存在')
- return c.json(await buybackLease(c.env.DB,lease,u.id,String(b.id),{revision:b.revision,penalty:b.penalty,reward:b.reward},now()))
 })

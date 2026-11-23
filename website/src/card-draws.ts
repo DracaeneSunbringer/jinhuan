@@ -2,7 +2,7 @@ import {communityProgressStatements} from './community-growth'
 import {ensureCoinWallet} from './farm/coin-packets'
 import {farmWallet} from './farm/wallet'
 import {newFarm,CROPS,type FarmState} from './farm/rules'
-import {farmClosed} from './farm/lifecycle'
+import {farewellRelease} from './legacy/live-app.js'
 import {raffleRoll,titleLevelSql} from './title-growth'
 import {RAFFLE_TITLES,raffleTitleEnabled} from './title-raffle'
 import {TITLE_PITY,TITLE_MAX_LEVEL,titleAvailable,titleChance,collectionTitle} from './shared/title-collection'
@@ -23,7 +23,7 @@ export async function drawProgress(db:D1Database,uid:number,limited=false){
 export async function drawBatchReceipt(db:D1Database,uid:number,id:string){return db.prepare('SELECT title,count,finger_level,results,pity_after FROM instant_card_batches WHERE user_id=? AND request_id=?').bind(uid,id).first<Batch>()}
 const output=(b:Batch)=>{const receipts=JSON.parse(b.results) as Prize[];return {receipts,pity:b.pity_after,count:receipts.length,requested_count:b.count,unspent:(b.count-receipts.length)*100}}
 export async function drawCards(db:D1Database,p:DrawInput,roll=raffleRoll){
- if(!/^[0-9a-f-]{36}$/.test(p.id)||![1,10,60,100].includes(p.count)||!Number.isInteger(p.level)||p.level<0||p.level>5||!Number.isInteger(p.revision)||!RAFFLE_TITLES.some(t=>t.id===p.title&&t.enabled&&!t.newcomer&&!t.commemorative))throw new DrawRuleError('抽卡参数无效')
+ if(!/^[0-9a-f-]{36}$/.test(p.id)||![1,10,100].includes(p.count)||!Number.isInteger(p.level)||p.level<0||p.level>5||!Number.isInteger(p.revision)||!RAFFLE_TITLES.some(t=>t.id===p.title&&t.enabled&&!t.newcomer&&!t.commemorative))throw new DrawRuleError('抽卡参数无效')
  const compatible=(b:Batch)=>{if(b.title!==p.title||b.count!==p.count||b.finger_level!==p.level)throw new DrawRuleError('请求标识已用于其他操作');return output(b)}
  const old=await drawBatchReceipt(db,p.uid,p.id);if(old)return compatible(old)
  // Recover pre-upgrade single receipts without charging again.
@@ -56,7 +56,7 @@ export async function drawCards(db:D1Database,p:DrawInput,roll=raffleRoll){
    const rare=roll()===0&&roll()<10,options=RAFFLE_TITLES.filter(t=>t.enabled&&raffleTitleEnabled(t.id)&&!t.newcomer&&!t.commemorative&&t.limited===rare&&(levels.get(t.id)||0)<TITLE_MAX_LEVEL)
    if(options.length){reward_kind='trial';reward_id=options[randomIndex(options.length)].id;const r=roll();reward_amount=r<60?1+randomIndex(50):r<90?50+randomIndex(251):r<99?300+randomIndex(1301):1600+randomIndex(3601)}else{reward_kind='seed';reward_id='wheat';reward_amount=1}
   }}
-  if(reward_kind==='seed'&&farmClosed(p.t)){reward_kind='coin';reward_amount*=CROPS.find(c=>c.id===reward_id)!.seedPrice;reward_id='';refund+=reward_amount}
+  if(reward_kind==='seed'&&farewellRelease.farmClosed(p.t)){reward_kind='coin';reward_amount*=CROPS.find(c=>c.id===reward_id)!.seedPrice;reward_id='';refund+=reward_amount}
   prizes.push({request_id:crypto.randomUUID(),title:p.title,kind:'draw',price:100,finger_level:p.level,chance,won:won?1:0,reward_kind,reward_id,reward_amount,guaranteed:guaranteed?1:0,created_at:p.t,...(reward_kind==='title'?{reward_level:levels.get(reward_id)}:{}),...(reward_kind==='trial'?{expires_at:p.t+86400}:{})})
  }
  let farmRevision:number|null=null,encoded:string|null=null

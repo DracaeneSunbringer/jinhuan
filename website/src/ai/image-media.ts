@@ -1,6 +1,6 @@
 type ImageMediaSource={image_key:string|null;image_url:string|null;thumb_url:string|null;gallery:string|null}
 type Media={u?:unknown;t?:unknown;k?:unknown}
-const ORIGIN='https://jinhuan.example'
+const ORIGIN='https://52dmeme.com'
 function localImage(value:string){
  if(!/^\/img\/[a-zA-Z0-9_./-]+$/.test(value)||value.includes('//')||value.split('/').some(p=>p==='.'||p==='..'))return null
  return ORIGIN+value

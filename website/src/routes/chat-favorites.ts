@@ -23,12 +23,12 @@ function mediaOf(m:Source):Media[]{
  return items
 }
 async function source(c:C,uid:number,id:number,owned=false){
- const row=await c.env.DB.prepare(`SELECT m.id,m.body,m.media,m.image_key,m.width,m.height,m.created_at FROM chat_messages m
+ const row=await c.env.DB.prepare(`SELECT m.id,m.body,m.media,m.image_key,m.width,m.height FROM chat_messages m
  WHERE m.id=?2 AND ${access}${owned?' AND EXISTS(SELECT 1 FROM chat_message_favorites f WHERE f.user_id=?1 AND f.message_id=m.id)':''}`).bind(uid,id).first<Source>()
  if(!row||sharedPacket(row.body))fail(404,'来源消息已不可使用')
  return row!
 }
-const version=(m:Source)=>sha256(JSON.stringify([m.body,m.media,m.image_key]))
+export const version=(m:Source)=>sha256(JSON.stringify([m.body,m.media,m.image_key]))
 // 最终发送事务再次核验来源，覆盖 prepare 到实际提交之间的编辑/撤回/取消收藏。
 export async function favoriteSendGuard(c:C,uid:number,raw:unknown,body:string){
  if(raw===undefined)return null
@@ -45,17 +45,17 @@ export const chatFavorites=new Hono<Ctx>()
 chatFavorites.get('/api/chat/favorites',async c=>{
  const u=needUser(c),cursor=c.req.query('before')||'',parts=cursor.split(':').map(Number)
  if(cursor&&(parts.length!==2||parts.some(n=>!Number.isSafeInteger(n)||n<1)))fail(400,'分页位置无效')
- const rows=await c.env.DB.prepare(`SELECT m.id,m.body,m.media,m.image_key,m.width,m.height,m.created_at,f.created_at AS saved_at,
+ const rows=await c.env.DB.prepare(`SELECT m.id,m.body,m.media,m.image_key,m.width,m.height,f.created_at,
  CASE WHEN ${access} THEN 1 ELSE 0 END AS available FROM chat_message_favorites f JOIN chat_messages m ON m.id=f.message_id
  WHERE f.user_id=?1 ${cursor?'AND (f.created_at,f.message_id)<(?2,?3)':''}
- ORDER BY f.created_at DESC,f.message_id DESC LIMIT 21`).bind(u.id,...(cursor?parts:[])).all<Source&{saved_at:number;available:number}>()
+ ORDER BY f.created_at DESC,f.message_id DESC LIMIT 21`).bind(u.id,...(cursor?parts:[])).all<Source&{created_at:number;available:number}>()
  const page=rows.results.slice(0,20),last=page.at(-1)
  c.header('Cache-Control','no-store')
  return c.json({items:page.map(m=>{
   if(!m.available||sharedPacket(m.body))return {id:m.id,unavailable:true}
   let media:Media[];try{media=mediaOf(m)}catch{return {id:m.id,unavailable:true}}
   return {id:m.id,body:m.body.slice(0,500),attachments:media.map(x=>x.kind||'image')}
- }),next:rows.results.length>20&&last?`${last.saved_at}:${last.id}`:null})
+ }),next:rows.results.length>20&&last?`${last.created_at}:${last.id}`:null})
 })
 // 仅按需返回当前用户仍有权查看的收藏附件，避免列表一次加载大量图片和动图。
 chatFavorites.get('/api/chat/favorites/:id/media',async c=>{

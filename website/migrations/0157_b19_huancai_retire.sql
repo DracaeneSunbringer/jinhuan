@@ -1,0 +1,2 @@
+-- b19 欢彩下线步骤记录（仅新建表）
+CREATE TABLE IF NOT EXISTS b19_huancai_retire (step TEXT PRIMARY KEY, at INTEGER NOT NULL, info TEXT) WITHOUT ROWID;

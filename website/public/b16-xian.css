@@ -1,0 +1,77 @@
+/* b16 云梦仙途 */
+.xian{position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;background:#0f2430;color:#2b1d10;font-size:14px;--ink:#3b2412;--paper:#fbf1d8;--line:#c9a96a;--accent:#2f7d63;--gold:#b7811f;overflow:hidden}
+.xian .xb{font:inherit;padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:#fff6df;color:var(--ink);cursor:pointer;line-height:1.3;min-height:34px}
+.xian .xb:hover:not(:disabled){filter:brightness(1.05)}.xian .xb:disabled{opacity:.45;cursor:default}
+.xian .xb:focus-visible,.xian-npc:focus-visible,.xian-spot:focus-visible,.xian-duel:focus-visible{outline:3px solid #ffd76a;outline-offset:2px}
+.xian .xb.primary{background:linear-gradient(#3f9c7a,#2a7258);color:#fff;border-color:#215a45}.xian .xb.ghost{background:transparent}.xian .xb.small{padding:4px 8px;min-height:28px;font-size:12px}.xian .xb.big{font-size:17px;padding:10px 26px}
+.xian .xb.tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.xian-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;background:rgba(251,241,216,.96);border-bottom:2px solid var(--line);z-index:3}
+.xian-rank{font-size:15px;color:#6b3d0e}.xian-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;background:#f1dfb4;font-variant-numeric:tabular-nums}
+.xian-top>.xb:last-child{margin-left:auto}
+.xian-scene{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.xian-stage{position:relative;aspect-ratio:3/2;width:min(100%,calc((100vh - var(--isle-top,60px) - var(--isle-bottom,0px) - 110px)*1.5));max-height:100%;background-size:cover;background-position:center;box-shadow:0 0 0 2px #0006}
+.xian-spot{position:absolute;transform:translate(-50%,-50%);font:inherit;font-size:13px;padding:5px 10px;border-radius:8px;border:2px solid #f6d58b;background:rgba(58,36,18,.82);color:#fff6df;cursor:pointer;white-space:nowrap;z-index:2;box-shadow:0 2px 6px #0006}
+.xian-spot:hover{background:rgba(47,125,99,.92)}
+.xian-npc{position:absolute;transform:translate(-50%,-85%);display:flex;flex-direction:column;align-items:center;background:none;border:0;padding:0;cursor:pointer;z-index:1}
+.xian-npc small{margin-top:-6px;padding:1px 6px;border-radius:6px;background:rgba(255,246,223,.92);color:var(--ink);font-size:11px;white-space:nowrap}
+.xian-npc.fresh small::after{content:' 💬'}
+.xian-hero{position:absolute;left:50%;bottom:2%;transform:translateX(-50%);pointer-events:none}
+.xs{display:inline-block;width:var(--s);height:var(--s);background-size:calc(var(--s)*4) calc(var(--s)*4);background-repeat:no-repeat;background-position:0 calc(var(--r)*var(--s)*-1);image-rendering:auto}
+.xs.idle{animation:xs-idle 3.6s infinite}.xs.fight{animation:xs-walk .8s steps(4) infinite}.xs.flip{transform:scaleX(-1)}.xs.boss{filter:drop-shadow(0 0 8px #c33)}
+@keyframes xs-idle{0%,88%{background-position-x:0}90%,96%{background-position-x:calc(var(--s)*-2)}97%,100%{background-position-x:0}}
+@keyframes xs-walk{from{background-position-x:0}to{background-position-x:calc(var(--s)*-4)}}
+.xian-tabs{display:flex;justify-content:center;gap:6px;padding:6px;background:rgba(251,241,216,.96);border-top:2px solid var(--line);z-index:3}
+.xian-enter{position:absolute;inset:auto 50% 50% auto;transform:translate(50%,50%);max-width:min(440px,92%);padding:22px;border-radius:14px;background:var(--paper);border:3px solid var(--line);text-align:center;box-shadow:0 10px 30px #0008;z-index:4}
+.xian-enter h2{margin:0 0 8px;font-size:24px;color:#6b3d0e}
+.xian .muted{color:#7a6448;font-size:12px}
+.xian-overlay{position:absolute;inset:0;z-index:20;background:rgba(10,20,25,.55);display:flex;align-items:center;justify-content:center;padding:10px}
+.xian-sheet{width:min(560px,100%);max-height:100%;display:flex;flex-direction:column;background:var(--paper);border:3px solid var(--line);border-radius:14px;box-shadow:0 12px 40px #0009}
+.xian-sheet.wide{width:min(860px,100%)}
+.xian-sheet header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line)}.xian-sheet h2{margin:0;font-size:18px;color:#6b3d0e}
+.xian-sheet-body{overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}
+.xian-sheet h3{margin:6px 0 0;font-size:15px;color:#6b3d0e}
+.xian-row,.xian-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.xian-actions.col{flex-direction:column;align-items:stretch}
+.xian-num{width:72px;padding:6px;border:1px solid var(--line);border-radius:7px;background:#fff;font:inherit;color:inherit}.xian-num.wide{width:auto}
+.xian-list{display:flex;flex-direction:column;gap:6px}
+.xian-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto auto;align-items:center;gap:8px;padding:8px;border:1px solid #e3cc98;border-radius:10px;background:#fffaf0}
+.xian-item>div{display:flex;flex-direction:column;gap:2px;min-width:0}.xian-item small{color:#6d5a40}
+.xian-item.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.xian-item.g1{background:#f4fbf3}.xian-item.g2{background:#eef5ff}.xian-item.g3{background:#f7efff}.xian-item.g4{background:#fff3e0;border-color:#e5a43b}
+.xi{display:inline-block;flex:none;background-repeat:no-repeat;vertical-align:middle}.xi.emoji{font-size:28px;line-height:1;text-align:center;width:40px}.xi.emoji.big{font-size:36px;width:48px}
+.xq{font-style:normal;font-size:11px;padding:0 5px;border-radius:5px;margin:0 2px;background:#eee}.xq.q1{background:#dff2dc}.xq.q2{background:#dce9ff}.xq.q3{background:#efdcff}.xq.q4{background:#ffe2b0}
+.xian-bar{height:8px;border-radius:5px;background:#e6d5ad;overflow:hidden}.xian-bar i{display:block;height:100%;background:linear-gradient(90deg,#4bb38a,#2a7258)}.xian-bar.thin{height:5px}
+.xian-hero-card{display:flex;gap:12px;align-items:center}.xian-hero-card>div{flex:1}.xian-hero-card h3{margin:0}
+.xian-talents{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.xian-talent{display:flex;flex-direction:column;gap:4px;padding:8px;border-radius:10px;border:1px solid #d9c08a;background:#fff}
+.xian-talent.r2{background:#f1fbef}.xian-talent.r3{background:#eef4ff}.xian-talent.r4{background:#f6ecff}.xian-talent.r5{background:#fff1d6;border-color:#e5a43b}
+.xian-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.xian-stat{padding:6px 8px;border-radius:8px;background:#f5e8c8;display:flex;justify-content:space-between}
+.xian-pend{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px;border:2px dashed var(--gold);border-radius:10px;background:#fff7e6}
+.xian-talk{display:flex;gap:12px;align-items:center}.xian-face{flex:none;width:120px;height:120px;background-size:300% 100%;border-radius:12px;background-color:#f0e2bd}
+.xian-line{font-size:15px;line-height:1.6;margin:0;padding:10px 12px;border-radius:10px;background:#fff;border:1px solid var(--line)}
+.xian-plots{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px}
+.xian-plot{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px;border-radius:8px;border:1px solid #c9a96a;background:#e8d3a2;font:inherit;min-height:86px;justify-content:center}
+.xian-plot.empty{background:#d9bf86;color:#6d5a40;cursor:pointer}.xian-plot.ready{background:#d9f0c8;border-color:#4bb38a}.xian-plot .xian-bar{width:100%}
+.xian-bag{display:flex;flex-wrap:wrap;gap:6px}.xian-bagi{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:8px;background:#fff}
+.xian-forge{display:grid;grid-template-columns:1fr 1fr;gap:10px}.xian-forge-npc{display:flex;gap:8px;align-items:center;padding:8px;border-radius:10px;background:#fff;border:1px solid #e3cc98}.xian-forge-npc>div{display:flex;flex-direction:column;gap:4px}
+.xian-affix{margin:2px 0 0;padding-left:16px;font-size:12px;color:#5a3f1d}
+.xian-locks{display:flex;flex-direction:column;gap:4px}
+.xian-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.xian-duel{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px;border:1px solid #e3cc98;border-radius:10px;background:#fff;cursor:pointer;font:inherit;color:inherit}.xian-duel.won{background:#eaf6e4}
+.xian-tower{display:flex;gap:12px;align-items:center}.xian-tower h3{margin:0}
+.xian-check{display:flex;align-items:center;gap:6px}
+.xian-battle{position:absolute;inset:0;z-index:30;background-size:cover;background-position:center;display:grid;grid-template-columns:1fr 1fr;align-items:end;padding:20px 6% 22%}
+.xian-ft{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform .2s}.xian-ft b{padding:2px 8px;border-radius:6px;background:rgba(0,0,0,.6);color:#fff;font-size:13px}
+.xian-ft.a.lunge{transform:translateX(18px)}.xian-ft.b.lunge{transform:translateX(-18px)}
+.xian-hp{width:150px;height:10px;border-radius:5px;background:#3a1b1b;border:1px solid #000;overflow:hidden}.xian-hp i{display:block;height:100%;background:linear-gradient(90deg,#e04b4b,#f08a4b);transition:width .25s}
+.xian-pop{position:absolute;top:-6px;font-weight:700;font-size:20px;color:#fff;text-shadow:0 2px 0 #000,0 0 6px #000;animation:xian-pop .9s ease-out forwards;pointer-events:none}.xian-pop.crit,.xian-pop.cannon{color:#ffd24a;font-size:26px}.xian-pop.regen,.xian-pop.pill{color:#7dff9a}
+@keyframes xian-pop{from{transform:translateY(0);opacity:1}to{transform:translateY(-46px);opacity:0}}
+.xian-bt-text{position:absolute;left:50%;top:14%;transform:translateX(-50%);margin:0;padding:8px 16px;border-radius:10px;background:rgba(251,241,216,.95);color:var(--ink);font-size:15px;max-width:90%;text-align:center}
+.xian-battle .x-skip{position:absolute;right:12px;top:12px;background:#fbf1d8;font-weight:600}.xian-battle .x-done{position:absolute;left:50%;top:calc(14% + 70px);transform:translateX(-50%)}
+.xian-fx{position:absolute;width:160px;height:160px;bottom:30%;background:url(/pets/dsh/xian-020755ac46d4/fx.webp) no-repeat;background-size:960px 640px;background-position:0 calc(var(--row,0)*-160px);opacity:0;pointer-events:none}
+.xian-fx.on-a{left:12%}.xian-fx.on-b{right:12%}.xian-fx.play{animation:xian-fx .45s steps(6) forwards}
+@keyframes xian-fx{0%{opacity:1;background-position-x:0}99%{opacity:1}100%{opacity:0;background-position-x:-960px}}
+@media(max-width:700px){.xian-spot{font-size:11px;padding:3px 6px}.xian-npc .xs{--s:56px!important}.xian-npc small{font-size:10px}.xian-hero .xs{--s:64px!important}
+ .xian-item{grid-template-columns:auto minmax(0,1fr);}.xian-item>:nth-child(n+3){grid-column:2}.xian-talents,.xian-forge{grid-template-columns:1fr}.xian-stats{grid-template-columns:repeat(2,1fr)}
+ .xian-face{width:84px;height:84px}.xian-battle{padding:16px 2% 30%}.xian-ft .xs{--s:96px!important}.xian-hp{width:110px}.xian-stage{width:100%}}
+@media(max-aspect-ratio:1/1){.xian-scene{justify-content:flex-start;overflow-x:auto;overflow-y:hidden;align-items:stretch;scrollbar-width:thin}.xian-stage{height:100%;width:auto;max-height:none;flex:none}}
+@media(prefers-reduced-motion:reduce){.xs.idle,.xs.fight{animation:none}.xian-pop{animation-duration:.01s}}

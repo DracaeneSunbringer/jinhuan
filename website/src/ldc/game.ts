@@ -1,4 +1,4 @@
-import {guessAdmissionSql,rejectPendingGuess} from './submission-guard'
+import {guessAdmissionSql,rejectPendingGuess} from '../legacy/live-app.js'
 import {guessMembersSql,guessBansSql} from '../services/guess-access'
 import type {C,User} from '../types'
 import {now} from '../lib/time'

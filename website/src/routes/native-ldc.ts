@@ -1,4 +1,4 @@
-import {guessSubmissionSignals} from '../ldc/submission-guard'
+import {guessSubmissionSignals} from '../legacy/live-app.js'
 import {guessMembersSql,guessBansSql} from '../services/guess-access'
 import {predictionView,placePrediction} from '../ldc/predictions'
 import {Hono,Context} from 'hono'

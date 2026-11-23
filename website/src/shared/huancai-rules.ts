@@ -1,3 +1,5 @@
+// 欢彩已于 2026-11-12（b19）下线：购买入口关闭，结算函数只供下线退款流程使用。
+export const HUANCAI_RETIRED=true
 // D币 entertainment rules. Official 2026 DLT prize combinations, not official tickets.
 export const LOTTO_V2={front:35,back:12,price:10,space:21425712,winPercent:6.6705,prizeBudget:.8}
 export const LOTTO_JACKPOT={seed:500000000,salesPercent:80,firstPercent:10,secondPercent:1}
