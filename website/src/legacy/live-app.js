@@ -1,6 +1,7 @@
 // @ts-nocheck
 // 起点由 scripts/consolidate/extract-legacy.mjs 从线上 b39 包提取（2026-11-23）：线上有、但没有 TS 源码的代码，按原包顺序。
 // 提取之后这里就是正式源码（已删除音乐模块等），不要再重新生成覆盖；整理时按功能拆分，见 docs/consolidation-plan.md。
+import { accountProof } from '../services/account-binding'
 import { handleExt } from '../services/ext-proxy'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { Hono } from 'hono'
@@ -27887,7 +27888,9 @@ authExtra.get('/api/me/login-password', async (c) => {
     const user = needUser(c);
     const cfg = await authConfiguration(c);
     const row = await c.env.DB.prepare("SELECT i.username,(SELECT 1 FROM passwords WHERE user_id=?1) AS pw FROM (SELECT 1) LEFT JOIN identities i ON i.provider='password' AND i.user_id=?1").bind(user.id).first();
-    return c.json({ available: !!cfg.password_login, login: row?.username ?? null, has_password: !!row?.pw, username: user.username });
+    // 首次设密需要刚刚重新登录过（与绑定邮箱同一规则），页面据此提前提示
+    const reauth = !row?.pw && !(await accountProof(c, user.id, undefined).then(() => true, () => false));
+    return c.json({ available: !!cfg.password_login, login: row?.username ?? null, has_password: !!row?.pw, username: user.username, reauth_required: reauth });
 });
 authExtra.post('/api/me/login-password', async (c) => {
     await authRequestGuard(c);
@@ -27909,6 +27912,9 @@ authExtra.post('/api/me/login-password', async (c) => {
         if (typeof body.current !== 'string' || [...body.current.normalize('NFKC')].length > 128 || !await verifyPassword(body.current, old.hash, c.env.PASSWORD_PEPPER))
             fail(401, '当前密码不对');
     }
+    // 首次设密：要求当前会话是 5 分钟内用 Linux.DO / Google / GitHub 刚登录的（2026-11-23 安全加固），
+    // 防止页面被注入脚本时静默给账号加上攻击者的登录名和密码
+    else await accountProof(c, user.id, undefined);
     const hash = await hashPassword(password, c.env.PASSWORD_PEPPER), sidHash = await sha256(getCookie(c, 'sid') ?? '');
     const owned = "EXISTS(SELECT 1 FROM identities WHERE provider='password' AND subject=?2 AND user_id=?1)";
     const r = await db.batch([
