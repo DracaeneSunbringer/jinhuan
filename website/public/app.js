@@ -631,6 +631,12 @@ function avatar(url, name, size = 28) {
     : h('span', { class: 'avatar avatar-ph', style: { width: size + 'px', height: size + 'px', fontSize: Math.round(size * 0.44) + 'px', '--h': hueOf(name) } },
       [...(name || '?')][0].toUpperCase())
 }
+// 社区头像框：用户佩戴了 deco.community.frame 时，在头像外包一层，由 community-skins.js 画外圈。
+// 化名身份（匿名群、新用户视角、未登录访客）的 deco 已被服务端清空，不会显示头像框
+function framedAvatar(u, size = 28, name = u?.name || u?.username) {
+  const el = avatar(u?.avatar, name, size), cls = communityClass(u?.deco?.community?.frame, 'frame')
+  return cls ? h('span', { class: 'cskin-frame-wrap' + cls, style: { '--frame-size': size + 'px' } }, el) : el
+}
 // 没头像时按名字取一个稳定的色相，免得一排回应全是灰点
 const hueOf = (s = '') => [...s].reduce((a, ch) => (a * 31 + ch.codePointAt(0)) % 360, 7)
 
@@ -9900,7 +9906,7 @@ function chatMsg(m, { cont, pane, pending } = {}) {
   const card = (e) => userCard(m.user.username, e.currentTarget)
   const at = (e) => { if (!canAt) return card(e); e.preventDefault(); pane.atUser(m.user.username) }
   // 右键 / 长按头像 @TA 在 chatPane 的委托里做（主列表、历史层一样）
-  const protected52=isOwner52Suit(personalOf(m.user,'chat')?.id);const shieldColor=['green','blue','purple','black'][Math.abs(Number(m.id||0))%4];const face = h('button', { class: 'cm-face'+(protected52?' di52-protected-face':''), type: 'button', title: canAt ? `${who} · 右键或长按 @TA` : who, 'data-pop': 'u' + m.user.username, 'data-di52-protected': protected52?'true':null, 'data-di52-shield': protected52?shieldColor:null, onclick: card }, avatar(m.user.avatar, who, 36), protected52&&h('span',{class:'di52-shield','aria-hidden':'true'}))
+  const protected52=isOwner52Suit(personalOf(m.user,'chat')?.id);const shieldColor=['green','blue','purple','black'][Math.abs(Number(m.id||0))%4];const face = h('button', { class: 'cm-face'+(protected52?' di52-protected-face':''), type: 'button', title: canAt ? `${who} · 右键或长按 @TA` : who, 'data-pop': 'u' + m.user.username, 'data-di52-protected': protected52?'true':null, 'data-di52-shield': protected52?shieldColor:null, onclick: card }, framedAvatar(m.user, 36, who), protected52&&h('span',{class:'di52-shield','aria-hidden':'true'}))
   const body = []
   let ref = null
   if (m.deleted) body.push(h('div', { class: 'cm-gone' }, `${m.mine ? '你' : who} 撤回了一条消息`))
